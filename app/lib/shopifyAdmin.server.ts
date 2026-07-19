@@ -4,25 +4,66 @@
  * Never import this file from anything that runs in the browser.
  */
 
+import {CheckoutStepError, sanitizeUpstreamError, type CheckoutStep} from '~/lib/checkoutErrors.server';
+
 const ADMIN_API_VERSION = '2026-04';
 
-async function adminFetch<T>(env: Env, query: string, variables: Record<string, unknown>): Promise<T> {
-  const response = await fetch(
-    `https://${env.PUBLIC_STORE_DOMAIN}/admin/api/${ADMIN_API_VERSION}/graphql.json`,
-    {
+async function adminFetch<T>(
+  env: Env,
+  query: string,
+  variables: Record<string, unknown>,
+  step: CheckoutStep,
+): Promise<T> {
+  if (!env.PUBLIC_STORE_DOMAIN) {
+    throw new CheckoutStepError(step, 'PUBLIC_STORE_DOMAIN is not set.');
+  }
+  if (!env.SHOPIFY_ADMIN_API_ACCESS_TOKEN) {
+    throw new CheckoutStepError(step, 'SHOPIFY_ADMIN_API_ACCESS_TOKEN is not set.');
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(`https://${env.PUBLIC_STORE_DOMAIN}/admin/api/${ADMIN_API_VERSION}/graphql.json`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-Shopify-Access-Token': env.SHOPIFY_ADMIN_API_ACCESS_TOKEN,
       },
       body: JSON.stringify({query, variables}),
-    },
-  );
+    });
+  } catch (networkError) {
+    throw new CheckoutStepError(
+      step,
+      `Network error calling Shopify Admin API: ${networkError instanceof Error ? networkError.message : String(networkError)}`,
+    );
+  }
 
-  const json = (await response.json()) as {data: T; errors?: unknown};
+  if (response.status === 401 || response.status === 403) {
+    throw new CheckoutStepError(
+      step,
+      'Shopify Admin API rejected the request (401/403) — the access token is missing, invalid, or lacks the required scopes.',
+      {httpStatus: response.status},
+    );
+  }
+
+  const rawText = await response.text();
+  let json: {data: T; errors?: unknown};
+  try {
+    json = JSON.parse(rawText) as {data: T; errors?: unknown};
+  } catch {
+    throw new CheckoutStepError(
+      step,
+      `Shopify Admin API returned a non-JSON response: ${sanitizeUpstreamError(rawText)}`,
+      {httpStatus: response.status},
+    );
+  }
 
   if (!response.ok || json.errors) {
-    throw new Error(`Shopify Admin API error: ${JSON.stringify(json.errors ?? response.statusText)}`);
+    throw new CheckoutStepError(
+      step,
+      `Shopify Admin API error: ${sanitizeUpstreamError(JSON.stringify(json.errors ?? response.statusText))}`,
+      {httpStatus: response.status},
+    );
   }
 
   return json.data;
@@ -76,7 +117,7 @@ export async function verifyVariantsAvailability(
       price: string;
       product: {title: string; status: string};
     } | null>;
-  }>(env, VARIANTS_QUERY, {ids: lines.map((l) => l.variantId)});
+  }>(env, VARIANTS_QUERY, {ids: lines.map((l) => l.variantId)}, 'stock_check');
 
   return lines.map((line, index) => {
     const variant = data.nodes[index];
@@ -189,16 +230,17 @@ export async function createDraftOrder(
         phone: params.shippingAddress.phone,
       },
     },
-  });
+  }, 'draft_order_create');
 
   if (data.draftOrderCreate.userErrors.length > 0) {
-    throw new Error(
-      `Draft order creation failed: ${data.draftOrderCreate.userErrors.map((e) => e.message).join(', ')}`,
+    throw new CheckoutStepError(
+      'draft_order_create',
+      `Draft order creation rejected: ${data.draftOrderCreate.userErrors.map((e) => e.message).join(', ')}`,
     );
   }
 
   if (!data.draftOrderCreate.draftOrder) {
-    throw new Error('Draft order creation returned no draft order');
+    throw new CheckoutStepError('draft_order_create', 'Draft order creation returned no draft order.');
   }
 
   return data.draftOrderCreate.draftOrder;
@@ -226,16 +268,22 @@ const DRAFT_ORDER_UPDATE_REFERENCE_MUTATION = `#graphql
   }
 `;
 
-/** Stores the SumUp checkoutId on the draft order for traceability/support. */
+/**
+ * Stores the SumUp checkoutId on the draft order for traceability/support.
+ * Best-effort only: a failure here must never block the payment itself, so
+ * the caller logs and swallows it rather than aborting checkout.
+ */
 export async function attachSumUpCheckoutReference(
   env: Env,
   draftOrderId: string,
   sumupCheckoutId: string,
 ) {
-  await adminFetch(env, DRAFT_ORDER_UPDATE_REFERENCE_MUTATION, {
-    id: draftOrderId,
-    checkoutId: sumupCheckoutId,
-  });
+  await adminFetch(
+    env,
+    DRAFT_ORDER_UPDATE_REFERENCE_MUTATION,
+    {id: draftOrderId, checkoutId: sumupCheckoutId},
+    'draft_order_create',
+  );
 }
 
 const DRAFT_ORDER_COMPLETE_MUTATION = `#graphql
@@ -266,7 +314,7 @@ export async function completeDraftOrder(env: Env, draftOrderId: string) {
       } | null;
       userErrors: Array<{field: string[]; message: string}>;
     };
-  }>(env, DRAFT_ORDER_COMPLETE_MUTATION, {id: draftOrderId});
+  }>(env, DRAFT_ORDER_COMPLETE_MUTATION, {id: draftOrderId}, 'shopify_order_complete');
 
   if (data.draftOrderComplete.userErrors.length > 0) {
     const messages = data.draftOrderComplete.userErrors.map((e) => e.message).join(', ');
@@ -284,7 +332,7 @@ export async function completeDraftOrder(env: Env, draftOrderId: string) {
       }
     }
 
-    throw new Error(`Draft order completion failed: ${messages}`);
+    throw new CheckoutStepError('shopify_order_complete', `Draft order completion rejected: ${messages}`);
   }
 
   return data.draftOrderComplete.draftOrder;
@@ -317,7 +365,7 @@ export async function getDraftOrder(env: Env, draftOrderId: string) {
       currencyCode: string;
       order: {id: string; name: string; confirmationNumber: string} | null;
     } | null;
-  }>(env, DRAFT_ORDER_QUERY, {id: draftOrderId});
+  }>(env, DRAFT_ORDER_QUERY, {id: draftOrderId}, 'shopify_order_complete');
 
   return data.draftOrder;
 }

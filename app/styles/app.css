@@ -1080,6 +1080,26 @@ img {
   color: var(--color-muted);
 }
 
+.pagination {
+  display: flex;
+  flex-direction: column;
+}
+
+.pagination__link {
+  display: flex;
+  justify-content: center;
+  padding: 1.25rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-ink-soft);
+}
+
+.pagination__link:hover {
+  text-decoration: none;
+  color: var(--color-ink);
+}
+
 .collection-toolbar {
   display: flex;
   align-items: center;
@@ -1660,6 +1680,11 @@ img {
 .form-error {
   color: var(--color-signal);
   font-size: 0.85rem;
+}
+
+.form-error__ref {
+  color: var(--color-muted);
+  font-size: 0.75rem;
 }
 
 .size-table-wrap {

@@ -1,5 +1,6 @@
 import type {Route} from './+types/api.sumup.verify';
 import {confirmSumUpPayment} from '~/lib/orderFulfillment.server';
+import {newRequestId} from '~/lib/checkoutErrors.server';
 
 /**
  * Called by the client right after the SumUp widget reports a client-side
@@ -9,15 +10,29 @@ import {confirmSumUpPayment} from '~/lib/orderFulfillment.server';
  */
 export async function action({request, context}: Route.ActionArgs) {
   if (request.method !== 'POST') {
-    return Response.json({error: 'Method not allowed'}, {status: 405});
+    return Response.json({status: 'ERROR', error: 'Method not allowed', requestId: newRequestId()}, {status: 405});
   }
 
-  const body = await request.json<{sumupCheckoutId?: string; draftOrderId?: string}>();
+  let body: {sumupCheckoutId?: string; draftOrderId?: string};
+  try {
+    body = (await request.json()) as typeof body;
+  } catch {
+    return Response.json(
+      {status: 'ERROR', error: 'Requête invalide.', requestId: newRequestId()},
+      {status: 400},
+    );
+  }
 
   if (!body.sumupCheckoutId || !body.draftOrderId) {
-    return Response.json({error: 'Missing sumupCheckoutId or draftOrderId'}, {status: 400});
+    return Response.json(
+      {status: 'ERROR', error: 'Missing sumupCheckoutId or draftOrderId', requestId: newRequestId()},
+      {status: 400},
+    );
   }
 
+  // confirmSumUpPayment already catches and logs its own failures, returning
+  // a typed {status: 'ERROR', ...} result — this try/catch is only a safety
+  // net against a truly unexpected throw.
   try {
     const result = await confirmSumUpPayment(context.env, {
       sumupCheckoutId: body.sumupCheckoutId,
@@ -25,7 +40,11 @@ export async function action({request, context}: Route.ActionArgs) {
     });
     return Response.json(result);
   } catch (error) {
-    console.error('SumUp verify failed', error);
-    return Response.json({error: 'Verification failed'}, {status: 500});
+    const requestId = newRequestId();
+    console.error(`[checkout:sumup_checkout_verify] requestId=${requestId} unexpected error=${error instanceof Error ? error.message : String(error)}`);
+    return Response.json(
+      {status: 'ERROR', error: 'Paiement reçu, mais confirmation Shopify impossible.', requestId},
+      {status: 500},
+    );
   }
 }

@@ -103,7 +103,7 @@ function SearchAside() {
             const {articles, collections, pages, products, queries} = items;
 
             if (state === 'loading' && term.current) {
-              return <div>Loading...</div>;
+              return <div>Recherche…</div>;
             }
 
             if (!total) {

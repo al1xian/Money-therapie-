@@ -8,6 +8,12 @@ import {
   verifyVariantsAvailability,
 } from '~/lib/shopifyAdmin.server';
 import {createSumUpCheckout} from '~/lib/sumup.server';
+import {
+  CheckoutStepError,
+  STEP_PUBLIC_MESSAGES,
+  logCheckoutStepFailure,
+  newRequestId,
+} from '~/lib/checkoutErrors.server';
 
 export const meta: Route.MetaFunction = () => {
   return [{title: 'Money Therapy | Paiement'}];
@@ -25,13 +31,36 @@ export async function loader({context}: Route.LoaderArgs) {
 
 type ActionResult =
   | {ok: true; sumupCheckoutId: string; draftOrderId: string}
-  | {ok: false; error: string};
+  | {ok: false; error: string; requestId: string; step?: string};
+
+function actionFailure(error: unknown, fallbackStep: CheckoutStepError['step']): ActionResult {
+  if (error instanceof CheckoutStepError) {
+    logCheckoutStepFailure(error);
+    return {
+      ok: false,
+      error: STEP_PUBLIC_MESSAGES[error.step],
+      requestId: error.requestId,
+      step: error.step,
+    };
+  }
+
+  const requestId = newRequestId();
+  console.error(
+    `[checkout:${fallbackStep}] requestId=${requestId} unexpected error=${error instanceof Error ? error.message : String(error)}`,
+  );
+  return {ok: false, error: STEP_PUBLIC_MESSAGES[fallbackStep], requestId, step: fallbackStep};
+}
 
 export async function action({request, context}: Route.ActionArgs): Promise<ActionResult> {
-  const cart = await context.cart.get();
+  let cart;
+  try {
+    cart = await context.cart.get();
+  } catch (error) {
+    return actionFailure(error, 'cart_read');
+  }
 
   if (!cart || !cart.lines?.nodes?.length) {
-    return {ok: false, error: 'Votre panier est vide.'};
+    return {ok: false, error: 'Votre panier est vide.', requestId: newRequestId()};
   }
 
   const formData = await request.formData();
@@ -46,7 +75,7 @@ export async function action({request, context}: Route.ActionArgs): Promise<Acti
   const phone = String(formData.get('phone') || '').trim();
 
   if (!email || !firstName || !lastName || !address1 || !city || !zip) {
-    return {ok: false, error: 'Merci de compléter tous les champs obligatoires.'};
+    return {ok: false, error: 'Merci de compléter tous les champs obligatoires.', requestId: newRequestId()};
   }
 
   const lines = cart.lines.nodes
@@ -56,20 +85,28 @@ export async function action({request, context}: Route.ActionArgs): Promise<Acti
       quantity: line.quantity,
     }));
 
+  // Step 1: stock/price re-verification — never trust the cart/browser.
+  let checks;
   try {
-    // Never trust the cart/browser for stock or price — re-read both
-    // directly from Shopify right before creating anything payable.
-    const checks = await verifyVariantsAvailability(context.env, lines);
-    const problems = checks.filter((c) => !c.ok);
+    checks = await verifyVariantsAvailability(context.env, lines);
+  } catch (error) {
+    return actionFailure(error, 'stock_check');
+  }
 
-    if (problems.length > 0) {
-      return {
-        ok: false,
-        error: problems.map((p) => p.reason).join(' '),
-      };
-    }
+  const problems = checks.filter((c) => !c.ok);
+  if (problems.length > 0) {
+    return {
+      ok: false,
+      error: problems.map((p) => p.reason).join(' '),
+      requestId: newRequestId(),
+      step: 'stock_check',
+    };
+  }
 
-    const draftOrder = await createDraftOrder(context.env, {
+  // Step 2: create the Shopify draft order (source of truth for the amount).
+  let draftOrder;
+  try {
+    draftOrder = await createDraftOrder(context.env, {
       email,
       lines,
       shippingAddress: {
@@ -84,36 +121,51 @@ export async function action({request, context}: Route.ActionArgs): Promise<Acti
       },
       note: `Cart ${cart.id}`,
     });
+  } catch (error) {
+    return actionFailure(error, 'draft_order_create');
+  }
 
-    // The SumUp amount comes from the draft order Shopify just computed
-    // from real variant prices — never from anything the browser sent.
+  // Step 3: create the SumUp checkout for the amount Shopify just computed.
+  let sumupCheckout;
+  try {
     const origin = new URL(request.url).origin;
-    const sumupCheckout = await createSumUpCheckout(context.env, {
+    sumupCheckout = await createSumUpCheckout(context.env, {
       amount: Number(draftOrder.totalPrice),
       currency: draftOrder.currencyCode,
       checkoutReference: draftOrder.id.split('/').pop() || draftOrder.id,
       description: `Money Therapy — ${draftOrder.name}`,
       returnUrl: `${origin}/api/sumup/return?draftOrderId=${encodeURIComponent(draftOrder.id)}`,
     });
-
-    await attachSumUpCheckoutReference(context.env, draftOrder.id, sumupCheckout.id);
-
-    return {ok: true, sumupCheckoutId: sumupCheckout.id, draftOrderId: draftOrder.id};
   } catch (error) {
-    console.error('Checkout payment initiation failed', error);
-    return {ok: false, error: "Impossible d'initier le paiement. Réessayez dans un instant."};
+    const failure = actionFailure(error, 'sumup_checkout_create');
+    console.error(`[checkout:sumup_checkout_create] draftOrderId=${draftOrder.id} requestId=${failure.ok ? '' : failure.requestId}`);
+    return failure;
   }
+
+  // Step 4 (best-effort, never blocks payment): note the SumUp checkoutId on
+  // the draft order for support/traceability.
+  try {
+    await attachSumUpCheckoutReference(context.env, draftOrder.id, sumupCheckout.id);
+  } catch (error) {
+    if (error instanceof CheckoutStepError) logCheckoutStepFailure(error, {draftOrderId: draftOrder.id});
+  }
+
+  return {ok: true, sumupCheckoutId: sumupCheckout.id, draftOrderId: draftOrder.id};
 }
 
-type WidgetStatus = 'idle' | 'sent' | 'auth-screen' | 'invalid' | 'error' | 'fail' | 'success';
+type WidgetStatus = 'idle' | 'loading' | 'load-error' | 'sent' | 'auth-screen' | 'invalid' | 'error' | 'fail' | 'success';
 
 const WIDGET_MESSAGES: Partial<Record<WidgetStatus, string>> = {
+  loading: 'Chargement du module de paiement…',
+  'load-error': "Le widget SumUp n'a pas pu se charger. Vérifiez votre connexion et réessayez.",
   sent: 'Envoi du paiement en cours…',
   'auth-screen': 'Vérification 3-D Secure en cours…',
   invalid: 'Les informations de carte semblent invalides. Vérifiez-les et réessayez.',
   error: "Une erreur technique est survenue pendant le paiement. Réessayez dans un instant.",
   fail: 'Le paiement a été refusé par votre banque ou annulé. Aucune somme n’a été débitée.',
 };
+
+const WIDGET_SCRIPT_TIMEOUT_MS = 12000;
 
 export default function Checkout() {
   const {cart} = useLoaderData<typeof loader>();
@@ -135,14 +187,44 @@ export default function Checkout() {
   useEffect(() => {
     if (phase !== 'widget' || !result?.ok || widgetMounted.current) return;
     widgetMounted.current = true;
+    setWidgetStatus('loading');
+
+    let settled = false;
+    const timeout = window.setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        console.error('[checkout:widget_load] SumUp SDK did not finish loading within timeout');
+        setWidgetStatus('load-error');
+      }
+    }, WIDGET_SCRIPT_TIMEOUT_MS);
 
     const script = document.createElement('script');
     script.src = 'https://gateway.sumup.com/gateway/ecom/card/v2/sdk.js';
     script.async = true;
-    script.onload = () => mountWidget(result.sumupCheckoutId, result.draftOrderId);
+    script.onload = () => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timeout);
+      const w = window as unknown as {SumUpCard?: unknown};
+      if (!w.SumUpCard) {
+        console.error('[checkout:widget_load] SumUp SDK script loaded but window.SumUpCard is undefined');
+        setWidgetStatus('load-error');
+        return;
+      }
+      setWidgetStatus('idle');
+      mountWidget(result.sumupCheckoutId, result.draftOrderId);
+    };
+    script.onerror = () => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timeout);
+      console.error('[checkout:widget_load] SumUp SDK script failed to load (network or CSP block)');
+      setWidgetStatus('load-error');
+    };
     document.body.appendChild(script);
 
     return () => {
+      window.clearTimeout(timeout);
       const w = window as unknown as {SumUpCard?: {unmount: (id: string) => void}};
       w.SumUpCard?.unmount('sumup-card');
     };
@@ -288,6 +370,9 @@ export default function Checkout() {
             {result && !result.ok && (
               <p className="form-error" role="alert">
                 {result.error}
+                {result.requestId && (
+                  <span className="form-error__ref"> (référence {result.requestId})</span>
+                )}
               </p>
             )}
 
@@ -300,15 +385,18 @@ export default function Checkout() {
             <h2>Paiement</h2>
             <p className="checkout-widget__note">Paiement sécurisé, traité par SumUp.</p>
 
-            <div id="sumup-card" aria-busy={isProcessing} />
+            <div id="sumup-card" aria-busy={isProcessing || widgetStatus === 'loading'} />
 
-            {isProcessing && (
+            {(isProcessing || widgetStatus === 'loading') && (
               <p className="checkout-widget__status" role="status">
                 {WIDGET_MESSAGES[widgetStatus]}
               </p>
             )}
 
-            {(widgetStatus === 'invalid' || widgetStatus === 'error' || widgetStatus === 'fail') && (
+            {(widgetStatus === 'invalid' ||
+              widgetStatus === 'error' ||
+              widgetStatus === 'fail' ||
+              widgetStatus === 'load-error') && (
               <div className="form-error" role="alert">
                 <p>{WIDGET_MESSAGES[widgetStatus]}</p>
                 <button type="button" className="link" onClick={retry}>

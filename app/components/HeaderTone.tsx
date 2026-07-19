@@ -1,4 +1,5 @@
 import {createContext, useContext, useEffect, useRef, useState} from 'react';
+import {useLocation} from 'react-router';
 
 type HeaderToneContextValue = {
   transparent: boolean;
@@ -8,7 +9,20 @@ type HeaderToneContextValue = {
 const HeaderToneContext = createContext<HeaderToneContextValue | null>(null);
 
 export function HeaderToneProvider({children}: {children: React.ReactNode}) {
-  const [transparent, setTransparent] = useState(false);
+  const {pathname} = useLocation();
+  const isHome = pathname === '/';
+  // Bug fix: initializing this to a hardcoded `false` made the homepage
+  // header render solid/white for one frame on first load and on every
+  // client-side navigation back to "/", before the hero's own effect had a
+  // chance to flip it — a visible flash. Seeding it from the route (which
+  // is known during SSR too) avoids that; the hero's IntersectionObserver
+  // still takes over for scroll-based refinement once mounted.
+  const [transparent, setTransparent] = useState(isHome);
+
+  useEffect(() => {
+    setTransparent(isHome);
+  }, [isHome]);
+
   return (
     <HeaderToneContext.Provider value={{transparent, setTransparent}}>
       {children}
