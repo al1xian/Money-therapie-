@@ -46,8 +46,10 @@ export default function Collections() {
   const {collections} = useLoaderData<typeof loader>();
 
   return (
-    <div className="collections">
-      <h1>Collections</h1>
+    <div className="collection-page">
+      <div className="collection-page__head">
+        <h1>Toutes les collections</h1>
+      </div>
       <PaginatedResourceSection<CollectionFragment>
         connection={collections}
         resourcesClassName="collections-grid"
@@ -73,21 +75,24 @@ function CollectionItem({
 }) {
   return (
     <Link
-      className="collection-item"
+      className="editorial-block editorial-block--compact"
       key={collection.id}
       to={`/collections/${collection.handle}`}
       prefetch="intent"
     >
-      {collection?.image && (
+      {collection?.image ? (
         <Image
           alt={collection.image.altText || collection.title}
-          aspectRatio="1/1"
+          aspectRatio="4/5"
           data={collection.image}
           loading={index < 3 ? 'eager' : undefined}
           sizes="(min-width: 45em) 400px, 100vw"
+          className="editorial-block__image"
         />
+      ) : (
+        <div className="editorial-block__placeholder" aria-hidden="true" />
       )}
-      <h5>{collection.title}</h5>
+      <span className="editorial-block__label">{collection.title}</span>
     </Link>
   );
 }

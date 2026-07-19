@@ -8,7 +8,9 @@ import type {
 import {Aside} from '~/components/Aside';
 import {Footer} from '~/components/Footer';
 import {Header, HeaderMenu} from '~/components/Header';
+import {HeaderToneProvider} from '~/components/HeaderTone';
 import {CartMain} from '~/components/CartMain';
+import {SearchIcon} from '~/components/Icons';
 import {
   SEARCH_ENDPOINT,
   SearchFormPredictive,
@@ -34,23 +36,25 @@ export function PageLayout({
 }: PageLayoutProps) {
   return (
     <Aside.Provider>
-      <CartAside cart={cart} />
-      <SearchAside />
-      <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
-      {header && (
-        <Header
+      <HeaderToneProvider>
+        <CartAside cart={cart} />
+        <SearchAside />
+        <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
+        {header && (
+          <Header
+            header={header}
+            cart={cart}
+            isLoggedIn={isLoggedIn}
+            publicStoreDomain={publicStoreDomain}
+          />
+        )}
+        <main>{children}</main>
+        <Footer
+          footer={footer}
           header={header}
-          cart={cart}
-          isLoggedIn={isLoggedIn}
           publicStoreDomain={publicStoreDomain}
         />
-      )}
-      <main>{children}</main>
-      <Footer
-        footer={footer}
-        header={header}
-        publicStoreDomain={publicStoreDomain}
-      />
+      </HeaderToneProvider>
     </Aside.Provider>
   );
 }
@@ -72,24 +76,25 @@ function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
 function SearchAside() {
   const queriesDatalistId = useId();
   return (
-    <Aside type="search" heading="SEARCH">
+    <Aside type="search" heading="Recherche">
       <div className="predictive-search">
-        <br />
         <SearchFormPredictive>
           {({fetchResults, goToSearch, inputRef}) => (
-            <>
+            <div className="predictive-search-bar">
+              <SearchIcon className="predictive-search-bar__icon" />
               <input
                 name="q"
                 onChange={fetchResults}
                 onFocus={fetchResults}
-                placeholder="Search"
+                placeholder="Rechercher un produit"
                 ref={inputRef}
                 type="search"
                 list={queriesDatalistId}
               />
-              &nbsp;
-              <button onClick={goToSearch}>Search</button>
-            </>
+              <button className="link" onClick={goToSearch}>
+                Voir tout
+              </button>
+            </div>
           )}
         </SearchFormPredictive>
 
@@ -161,13 +166,18 @@ function MobileMenuAside({
   return (
     header.menu &&
     header.shop.primaryDomain?.url && (
-      <Aside type="mobile" heading="MENU">
-        <HeaderMenu
-          menu={header.menu}
-          viewport="mobile"
-          primaryDomainUrl={header.shop.primaryDomain.url}
-          publicStoreDomain={publicStoreDomain}
-        />
+      <Aside type="mobile" heading="Menu">
+        <div className="side-nav">
+          <HeaderMenu
+            menu={header.menu}
+            viewport="mobile"
+            primaryDomainUrl={header.shop.primaryDomain.url}
+            publicStoreDomain={publicStoreDomain}
+          />
+          <div className="side-nav__footer">
+            <span className="side-nav__locale">France — EUR €</span>
+          </div>
+        </div>
       </Aside>
     )
   );

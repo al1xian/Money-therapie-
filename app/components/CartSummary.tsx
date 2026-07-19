@@ -50,11 +50,10 @@ function CartCheckoutActions({checkoutUrl}: {checkoutUrl?: string}) {
   if (!checkoutUrl) return null;
 
   return (
-    <div>
-      <a href={checkoutUrl} target="_self">
-        <p>Continue to Checkout &rarr;</p>
+    <div className="cart-checkout-actions">
+      <a href={checkoutUrl} target="_self" className="btn btn--primary">
+        Passer commande
       </a>
-      <br />
     </div>
   );
 }
