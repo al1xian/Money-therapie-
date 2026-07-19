@@ -1,0 +1,14 @@
+node_modules
+/build
+/dist
+/.cache
+/.react-router
+.env
+.env.*
+!.env.example
+*.local
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.turbo
+*.log
