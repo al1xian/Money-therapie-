@@ -2,7 +2,11 @@ import {useEffect, useRef, useState} from 'react';
 import {redirect, useFetcher, useLoaderData, useNavigate} from 'react-router';
 import type {Route} from './+types/checkout';
 import {Image, Money} from '@shopify/hydrogen';
-import {createDraftOrder} from '~/lib/shopifyAdmin.server';
+import {
+  attachSumUpCheckoutReference,
+  createDraftOrder,
+  verifyVariantsAvailability,
+} from '~/lib/shopifyAdmin.server';
 import {createSumUpCheckout} from '~/lib/sumup.server';
 
 export const meta: Route.MetaFunction = () => {
@@ -53,6 +57,18 @@ export async function action({request, context}: Route.ActionArgs): Promise<Acti
     }));
 
   try {
+    // Never trust the cart/browser for stock or price — re-read both
+    // directly from Shopify right before creating anything payable.
+    const checks = await verifyVariantsAvailability(context.env, lines);
+    const problems = checks.filter((c) => !c.ok);
+
+    if (problems.length > 0) {
+      return {
+        ok: false,
+        error: problems.map((p) => p.reason).join(' '),
+      };
+    }
+
     const draftOrder = await createDraftOrder(context.env, {
       email,
       lines,
@@ -69,6 +85,8 @@ export async function action({request, context}: Route.ActionArgs): Promise<Acti
       note: `Cart ${cart.id}`,
     });
 
+    // The SumUp amount comes from the draft order Shopify just computed
+    // from real variant prices — never from anything the browser sent.
     const origin = new URL(request.url).origin;
     const sumupCheckout = await createSumUpCheckout(context.env, {
       amount: Number(draftOrder.totalPrice),
@@ -78,6 +96,8 @@ export async function action({request, context}: Route.ActionArgs): Promise<Acti
       returnUrl: `${origin}/api/sumup/return?draftOrderId=${encodeURIComponent(draftOrder.id)}`,
     });
 
+    await attachSumUpCheckoutReference(context.env, draftOrder.id, sumupCheckout.id);
+
     return {ok: true, sumupCheckoutId: sumupCheckout.id, draftOrderId: draftOrder.id};
   } catch (error) {
     console.error('Checkout payment initiation failed', error);
@@ -85,15 +105,26 @@ export async function action({request, context}: Route.ActionArgs): Promise<Acti
   }
 }
 
+type WidgetStatus = 'idle' | 'sent' | 'auth-screen' | 'invalid' | 'error' | 'fail' | 'success';
+
+const WIDGET_MESSAGES: Partial<Record<WidgetStatus, string>> = {
+  sent: 'Envoi du paiement en cours…',
+  'auth-screen': 'Vérification 3-D Secure en cours…',
+  invalid: 'Les informations de carte semblent invalides. Vérifiez-les et réessayez.',
+  error: "Une erreur technique est survenue pendant le paiement. Réessayez dans un instant.",
+  fail: 'Le paiement a été refusé par votre banque ou annulé. Aucune somme n’a été débitée.',
+};
+
 export default function Checkout() {
   const {cart} = useLoaderData<typeof loader>();
   const fetcher = useFetcher<ActionResult>();
   const navigate = useNavigate();
   const [phase, setPhase] = useState<'form' | 'widget'>('form');
-  const [widgetError, setWidgetError] = useState<string | null>(null);
+  const [widgetStatus, setWidgetStatus] = useState<WidgetStatus>('idle');
   const widgetMounted = useRef(false);
 
   const result = fetcher.data;
+  const isProcessing = widgetStatus === 'sent' || widgetStatus === 'auth-screen';
 
   useEffect(() => {
     if (result?.ok && phase === 'form') {
@@ -112,7 +143,6 @@ export default function Checkout() {
     document.body.appendChild(script);
 
     return () => {
-      // Widget script stays loaded for the session; only unmount the card UI.
       const w = window as unknown as {SumUpCard?: {unmount: (id: string) => void}};
       w.SumUpCard?.unmount('sumup-card');
     };
@@ -125,6 +155,7 @@ export default function Checkout() {
         mount: (config: {
           id: string;
           checkoutId: string;
+          locale?: string;
           onResponse: (type: string, body: {transaction_id?: string; message?: string}) => void;
         }) => void;
       };
@@ -133,38 +164,52 @@ export default function Checkout() {
     w.SumUpCard?.mount({
       id: 'sumup-card',
       checkoutId: sumupCheckoutId,
+      // `locale` is passed best-effort (fr-FR) — not independently confirmed
+      // against SumUp's full widget reference from this environment; the
+      // checkoutId + return payload are the parts that are load-bearing.
+      locale: 'fr-FR',
       onResponse: (type, body) => {
-        if (type === 'success') {
+        const status = type as WidgetStatus;
+        setWidgetStatus(status);
+
+        if (status === 'success') {
           void verifyAndRedirect(sumupCheckoutId, draftOrderId);
-        } else if (type === 'error') {
-          setWidgetError(body.message || 'Le paiement a échoué ou a été annulé.');
+        } else if (status === 'fail' || status === 'error') {
+          console.error('SumUp widget response', type, body);
         }
       },
     });
   }
 
   async function verifyAndRedirect(sumupCheckoutId: string, draftOrderId: string) {
+    // A widget "success" is never treated as proof of payment on its own —
+    // it only triggers this server-side re-check against SumUp's API.
     try {
       const response = await fetch('/api/sumup/verify', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({sumupCheckoutId, draftOrderId}),
       });
-      const data = await response.json<{status: string}>();
+      const data = (await response.json()) as {status: string};
 
-      if (data.status === 'PAID') {
-        void navigate(`/checkout/confirmation?order=${encodeURIComponent(draftOrderId)}`);
-      } else if (data.status === 'FAILED' || data.status === 'EXPIRED') {
+      if (data.status === 'FAILED' || data.status === 'EXPIRED') {
         void navigate('/checkout/failed');
-      } else {
-        // Payment reported success but SumUp hasn't confirmed PAID yet —
-        // send the customer to the confirmation page, which polls.
-        void navigate(`/checkout/confirmation?order=${encodeURIComponent(draftOrderId)}`);
+        return;
       }
+
+      // PAID or still PENDING (SumUp hasn't confirmed yet): the confirmation
+      // page polls until the Shopify order is actually completed.
+      void navigate(`/checkout/confirmation?order=${encodeURIComponent(draftOrderId)}`);
     } catch (error) {
       console.error('Post-payment verification failed', error);
       void navigate(`/checkout/confirmation?order=${encodeURIComponent(draftOrderId)}`);
     }
+  }
+
+  function retry() {
+    setWidgetStatus('idle');
+    setPhase('form');
+    widgetMounted.current = false;
   }
 
   return (
@@ -254,19 +299,19 @@ export default function Checkout() {
           <div className="checkout-widget">
             <h2>Paiement</h2>
             <p className="checkout-widget__note">Paiement sécurisé, traité par SumUp.</p>
-            <div id="sumup-card" />
-            {widgetError && (
+
+            <div id="sumup-card" aria-busy={isProcessing} />
+
+            {isProcessing && (
+              <p className="checkout-widget__status" role="status">
+                {WIDGET_MESSAGES[widgetStatus]}
+              </p>
+            )}
+
+            {(widgetStatus === 'invalid' || widgetStatus === 'error' || widgetStatus === 'fail') && (
               <div className="form-error" role="alert">
-                <p>{widgetError}</p>
-                <button
-                  type="button"
-                  className="link"
-                  onClick={() => {
-                    setWidgetError(null);
-                    setPhase('form');
-                    widgetMounted.current = false;
-                  }}
-                >
+                <p>{WIDGET_MESSAGES[widgetStatus]}</p>
+                <button type="button" className="link" onClick={retry}>
                   Réessayer
                 </button>
               </div>

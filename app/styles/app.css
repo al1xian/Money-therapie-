@@ -1544,6 +1544,17 @@ img {
   min-height: 320px;
 }
 
+#sumup-card[aria-busy='true'] {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.checkout-widget__status {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  margin-top: 0.75rem;
+}
+
 .checkout-confirmation {
   max-width: 560px;
   margin: 0 auto;

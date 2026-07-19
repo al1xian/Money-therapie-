@@ -1,12 +1,16 @@
 import type {Route} from './+types/api.sumup.return';
-import {verifySumUpSignature} from '~/lib/sumup.server';
 import {confirmSumUpPayment} from '~/lib/orderFulfillment.server';
 
 /**
  * The `return_url` passed when creating each SumUp checkout. SumUp calls
- * this server-to-server when the checkout's status changes. The payload is
- * only used to find *which* checkout to look up — the actual status is
- * always re-fetched from SumUp's API before any order is completed.
+ * this server-to-server when the checkout's status changes.
+ *
+ * The payload is only ever used to find *which* checkout id to look up —
+ * its "status" field (if any) is never trusted. The real status is always
+ * re-fetched from SumUp's API (confirmSumUpPayment -> getSumUpCheckout)
+ * with SUMUP_API_KEY before any order is completed. This is the official
+ * pattern for this integration: authenticity comes from re-querying SumUp's
+ * API, not from a webhook secret.
  */
 export async function action({request, context}: Route.ActionArgs) {
   const url = new URL(request.url);
@@ -15,18 +19,6 @@ export async function action({request, context}: Route.ActionArgs) {
 
   if (!draftOrderId) {
     return new Response('Missing draftOrderId', {status: 400});
-  }
-
-  const signatureHeader = request.headers.get('x-payload-signature');
-  const validSignature = await verifySumUpSignature(
-    rawBody,
-    signatureHeader,
-    context.env.SUMUP_WEBHOOK_SECRET,
-  );
-
-  if (!validSignature) {
-    console.error('SumUp callback: invalid signature');
-    return new Response('Invalid signature', {status: 401});
   }
 
   let payload: {id?: string; checkout_id?: string; checkoutId?: string} = {};

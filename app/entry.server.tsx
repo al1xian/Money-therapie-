@@ -19,6 +19,17 @@ export default async function handleRequest(
       checkoutDomain: context.env.PUBLIC_CHECKOUT_DOMAIN,
       storeDomain: context.env.PUBLIC_STORE_DOMAIN,
     },
+    // Allow the SumUp Payment Widget: its SDK script, the iframe it mounts
+    // for card entry / 3-D Secure, and the XHR calls it makes to tokenize
+    // card details directly with SumUp (never through our server).
+    //
+    // `scriptSrc` and `frameSrc` have no Hydrogen default to merge onto (only
+    // `connectSrc` does), so the defaults are repeated here explicitly —
+    // passing just the SumUp domain would otherwise silently drop 'self' /
+    // cdn.shopify.com and break the app's own hydration scripts.
+    scriptSrc: ["'self'", 'https://cdn.shopify.com', 'https://shopify.com', 'https://gateway.sumup.com'],
+    connectSrc: ['https://gateway.sumup.com', 'https://api.sumup.com'],
+    frameSrc: ["'self'", 'https://gateway.sumup.com'],
   });
 
   const body = await renderToReadableStream(

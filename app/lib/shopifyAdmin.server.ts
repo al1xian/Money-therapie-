@@ -33,6 +33,92 @@ export type DraftOrderLine = {
   quantity: number;
 };
 
+const VARIANTS_QUERY = `#graphql
+  query VerifyVariants($ids: [ID!]!) {
+    nodes(ids: $ids) {
+      ... on ProductVariant {
+        id
+        availableForSale
+        inventoryQuantity
+        price
+        product {
+          title
+          status
+        }
+      }
+    }
+  }
+`;
+
+export type VariantCheck = {
+  variantId: string;
+  requestedQuantity: number;
+  ok: boolean;
+  reason?: string;
+  productTitle?: string;
+  unitPrice?: string;
+};
+
+/**
+ * Re-reads price, stock and availability directly from Shopify for every
+ * requested line, server-side, right before a draft order is created.
+ * Never trust a price or "in stock" flag coming from the client/cart.
+ */
+export async function verifyVariantsAvailability(
+  env: Env,
+  lines: DraftOrderLine[],
+): Promise<VariantCheck[]> {
+  const data = await adminFetch<{
+    nodes: Array<{
+      id: string;
+      availableForSale: boolean;
+      inventoryQuantity: number | null;
+      price: string;
+      product: {title: string; status: string};
+    } | null>;
+  }>(env, VARIANTS_QUERY, {ids: lines.map((l) => l.variantId)});
+
+  return lines.map((line, index) => {
+    const variant = data.nodes[index];
+
+    if (!variant) {
+      return {variantId: line.variantId, requestedQuantity: line.quantity, ok: false, reason: 'Produit introuvable.'};
+    }
+
+    if (variant.product.status !== 'ACTIVE' || !variant.availableForSale) {
+      return {
+        variantId: line.variantId,
+        requestedQuantity: line.quantity,
+        ok: false,
+        reason: `${variant.product.title} n'est plus disponible.`,
+        productTitle: variant.product.title,
+      };
+    }
+
+    if (
+      variant.inventoryQuantity !== null &&
+      variant.inventoryQuantity >= 0 &&
+      variant.inventoryQuantity < line.quantity
+    ) {
+      return {
+        variantId: line.variantId,
+        requestedQuantity: line.quantity,
+        ok: false,
+        reason: `Stock insuffisant pour ${variant.product.title} (${variant.inventoryQuantity} disponible${variant.inventoryQuantity > 1 ? 's' : ''}).`,
+        productTitle: variant.product.title,
+      };
+    }
+
+    return {
+      variantId: line.variantId,
+      requestedQuantity: line.quantity,
+      ok: true,
+      productTitle: variant.product.title,
+      unitPrice: variant.price,
+    };
+  });
+}
+
 export type ShippingAddressInput = {
   firstName: string;
   lastName: string;
@@ -91,6 +177,7 @@ export async function createDraftOrder(
         variantId: line.variantId,
         quantity: line.quantity,
       })),
+      customAttributes: [{key: 'payment_provider', value: 'sumup'}],
       shippingAddress: {
         firstName: params.shippingAddress.firstName,
         lastName: params.shippingAddress.lastName,
@@ -115,6 +202,40 @@ export async function createDraftOrder(
   }
 
   return data.draftOrderCreate.draftOrder;
+}
+
+const DRAFT_ORDER_UPDATE_REFERENCE_MUTATION = `#graphql
+  mutation DraftOrderAttachSumUpCheckout($id: ID!, $checkoutId: String!) {
+    draftOrderUpdate(
+      id: $id
+      input: {
+        customAttributes: [
+          {key: "payment_provider", value: "sumup"}
+          {key: "sumup_checkout_id", value: $checkoutId}
+        ]
+      }
+    ) {
+      draftOrder {
+        id
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+/** Stores the SumUp checkoutId on the draft order for traceability/support. */
+export async function attachSumUpCheckoutReference(
+  env: Env,
+  draftOrderId: string,
+  sumupCheckoutId: string,
+) {
+  await adminFetch(env, DRAFT_ORDER_UPDATE_REFERENCE_MUTATION, {
+    id: draftOrderId,
+    checkoutId: sumupCheckoutId,
+  });
 }
 
 const DRAFT_ORDER_COMPLETE_MUTATION = `#graphql
@@ -148,9 +269,22 @@ export async function completeDraftOrder(env: Env, draftOrderId: string) {
   }>(env, DRAFT_ORDER_COMPLETE_MUTATION, {id: draftOrderId});
 
   if (data.draftOrderComplete.userErrors.length > 0) {
-    throw new Error(
-      `Draft order completion failed: ${data.draftOrderComplete.userErrors.map((e) => e.message).join(', ')}`,
-    );
+    const messages = data.draftOrderComplete.userErrors.map((e) => e.message).join(', ');
+
+    // Idempotency: two near-simultaneous confirmations (the client-side
+    // verify call and SumUp's return_url callback) can both try to complete
+    // the same draft order. Shopify rejects the second attempt — treat that
+    // as success and return the order that already exists instead of
+    // throwing, rather than risk the customer seeing a false failure.
+    const alreadyCompleted = /already been completed|already completed|already converted/i.test(messages);
+    if (alreadyCompleted) {
+      const existing = await getDraftOrder(env, draftOrderId);
+      if (existing?.order) {
+        return {id: existing.id, order: existing.order};
+      }
+    }
+
+    throw new Error(`Draft order completion failed: ${messages}`);
   }
 
   return data.draftOrderComplete.draftOrder;
