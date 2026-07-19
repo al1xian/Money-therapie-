@@ -14,6 +14,9 @@ const graphqlConfig: IGraphQLConfig = {
         './*.{ts,tsx,js,jsx}',
         './app/**/*.{ts,tsx,js,jsx}',
         '!./app/graphql/**/*.{ts,tsx,js,jsx}',
+        // Admin API queries (shopifyAdmin.server.ts) use a different schema
+        // with no offline copy available — excluded from Storefront codegen.
+        '!./app/lib/shopifyAdmin.server.ts',
       ],
     },
 

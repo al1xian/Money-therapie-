@@ -13,6 +13,7 @@ import {ProductPrice} from '~/components/ProductPrice';
 import {ProductGallery} from '~/components/ProductGallery';
 import {ProductForm} from '~/components/ProductForm';
 import {Accordion} from '~/components/Accordion';
+import {DeliveryTimeline} from '~/components/DeliveryTimeline';
 import {ProductItem} from '~/components/ProductItem';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 
@@ -126,6 +127,8 @@ export default function Product() {
             selectedVariant={selectedVariant}
           />
         </div>
+
+        <DeliveryTimeline />
 
         <div className="product-page__accordions">
           <Accordion title="Description" defaultOpen>

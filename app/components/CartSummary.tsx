@@ -2,7 +2,7 @@ import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import type {CartLayout} from '~/components/CartMain';
 import {CartForm, Money, type OptimisticCart} from '@shopify/hydrogen';
 import {useEffect, useId, useRef, useState} from 'react';
-import {useFetcher} from 'react-router';
+import {Link, useFetcher} from 'react-router';
 
 type CartSummaryProps = {
   cart: OptimisticCart<CartApiQueryFragment | null>;
@@ -41,19 +41,19 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
         giftCardHeadingId={giftCardHeadingId}
         giftCardInputId={giftCardInputId}
       />
-      <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} />
+      <CartCheckoutActions hasItems={Boolean(cart?.lines?.nodes?.length)} />
     </div>
   );
 }
 
-function CartCheckoutActions({checkoutUrl}: {checkoutUrl?: string}) {
-  if (!checkoutUrl) return null;
+function CartCheckoutActions({hasItems}: {hasItems: boolean}) {
+  if (!hasItems) return null;
 
   return (
     <div className="cart-checkout-actions">
-      <a href={checkoutUrl} target="_self" className="btn btn--primary">
+      <Link to="/checkout" className="btn btn--primary">
         Passer commande
-      </a>
+      </Link>
     </div>
   );
 }
