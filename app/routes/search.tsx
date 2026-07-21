@@ -14,7 +14,7 @@ import type {
 } from 'storefrontapi.generated';
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: `Money Therapy | Search`}];
+  return [{title: `Hydrogen | Search`}];
 };
 
 export async function loader({request, context}: Route.LoaderArgs) {

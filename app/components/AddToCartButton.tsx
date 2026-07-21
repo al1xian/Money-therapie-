@@ -25,11 +25,10 @@ export function AddToCartButton({
           />
           <button
             type="submit"
-            className="btn btn--primary add-to-cart-button"
             onClick={onClick}
             disabled={disabled ?? fetcher.state !== 'idle'}
           >
-            {fetcher.state !== 'idle' ? 'Ajout…' : children}
+            {children}
           </button>
         </>
       )}

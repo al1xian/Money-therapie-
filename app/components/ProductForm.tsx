@@ -25,7 +25,7 @@ export function ProductForm({
 
         return (
           <div className="product-options" key={option.name}>
-            <h5 className="product-options__label">{option.name}</h5>
+            <h5>{option.name}</h5>
             <div className="product-options-grid">
               {option.optionValues.map((value) => {
                 const {
@@ -52,8 +52,12 @@ export function ProductForm({
                       preventScrollReset
                       replace
                       to={`/products/${handle}?${variantUriQuery}`}
-                      data-selected={selected}
-                      data-unavailable={!available}
+                      style={{
+                        border: selected
+                          ? '1px solid black'
+                          : '1px solid transparent',
+                        opacity: available ? 1 : 0.3,
+                      }}
                     >
                       <ProductOptionSwatch swatch={swatch} name={name} />
                     </Link>
@@ -71,8 +75,12 @@ export function ProductForm({
                         exists && !selected ? ' link' : ''
                       }`}
                       key={option.name + name}
-                      data-selected={selected}
-                      data-unavailable={!available}
+                      style={{
+                        border: selected
+                          ? '1px solid black'
+                          : '1px solid transparent',
+                        opacity: available ? 1 : 0.3,
+                      }}
                       disabled={!exists}
                       onClick={() => {
                         if (!selected) {
@@ -89,30 +97,29 @@ export function ProductForm({
                 }
               })}
             </div>
+            <br />
           </div>
         );
       })}
-      <div className="product-form__submit">
-        <AddToCartButton
-          disabled={!selectedVariant || !selectedVariant.availableForSale}
-          onClick={() => {
-            open('cart');
-          }}
-          lines={
-            selectedVariant
-              ? [
-                  {
-                    merchandiseId: selectedVariant.id,
-                    quantity: 1,
-                    selectedVariant,
-                  },
-                ]
-              : []
-          }
-        >
-          {selectedVariant?.availableForSale ? 'Ajouter au panier' : 'Épuisé'}
-        </AddToCartButton>
-      </div>
+      <AddToCartButton
+        disabled={!selectedVariant || !selectedVariant.availableForSale}
+        onClick={() => {
+          open('cart');
+        }}
+        lines={
+          selectedVariant
+            ? [
+                {
+                  merchandiseId: selectedVariant.id,
+                  quantity: 1,
+                  selectedVariant,
+                },
+              ]
+            : []
+        }
+      >
+        {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
+      </AddToCartButton>
     </div>
   );
 }

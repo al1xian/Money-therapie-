@@ -6,7 +6,7 @@ import {ProductItem} from '~/components/ProductItem';
 import type {CollectionItemFragment} from 'storefrontapi.generated';
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: `Money Therapy | Products`}];
+  return [{title: `Hydrogen | Products`}];
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -51,24 +51,20 @@ export default function Collection() {
   const {products} = useLoaderData<typeof loader>();
 
   return (
-    <div className="collection-page">
-      <div className="collection-page__head">
-        <h1>Tous les produits</h1>
-      </div>
-      <div className="product-grid">
-        <PaginatedResourceSection<CollectionItemFragment>
-          connection={products}
-          resourcesClassName="product-grid__inner"
-        >
-          {({node: product, index}) => (
-            <ProductItem
-              key={product.id}
-              product={product}
-              loading={index < 8 ? 'eager' : undefined}
-            />
-          )}
-        </PaginatedResourceSection>
-      </div>
+    <div className="collection">
+      <h1>Products</h1>
+      <PaginatedResourceSection<CollectionItemFragment>
+        connection={products}
+        resourcesClassName="products-grid"
+      >
+        {({node: product, index}) => (
+          <ProductItem
+            key={product.id}
+            product={product}
+            loading={index < 8 ? 'eager' : undefined}
+          />
+        )}
+      </PaginatedResourceSection>
     </div>
   );
 }
@@ -82,8 +78,6 @@ const COLLECTION_ITEM_FRAGMENT = `#graphql
     id
     handle
     title
-    createdAt
-    availableForSale
     featuredImage {
       id
       altText
@@ -91,32 +85,12 @@ const COLLECTION_ITEM_FRAGMENT = `#graphql
       width
       height
     }
-    images(first: 2) {
-      nodes {
-        id
-        altText
-        url
-        width
-        height
-      }
-    }
     priceRange {
       minVariantPrice {
         ...MoneyCollectionItem
       }
       maxVariantPrice {
         ...MoneyCollectionItem
-      }
-    }
-    compareAtPriceRange {
-      minVariantPrice {
-        ...MoneyCollectionItem
-      }
-    }
-    variants(first: 2) {
-      nodes {
-        id
-        availableForSale
       }
     }
   }

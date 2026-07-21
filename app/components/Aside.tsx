@@ -6,7 +6,6 @@ import {
   useState,
 } from 'react';
 import {useId} from 'react';
-import {CloseIcon} from '~/components/Icons';
 
 type AsideType = 'search' | 'cart' | 'mobile' | 'closed';
 type AsideContextValue = {
@@ -61,21 +60,15 @@ export function Aside({
       role="dialog"
       aria-labelledby={id}
     >
-      <button className="close-outside" onClick={close} aria-label="Fermer" />
-      <aside className={`aside-panel aside-panel--${type}`}>
-        <header className="aside-panel__header">
-          <h3 id={id} className="aside-panel__heading">
-            {heading}
-          </h3>
-          <button
-            className="aside-panel__close"
-            onClick={close}
-            aria-label="Fermer"
-          >
-            <CloseIcon />
+      <button className="close-outside" onClick={close} />
+      <aside>
+        <header>
+          <h3 id={id}>{heading}</h3>
+          <button className="close reset" onClick={close} aria-label="Close">
+            &times;
           </button>
         </header>
-        <main className="aside-panel__main">{children}</main>
+        <main>{children}</main>
       </aside>
     </div>
   );

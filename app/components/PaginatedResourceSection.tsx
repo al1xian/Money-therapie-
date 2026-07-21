@@ -23,13 +23,13 @@ export function PaginatedResourceSection<NodesType>({
         );
 
         return (
-          <div className="pagination">
-            <PreviousLink className="pagination__link">
+          <div>
+            <PreviousLink>
               {isLoading ? (
-                'Chargement…'
+                'Loading...'
               ) : (
                 <span>
-                  <span aria-hidden="true">↑</span> Précédent
+                  <span aria-hidden="true">↑</span> Load previous
                 </span>
               )}
             </PreviousLink>
@@ -44,12 +44,12 @@ export function PaginatedResourceSection<NodesType>({
             ) : (
               resourcesMarkup
             )}
-            <NextLink className="pagination__link">
+            <NextLink>
               {isLoading ? (
-                'Chargement…'
+                'Loading...'
               ) : (
                 <span>
-                  Voir plus <span aria-hidden="true">↓</span>
+                  Load more <span aria-hidden="true">↓</span>
                 </span>
               )}
             </NextLink>

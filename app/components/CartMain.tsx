@@ -96,10 +96,13 @@ function CartEmpty({
   return (
     <div hidden={hidden}>
       <br />
-      <p>Votre panier est vide pour le moment.</p>
+      <p>
+        Looks like you haven&rsquo;t added anything yet, let&rsquo;s get you
+        started!
+      </p>
       <br />
-      <Link to="/collections/all" onClick={close} prefetch="viewport">
-        Continuer mes achats →
+      <Link to="/collections" onClick={close} prefetch="viewport">
+        Continue shopping →
       </Link>
     </div>
   );

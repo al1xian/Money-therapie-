@@ -25,15 +25,15 @@ export default function Policies() {
   const {policies} = useLoaderData<typeof loader>();
 
   return (
-    <div className="info-page">
-      <h1>Informations légales</h1>
-      <ul className="policies-list">
+    <div className="policies">
+      <h1>Policies</h1>
+      <div>
         {policies.map((policy) => (
-          <li key={policy.id}>
+          <fieldset key={policy.id}>
             <Link to={`/policies/${policy.handle}`}>{policy.title}</Link>
-          </li>
+          </fieldset>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
