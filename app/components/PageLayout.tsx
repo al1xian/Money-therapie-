@@ -8,7 +8,9 @@ import type {
 import {Aside} from '~/components/Aside';
 import {Footer} from '~/components/Footer';
 import {Header, HeaderMenu} from '~/components/Header';
+import {Marquee} from '~/components/Marquee';
 import {CartMain} from '~/components/CartMain';
+import {SearchIcon} from '~/components/Icons';
 import {
   SEARCH_ENDPOINT,
   SearchFormPredictive,
@@ -27,7 +29,6 @@ interface PageLayoutProps {
 export function PageLayout({
   cart,
   children = null,
-  footer,
   header,
   isLoggedIn,
   publicStoreDomain,
@@ -37,6 +38,7 @@ export function PageLayout({
       <CartAside cart={cart} />
       <SearchAside />
       <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
+      <Marquee />
       {header && (
         <Header
           header={header}
@@ -46,23 +48,17 @@ export function PageLayout({
         />
       )}
       <main>{children}</main>
-      <Footer
-        footer={footer}
-        header={header}
-        publicStoreDomain={publicStoreDomain}
-      />
+      <Footer header={header} />
     </Aside.Provider>
   );
 }
 
 function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
   return (
-    <Aside type="cart" heading="CART">
-      <Suspense fallback={<p>Loading cart ...</p>}>
+    <Aside type="cart" heading="panier">
+      <Suspense fallback={<p>chargement…</p>}>
         <Await resolve={cart}>
-          {(cart) => {
-            return <CartMain cart={cart} layout="aside" />;
-          }}
+          {(resolved) => <CartMain cart={resolved} layout="aside" />}
         </Await>
       </Suspense>
     </Aside>
@@ -72,24 +68,25 @@ function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
 function SearchAside() {
   const queriesDatalistId = useId();
   return (
-    <Aside type="search" heading="SEARCH">
+    <Aside type="search" heading="recherche">
       <div className="predictive-search">
-        <br />
         <SearchFormPredictive>
           {({fetchResults, goToSearch, inputRef}) => (
-            <>
+            <div className="search-bar">
+              <SearchIcon />
               <input
                 name="q"
                 onChange={fetchResults}
                 onFocus={fetchResults}
-                placeholder="Search"
+                placeholder="rechercher un produit"
                 ref={inputRef}
                 type="search"
                 list={queriesDatalistId}
               />
-              &nbsp;
-              <button onClick={goToSearch}>Search</button>
-            </>
+              <button className="link" onClick={goToSearch}>
+                ok
+              </button>
+            </div>
           )}
         </SearchFormPredictive>
 
@@ -98,7 +95,7 @@ function SearchAside() {
             const {articles, collections, pages, products, queries} = items;
 
             if (state === 'loading' && term.current) {
-              return <div>Loading...</div>;
+              return <p className="search-group">recherche…</p>;
             }
 
             if (!total) {
@@ -136,10 +133,7 @@ function SearchAside() {
                     onClick={closeSearch}
                     to={`${SEARCH_ENDPOINT}?q=${term.current}`}
                   >
-                    <p>
-                      View all results for <q>{term.current}</q>
-                      &nbsp; →
-                    </p>
+                    <p>voir tous les résultats pour « {term.current} » →</p>
                   </Link>
                 ) : null}
               </>
@@ -159,16 +153,13 @@ function MobileMenuAside({
   publicStoreDomain: PageLayoutProps['publicStoreDomain'];
 }) {
   return (
-    header.menu &&
-    header.shop.primaryDomain?.url && (
-      <Aside type="mobile" heading="MENU">
-        <HeaderMenu
-          menu={header.menu}
-          viewport="mobile"
-          primaryDomainUrl={header.shop.primaryDomain.url}
-          publicStoreDomain={publicStoreDomain}
-        />
-      </Aside>
-    )
+    <Aside type="mobile" heading="menu">
+      <HeaderMenu
+        menu={header?.menu}
+        viewport="mobile"
+        primaryDomainUrl={header?.shop?.primaryDomain?.url ?? ''}
+        publicStoreDomain={publicStoreDomain}
+      />
+    </Aside>
   );
 }

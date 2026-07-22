@@ -1,6 +1,38 @@
 /**
- * Configure Tailwind v4 in this file using CSS variables and directives:
- * https://tailwindcss.com/docs/v4-beta#css-first-configuration
+ * money therapy — design tokens (Tailwind v4 CSS-first config)
+ * Minimal, monospace, black & white — grille éditoriale sobre.
  */
-
 @import 'tailwindcss';
+
+@theme {
+  --color-ink: #111111;
+  --color-paper: #ffffff;
+  --color-tile: #f5f5f4;
+  --color-line: #e5e5e3;
+  --color-muted: #8a8a86;
+  --color-sale: #b3261e;
+
+  --font-mono:
+    ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', Menlo, Consolas,
+    'Liberation Mono', monospace;
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  ::selection {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

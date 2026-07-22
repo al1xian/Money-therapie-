@@ -4,8 +4,9 @@ import {
   useContext,
   useEffect,
   useState,
+  useId,
 } from 'react';
-import {useId} from 'react';
+import {CloseIcon} from '~/components/Icons';
 
 type AsideType = 'search' | 'cart' | 'mobile' | 'closed';
 type AsideContextValue = {
@@ -15,14 +16,8 @@ type AsideContextValue = {
 };
 
 /**
- * A side bar component with Overlay
- * @example
- * ```jsx
- * <Aside type="search" heading="SEARCH">
- *  <input type="search" />
- *  ...
- * </Aside>
- * ```
+ * Right-side drawer with dimmed overlay. Closes on Escape and on
+ * outside click. Used for cart, search and mobile menu.
  */
 export function Aside({
   children,
@@ -36,16 +31,14 @@ export function Aside({
   const {type: activeType, close} = useAside();
   const expanded = type === activeType;
   const id = useId();
+
   useEffect(() => {
     const abortController = new AbortController();
-
     if (expanded) {
       document.addEventListener(
         'keydown',
-        function handler(event: KeyboardEvent) {
-          if (event.key === 'Escape') {
-            close();
-          }
+        (event: KeyboardEvent) => {
+          if (event.key === 'Escape') close();
         },
         {signal: abortController.signal},
       );
@@ -60,15 +53,17 @@ export function Aside({
       role="dialog"
       aria-labelledby={id}
     >
-      <button className="close-outside" onClick={close} />
-      <aside>
-        <header>
-          <h3 id={id}>{heading}</h3>
-          <button className="close reset" onClick={close} aria-label="Close">
-            &times;
+      <button className="close-outside" onClick={close} aria-label="Fermer" />
+      <aside className="drawer">
+        <header className="drawer__header">
+          <h3 id={id} className="drawer__heading">
+            {heading}
+          </h3>
+          <button className="drawer__close" onClick={close} aria-label="Fermer">
+            <CloseIcon />
           </button>
         </header>
-        <main>{children}</main>
+        <div className="drawer__main">{children}</div>
       </aside>
     </div>
   );
