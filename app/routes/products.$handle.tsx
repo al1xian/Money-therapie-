@@ -12,8 +12,11 @@ import {
 import {ProductPrice} from '~/components/ProductPrice';
 import {ProductGallery} from '~/components/ProductGallery';
 import {ProductForm} from '~/components/ProductForm';
+import {AddToCartButton} from '~/components/AddToCartButton';
+import {BuyNowButton} from '~/components/BuyNowButton';
 import {Accordion} from '~/components/Accordion';
 import {ProductItem} from '~/components/ProductItem';
+import {useAside} from '~/components/Aside';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 
 export const meta: Route.MetaFunction = ({data}) => {
@@ -72,6 +75,8 @@ export default function Product() {
 
   useSelectedOptionInUrlParam(selectedVariant.selectedOptions);
 
+  const {open: openAside} = useAside();
+
   const productOptions = getProductOptions({
     ...product,
     selectedOrFirstAvailableVariant: selectedVariant,
@@ -83,6 +88,25 @@ export default function Product() {
     : selectedVariant?.image
       ? [selectedVariant.image]
       : [];
+
+  const available = Boolean(selectedVariant?.availableForSale);
+  const qty = selectedVariant?.quantityAvailable ?? null;
+  const priceAmount = Number(selectedVariant?.price?.amount ?? 0);
+  const compareAmount = Number(selectedVariant?.compareAtPrice?.amount ?? 0);
+  const discountPct =
+    compareAmount > priceAmount && compareAmount > 0
+      ? Math.round((1 - priceAmount / compareAmount) * 100)
+      : 0;
+
+  const stock = !available
+    ? {className: 'pdp__stock--out', label: 'épuisé'}
+    : qty !== null && qty > 0 && qty <= 5
+      ? {className: 'pdp__stock--low', label: 'stock limité'}
+      : {className: 'pdp__stock--in', label: 'en stock'};
+
+  const addLines = selectedVariant
+    ? [{merchandiseId: selectedVariant.id, quantity: 1}]
+    : [];
 
   return (
     <div className="pdp">
@@ -97,18 +121,32 @@ export default function Product() {
             price={selectedVariant?.price}
             compareAtPrice={selectedVariant?.compareAtPrice}
           />
+          {discountPct > 0 && <span className="pdp__discount">−{discountPct}%</span>}
+        </div>
+        <p className="pdp__tax-note">
+          taxes incluses · <a href="/policies/shipping-policy">frais de port</a> calculés au paiement.
+        </p>
+
+        <div className={`pdp__stock ${stock.className}`}>
+          <span className="pdp__stock-dot" />
+          {stock.label}
         </div>
 
-        {product.description ? (
-          <div className="pdp__description">
-            <p>{product.description}</p>
-          </div>
-        ) : null}
+        <ProductForm productOptions={productOptions} />
 
-        <ProductForm
-          productOptions={productOptions}
-          selectedVariant={selectedVariant}
-        />
+        <div className="pdp__buttons">
+          <AddToCartButton
+            className="btn btn--full btn--outline"
+            disabled={!available}
+            onClick={() => openAside('cart')}
+            lines={addLines}
+          >
+            {available ? 'ajouter au panier' : 'épuisé'}
+          </AddToCartButton>
+          <BuyNowButton disabled={!available} lines={addLines}>
+            acheter maintenant
+          </BuyNowButton>
+        </div>
 
         <p className="pdp__reassurance">
           échanges gratuits · retours 30 jours · paiement sécurisé
@@ -175,6 +213,7 @@ export default function Product() {
 const PRODUCT_VARIANT_FRAGMENT = `#graphql
   fragment ProductVariant on ProductVariant {
     availableForSale
+    quantityAvailable
     compareAtPrice {
       amount
       currencyCode
@@ -307,6 +346,28 @@ const PRODUCT_RECOMMENDATIONS_QUERY = `#graphql
     compareAtPriceRange {
       minVariantPrice {
         ...RecoMoney
+      }
+    }
+    options {
+      name
+      optionValues {
+        name
+      }
+    }
+    variants(first: 20) {
+      nodes {
+        id
+        availableForSale
+        selectedOptions {
+          name
+          value
+        }
+        price {
+          ...RecoMoney
+        }
+        compareAtPrice {
+          ...RecoMoney
+        }
       }
     }
   }

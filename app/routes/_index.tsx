@@ -161,6 +161,28 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
         height
       }
     }
+    options {
+      name
+      optionValues {
+        name
+      }
+    }
+    variants(first: 20) {
+      nodes {
+        id
+        availableForSale
+        selectedOptions {
+          name
+          value
+        }
+        price {
+          ...RecommendedMoney
+        }
+        compareAtPrice {
+          ...RecommendedMoney
+        }
+      }
+    }
   }
   query RecommendedProducts ($country: CountryCode, $language: LanguageCode)
     @inContext(country: $country, language: $language) {

@@ -91,6 +91,28 @@ const COLLECTION_ITEM_FRAGMENT = `#graphql
         ...MoneyCollectionItem
       }
     }
+    options {
+      name
+      optionValues {
+        name
+      }
+    }
+    variants(first: 20) {
+      nodes {
+        id
+        availableForSale
+        selectedOptions {
+          name
+          value
+        }
+        price {
+          ...MoneyCollectionItem
+        }
+        compareAtPrice {
+          ...MoneyCollectionItem
+        }
+      }
+    }
   }
 ` as const;
 

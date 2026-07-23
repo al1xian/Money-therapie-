@@ -6,6 +6,7 @@ import type {
   RecommendedProductFragment,
 } from 'storefrontapi.generated';
 import {useVariantUrl} from '~/lib/variants';
+import {useQuickView, type QuickViewProduct} from '~/components/QuickView';
 
 type GridProduct =
   | CollectionItemFragment
@@ -20,9 +21,9 @@ export function ProductItem({
   loading?: 'eager' | 'lazy';
 }) {
   const variantUrl = useVariantUrl(product.handle);
+  const {open} = useQuickView();
   const image = product.featuredImage;
 
-  // Optional fields (present when the query fragment includes them).
   const images = 'images' in product ? product.images?.nodes ?? [] : [];
   const altImage = images.find((img) => img.id !== image?.id);
   const price = product.priceRange.minVariantPrice;
@@ -30,12 +31,14 @@ export function ProductItem({
     'compareAtPriceRange' in product
       ? product.compareAtPriceRange?.minVariantPrice
       : undefined;
-  const onSale =
-    compareAt && Number(compareAt.amount) > Number(price.amount);
+  const onSale = compareAt && Number(compareAt.amount) > Number(price.amount);
+
+  // Quick view only when the fragment carries variants (grid/home queries do).
+  const canQuickView = 'variants' in product && !!product.variants?.nodes?.length;
 
   return (
-    <Link className="product-card" prefetch="intent" to={variantUrl}>
-      <div className="product-card__media">
+    <div className="product-card">
+      <Link className="product-card__media" prefetch="intent" to={variantUrl}>
         {onSale && <span className="badge-sale">sale</span>}
         {image && (
           <Image
@@ -57,8 +60,20 @@ export function ProductItem({
             className="product-card__img product-card__img--alt"
           />
         )}
-      </div>
-      <div className="product-card__info">
+        {canQuickView && (
+          <button
+            type="button"
+            className="product-card__quickview"
+            onClick={(e) => {
+              e.preventDefault();
+              open(product as unknown as QuickViewProduct);
+            }}
+          >
+            aperçu rapide
+          </button>
+        )}
+      </Link>
+      <Link className="product-card__info" prefetch="intent" to={variantUrl}>
         <h3 className="product-card__title">{product.title}</h3>
         <div className="product-card__price">
           <Money data={price} />
@@ -68,7 +83,7 @@ export function ProductItem({
             </s>
           )}
         </div>
-      </div>
-    </Link>
+      </Link>
+    </div>
   );
 }
