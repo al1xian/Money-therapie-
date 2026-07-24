@@ -1,5 +1,6 @@
 import {Link} from 'react-router';
 import {Image} from '@shopify/hydrogen';
+import {Reveal} from '~/components/Reveal';
 
 type SliderCollection = {
   id: string;
@@ -23,7 +24,7 @@ export function CollectionsSlider({collections}: {collections: SliderCollection[
   if (!collections.length) return null;
 
   return (
-    <section className="collections-slider" aria-label="Collections">
+    <Reveal as="section" className="collections-slider" aria-label="Collections">
       <div className="collections-slider__track">
         {collections.map((collection) => (
           <Link
@@ -47,6 +48,6 @@ export function CollectionsSlider({collections}: {collections: SliderCollection[
           </Link>
         ))}
       </div>
-    </section>
+    </Reveal>
   );
 }

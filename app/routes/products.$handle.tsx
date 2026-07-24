@@ -158,16 +158,43 @@ export default function Product() {
               <div dangerouslySetInnerHTML={{__html: descriptionHtml}} />
             </Accordion>
           ) : null}
-          <Accordion title="livraison & retours">
+          <Accordion title="coupe & taille">
             <p>
-              livraison suivie, retours acceptés sous 30 jours. détails sur nos
-              pages <a href="/policies/shipping-policy">livraison</a> et{' '}
-              <a href="/policies/refund-policy">retours</a>.
+              coupe et correspondance des tailles précisées dans la
+              description ci-dessus lorsqu&rsquo;elles sont disponibles. en
+              cas de doute entre deux tailles, contactez notre service
+              client avant l&rsquo;achat.
             </p>
           </Accordion>
-          <Accordion title="composition & entretien">
+          <Accordion title="composition">
             <p>
-              composition et conseils d&rsquo;entretien indiqués sur
+              la composition exacte de la pièce (matières, pourcentages) est
+              indiquée sur l&rsquo;étiquette cousue à l&rsquo;intérieur du
+              vêtement.
+            </p>
+          </Accordion>
+          <Accordion title="fabrication">
+            <p>
+              chaque pièce est sélectionnée et contrôlée avant sa mise en
+              vente selon nos critères de qualité et de finition.
+            </p>
+          </Accordion>
+          <Accordion title="livraison">
+            <p>
+              livraison suivie, expédiée sous quelques jours ouvrés. détails
+              sur notre page <a href="/policies/shipping-policy">livraison</a>.
+            </p>
+          </Accordion>
+          <Accordion title="retours">
+            <p>
+              retours et échanges acceptés sous 30 jours. détails sur notre
+              page <a href="/policies/refund-policy">retours</a>.
+            </p>
+          </Accordion>
+          <Accordion title="entretien">
+            <p>
+              lavez de préférence à l&rsquo;envers, à basse température, et
+              suivez les instructions précises indiquées sur
               l&rsquo;étiquette du produit.
             </p>
           </Accordion>

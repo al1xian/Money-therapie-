@@ -9,11 +9,12 @@ export function Reveal({
   children,
   className = '',
   as: Tag = 'div',
+  ...rest
 }: {
   children: React.ReactNode;
   className?: string;
   as?: 'div' | 'section' | 'li';
-}) {
+} & React.HTMLAttributes<HTMLElement>) {
   const ref = useRef<HTMLElement | null>(null);
   const [visible, setVisible] = useState(false);
 
@@ -38,6 +39,7 @@ export function Reveal({
     <Tag
       ref={ref as never}
       className={`reveal ${visible ? 'reveal--visible' : ''} ${className}`.trim()}
+      {...rest}
     >
       {children}
     </Tag>
