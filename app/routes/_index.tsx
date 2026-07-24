@@ -1,7 +1,7 @@
 import {Await, useLoaderData, Link} from 'react-router';
 import type {Route} from './+types/_index';
 import {Suspense} from 'react';
-import type {RecommendedProductsQuery} from 'storefrontapi.generated';
+import type {AllProductsQuery} from 'storefrontapi.generated';
 import {ProductItem} from '~/components/ProductItem';
 import {CollectionsSlider} from '~/components/CollectionsSlider';
 import {Reveal} from '~/components/Reveal';
@@ -13,6 +13,11 @@ export const meta: Route.MetaFunction = () => {
     {name: 'description', content: 'money therapy — vêtements minimalistes.'},
   ];
 };
+
+/** Preload the hero image (LCP element on the homepage). */
+export function links() {
+  return [{rel: 'preload', as: 'image', href: '/images/P1973928-2.webp'}];
+}
 
 export async function loader(args: Route.LoaderArgs) {
   const deferredData = loadDeferredData(args);
@@ -31,13 +36,15 @@ async function loadCriticalData({context}: Route.LoaderArgs) {
 }
 
 function loadDeferredData({context}: Route.LoaderArgs) {
-  const recommendedProducts = context.storefront
-    .query(RECOMMENDED_PRODUCTS_QUERY)
+  // "first: 100" shows the full catalog on the homepage — the point isn't a
+  // paginated slice, it's every product, dynamically from Shopify.
+  const allProducts = context.storefront
+    .query(ALL_PRODUCTS_QUERY, {variables: {first: 100}})
     .catch((error: Error) => {
       console.error(error);
       return null;
     });
-  return {recommendedProducts};
+  return {allProducts};
 }
 
 export default function Homepage() {
@@ -47,8 +54,27 @@ export default function Homepage() {
   return (
     <div className="home">
       <section className="hero">
-        <div className="hero__media" aria-hidden="true">
-          {/* remplacer par la vraie image/vidéo de campagne (hero) */}
+        <div className="hero__media">
+          {/* Mobile: object-contain so both people stay fully in frame on a
+              tall, narrow viewport instead of being cropped by a full-bleed
+              cover of a wide photo — no distortion either way, only cover vs
+              contain. Desktop: full-bleed object-cover. */}
+          <img
+            src="/images/P1973928-2.webp"
+            alt="Deux personnes en tenue money therapy, ambiance urbaine"
+            fetchPriority="high"
+            loading="eager"
+            decoding="async"
+            className="hero__img hero__img--mobile"
+          />
+          <img
+            src="/images/P1973928-2.webp"
+            alt="Deux personnes en tenue money therapy, ambiance urbaine"
+            fetchPriority="high"
+            loading="eager"
+            decoding="async"
+            className="hero__img hero__img--desktop"
+          />
         </div>
         <div className="hero__caption">
           <span className="hero__title">nouvelle collection</span>
@@ -63,7 +89,7 @@ export default function Homepage() {
 
       <CollectionsSlider collections={data.collections} />
 
-      <RecommendedProducts products={data.recommendedProducts} />
+      <AllProducts products={data.allProducts} />
 
       <Reveal as="section">
         <Newsletter />
@@ -72,16 +98,18 @@ export default function Homepage() {
   );
 }
 
-function RecommendedProducts({
+function AllProducts({
   products,
 }: {
-  products: Promise<RecommendedProductsQuery | null>;
+  products: Promise<AllProductsQuery | null>;
 }) {
   return (
-    <section aria-labelledby="featured-heading">
-      <h2 id="featured-heading" className="section-title">
-        nouveautés
-      </h2>
+    <section aria-labelledby="catalogue-heading">
+      <Reveal as="section">
+        <h2 id="catalogue-heading" className="section-title">
+          tous nos produits
+        </h2>
+      </Reveal>
       <Suspense fallback={<div className="product-grid" aria-hidden="true" />}>
         <Await resolve={products}>
           {(response) =>
@@ -129,24 +157,24 @@ const HOME_COLLECTIONS_QUERY = `#graphql
   }
 ` as const;
 
-const RECOMMENDED_PRODUCTS_QUERY = `#graphql
-  fragment RecommendedMoney on MoneyV2 {
+const ALL_PRODUCTS_QUERY = `#graphql
+  fragment HomeMoney on MoneyV2 {
     amount
     currencyCode
   }
-  fragment RecommendedProduct on Product {
+  fragment HomeProduct on Product {
     id
     title
     handle
     availableForSale
     priceRange {
       minVariantPrice {
-        ...RecommendedMoney
+        ...HomeMoney
       }
     }
     compareAtPriceRange {
       minVariantPrice {
-        ...RecommendedMoney
+        ...HomeMoney
       }
     }
     featuredImage {
@@ -165,6 +193,26 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
         height
       }
     }
+    media(first: 3) {
+      nodes {
+        mediaContentType
+        ... on Video {
+          id
+          previewImage {
+            id
+            url
+            altText
+            width
+            height
+          }
+          sources {
+            url
+            mimeType
+            format
+          }
+        }
+      }
+    }
     options {
       name
       optionValues {
@@ -180,19 +228,19 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
           value
         }
         price {
-          ...RecommendedMoney
+          ...HomeMoney
         }
         compareAtPrice {
-          ...RecommendedMoney
+          ...HomeMoney
         }
       }
     }
   }
-  query RecommendedProducts ($country: CountryCode, $language: LanguageCode)
+  query AllProducts ($country: CountryCode, $language: LanguageCode, $first: Int)
     @inContext(country: $country, language: $language) {
-    products(first: 8, sortKey: UPDATED_AT, reverse: true) {
+    products(first: $first, sortKey: UPDATED_AT, reverse: true) {
       nodes {
-        ...RecommendedProduct
+        ...HomeProduct
       }
     }
   }

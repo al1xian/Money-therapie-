@@ -11,6 +11,7 @@ import {Header, HeaderMenu} from '~/components/Header';
 import {Marquee} from '~/components/Marquee';
 import {CartMain} from '~/components/CartMain';
 import {SearchIcon} from '~/components/Icons';
+import {QuickViewProvider} from '~/components/QuickView';
 import {
   SEARCH_ENDPOINT,
   SearchFormPredictive,
@@ -35,20 +36,22 @@ export function PageLayout({
 }: PageLayoutProps) {
   return (
     <Aside.Provider>
-      <CartAside cart={cart} />
-      <SearchAside />
-      <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
-      <Marquee />
-      {header && (
-        <Header
-          header={header}
-          cart={cart}
-          isLoggedIn={isLoggedIn}
-          publicStoreDomain={publicStoreDomain}
-        />
-      )}
-      <main>{children}</main>
-      <Footer header={header} />
+      <QuickViewProvider>
+        <CartAside cart={cart} />
+        <SearchAside />
+        <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
+        <Marquee />
+        {header && (
+          <Header
+            header={header}
+            cart={cart}
+            isLoggedIn={isLoggedIn}
+            publicStoreDomain={publicStoreDomain}
+          />
+        )}
+        <main>{children}</main>
+        <Footer header={header} />
+      </QuickViewProvider>
     </Aside.Provider>
   );
 }

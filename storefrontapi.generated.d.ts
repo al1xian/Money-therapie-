@@ -406,12 +406,12 @@ export type HomeCollectionsQuery = {
   };
 };
 
-export type RecommendedMoneyFragment = Pick<
+export type HomeMoneyFragment = Pick<
   StorefrontAPI.MoneyV2,
   'amount' | 'currencyCode'
 >;
 
-export type RecommendedProductFragment = Pick<
+export type HomeProductFragment = Pick<
   StorefrontAPI.Product,
   'id' | 'title' | 'handle' | 'availableForSale'
 > & {
@@ -427,6 +427,24 @@ export type RecommendedProductFragment = Pick<
   images: {
     nodes: Array<
       Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
+    >;
+  };
+  media: {
+    nodes: Array<
+      | Pick<StorefrontAPI.ExternalVideo, 'mediaContentType'>
+      | Pick<StorefrontAPI.MediaImage, 'mediaContentType'>
+      | Pick<StorefrontAPI.Model3d, 'mediaContentType'>
+      | (Pick<StorefrontAPI.Video, 'id' | 'mediaContentType'> & {
+          previewImage?: StorefrontAPI.Maybe<
+            Pick<
+              StorefrontAPI.Image,
+              'id' | 'url' | 'altText' | 'width' | 'height'
+            >
+          >;
+          sources: Array<
+            Pick<StorefrontAPI.VideoSource, 'url' | 'mimeType' | 'format'>
+          >;
+        })
     >;
   };
   options: Array<
@@ -449,12 +467,13 @@ export type RecommendedProductFragment = Pick<
   };
 };
 
-export type RecommendedProductsQueryVariables = StorefrontAPI.Exact<{
+export type AllProductsQueryVariables = StorefrontAPI.Exact<{
   country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
   language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
+  first?: StorefrontAPI.InputMaybe<StorefrontAPI.Scalars['Int']['input']>;
 }>;
 
-export type RecommendedProductsQuery = {
+export type AllProductsQuery = {
   products: {
     nodes: Array<
       Pick<
@@ -485,6 +504,24 @@ export type RecommendedProductsQuery = {
               StorefrontAPI.Image,
               'id' | 'url' | 'altText' | 'width' | 'height'
             >
+          >;
+        };
+        media: {
+          nodes: Array<
+            | Pick<StorefrontAPI.ExternalVideo, 'mediaContentType'>
+            | Pick<StorefrontAPI.MediaImage, 'mediaContentType'>
+            | Pick<StorefrontAPI.Model3d, 'mediaContentType'>
+            | (Pick<StorefrontAPI.Video, 'id' | 'mediaContentType'> & {
+                previewImage?: StorefrontAPI.Maybe<
+                  Pick<
+                    StorefrontAPI.Image,
+                    'id' | 'url' | 'altText' | 'width' | 'height'
+                  >
+                >;
+                sources: Array<
+                  Pick<StorefrontAPI.VideoSource, 'url' | 'mimeType' | 'format'>
+                >;
+              })
           >;
         };
         options: Array<
@@ -1595,9 +1632,9 @@ interface GeneratedQueryTypes {
     return: HomeCollectionsQuery;
     variables: HomeCollectionsQueryVariables;
   };
-  '#graphql\n  fragment RecommendedMoney on MoneyV2 {\n    amount\n    currencyCode\n  }\n  fragment RecommendedProduct on Product {\n    id\n    title\n    handle\n    availableForSale\n    priceRange {\n      minVariantPrice {\n        ...RecommendedMoney\n      }\n    }\n    compareAtPriceRange {\n      minVariantPrice {\n        ...RecommendedMoney\n      }\n    }\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n    images(first: 2) {\n      nodes {\n        id\n        url\n        altText\n        width\n        height\n      }\n    }\n    options {\n      name\n      optionValues {\n        name\n      }\n    }\n    variants(first: 20) {\n      nodes {\n        id\n        availableForSale\n        selectedOptions {\n          name\n          value\n        }\n        price {\n          ...RecommendedMoney\n        }\n        compareAtPrice {\n          ...RecommendedMoney\n        }\n      }\n    }\n  }\n  query RecommendedProducts ($country: CountryCode, $language: LanguageCode)\n    @inContext(country: $country, language: $language) {\n    products(first: 8, sortKey: UPDATED_AT, reverse: true) {\n      nodes {\n        ...RecommendedProduct\n      }\n    }\n  }\n': {
-    return: RecommendedProductsQuery;
-    variables: RecommendedProductsQueryVariables;
+  '#graphql\n  fragment HomeMoney on MoneyV2 {\n    amount\n    currencyCode\n  }\n  fragment HomeProduct on Product {\n    id\n    title\n    handle\n    availableForSale\n    priceRange {\n      minVariantPrice {\n        ...HomeMoney\n      }\n    }\n    compareAtPriceRange {\n      minVariantPrice {\n        ...HomeMoney\n      }\n    }\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n    images(first: 2) {\n      nodes {\n        id\n        url\n        altText\n        width\n        height\n      }\n    }\n    media(first: 3) {\n      nodes {\n        mediaContentType\n        ... on Video {\n          id\n          previewImage {\n            id\n            url\n            altText\n            width\n            height\n          }\n          sources {\n            url\n            mimeType\n            format\n          }\n        }\n      }\n    }\n    options {\n      name\n      optionValues {\n        name\n      }\n    }\n    variants(first: 20) {\n      nodes {\n        id\n        availableForSale\n        selectedOptions {\n          name\n          value\n        }\n        price {\n          ...HomeMoney\n        }\n        compareAtPrice {\n          ...HomeMoney\n        }\n      }\n    }\n  }\n  query AllProducts ($country: CountryCode, $language: LanguageCode, $first: Int)\n    @inContext(country: $country, language: $language) {\n    products(first: $first, sortKey: UPDATED_AT, reverse: true) {\n      nodes {\n        ...HomeProduct\n      }\n    }\n  }\n': {
+    return: AllProductsQuery;
+    variables: AllProductsQueryVariables;
   };
   '#graphql\n  query Article(\n    $articleHandle: String!\n    $blogHandle: String!\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(language: $language, country: $country) {\n    blog(handle: $blogHandle) {\n      handle\n      articleByHandle(handle: $articleHandle) {\n        handle\n        title\n        contentHtml\n        publishedAt\n        author: authorV2 {\n          name\n        }\n        image {\n          id\n          altText\n          url\n          width\n          height\n        }\n        seo {\n          description\n          title\n        }\n      }\n    }\n  }\n': {
     return: ArticleQuery;
