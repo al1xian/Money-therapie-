@@ -465,7 +465,6 @@
   background:
     radial-gradient(circle at 25% 30%, #d9d9d5, transparent 60%),
     linear-gradient(160deg, #eceae6 0%, #cfcecb 100%);
-  animation: hero-zoom 14s var(--ease-out-soft) forwards;
 }
 
 .hero__img {
@@ -496,50 +495,10 @@
   }
 }
 
-@keyframes hero-zoom {
-  from {
-    transform: scale(1.06);
-  }
-  to {
-    transform: scale(1);
-  }
-}
-
-.hero__caption {
-  position: absolute;
-  left: 1.25rem;
-  bottom: 1.5rem;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.9rem;
-  animation: hero-fade 900ms var(--ease-out-soft) both 200ms;
-}
-
-@keyframes hero-fade {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.hero__title {
-  font-size: 0.8rem;
-  text-transform: lowercase;
-  color: var(--color-ink);
-}
-
-.hero__cta {
-  font-size: 0.8rem;
-  text-transform: lowercase;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  width: fit-content;
-}
+/* Entrance for the hero image + caption is now driven by framer-motion in
+   AnimatedHero.tsx (staggered fade/slide), not CSS keyframes — kept the
+   plain hero/hero__media/hero__img layout rules above since AnimatedHero
+   still uses them for image sizing and object-fit/position. */
 
 /*
 * --------------------------------------------------

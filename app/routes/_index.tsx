@@ -4,6 +4,7 @@ import {Suspense} from 'react';
 import type {AllProductsQuery} from 'storefrontapi.generated';
 import {ProductItem} from '~/components/ProductItem';
 import {CollectionsSlider} from '~/components/CollectionsSlider';
+import {AnimatedHero} from '~/components/AnimatedHero';
 import {Reveal} from '~/components/Reveal';
 import {Newsletter} from '~/components/Newsletter';
 
@@ -53,39 +54,19 @@ export default function Homepage() {
 
   return (
     <div className="home">
-      <section className="hero">
-        <div className="hero__media">
-          {/* Mobile: object-contain so both people stay fully in frame on a
-              tall, narrow viewport instead of being cropped by a full-bleed
-              cover of a wide photo — no distortion either way, only cover vs
-              contain. Desktop: full-bleed object-cover. */}
-          <img
-            src="/images/P1973928-2.webp"
-            alt="Deux personnes en tenue money therapy, ambiance urbaine"
-            fetchPriority="high"
-            loading="eager"
-            decoding="async"
-            className="hero__img hero__img--mobile"
-          />
-          <img
-            src="/images/P1973928-2.webp"
-            alt="Deux personnes en tenue money therapy, ambiance urbaine"
-            fetchPriority="high"
-            loading="eager"
-            decoding="async"
-            className="hero__img hero__img--desktop"
-          />
-        </div>
-        <div className="hero__caption">
-          <span className="hero__title">nouvelle collection</span>
-          <Link
-            to={featured ? `/collections/${featured.handle}` : '/collections/all'}
-            className="hero__cta"
-          >
-            découvrir
-          </Link>
-        </div>
-      </section>
+      <AnimatedHero
+        imageMobileSrc="/images/P1973928-2.webp"
+        imageDesktopSrc="/images/P1973928-2.webp"
+        imageAlt="Deux personnes en tenue money therapy, ambiance urbaine"
+        eyebrow="nouvelle collection"
+        title="money therapy"
+        description="vêtements minimalistes, pensés pour durer."
+        ctaButton={{
+          text: 'découvrir',
+          href: featured ? `/collections/${featured.handle}` : '/collections/all',
+        }}
+        secondaryCta={{text: 'notre histoire', href: '/about'}}
+      />
 
       <CollectionsSlider collections={data.collections} />
 
