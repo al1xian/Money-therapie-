@@ -3,6 +3,7 @@ import type {Route} from './+types/_index';
 import {Suspense} from 'react';
 import type {RecommendedProductsQuery} from 'storefrontapi.generated';
 import {ProductItem} from '~/components/ProductItem';
+import {CollectionsSlider} from '~/components/CollectionsSlider';
 import {Reveal} from '~/components/Reveal';
 import {Newsletter} from '~/components/Newsletter';
 
@@ -21,9 +22,10 @@ export async function loader(args: Route.LoaderArgs) {
 
 async function loadCriticalData({context}: Route.LoaderArgs) {
   const [{collections}] = await Promise.all([
-    context.storefront.query(FEATURED_COLLECTION_QUERY),
+    context.storefront.query(HOME_COLLECTIONS_QUERY),
   ]);
   return {
+    collections: collections.nodes,
     featuredCollection: collections.nodes[0] ?? null,
   };
 }
@@ -59,6 +61,8 @@ export default function Homepage() {
         </div>
       </section>
 
+      <CollectionsSlider collections={data.collections} />
+
       <RecommendedProducts products={data.recommendedProducts} />
 
       <Reveal as="section">
@@ -74,15 +78,15 @@ function RecommendedProducts({
   products: Promise<RecommendedProductsQuery | null>;
 }) {
   return (
-    <section className="product-row" aria-labelledby="featured-heading">
-      <h2 id="featured-heading" className="sr-only">
-        produits en avant
+    <section aria-labelledby="featured-heading">
+      <h2 id="featured-heading" className="section-title">
+        nouveautés
       </h2>
-      <Suspense fallback={<div className="product-row__track" aria-hidden="true" />}>
+      <Suspense fallback={<div className="product-grid" aria-hidden="true" />}>
         <Await resolve={products}>
           {(response) =>
             response ? (
-              <div className="product-row__track">
+              <div className="product-grid">
                 {response.products.nodes.map((product, index) => (
                   <ProductItem
                     key={product.id}
@@ -102,8 +106,8 @@ function RecommendedProducts({
   );
 }
 
-const FEATURED_COLLECTION_QUERY = `#graphql
-  fragment FeaturedCollection on Collection {
+const HOME_COLLECTIONS_QUERY = `#graphql
+  fragment HomeCollection on Collection {
     id
     title
     handle
@@ -115,11 +119,11 @@ const FEATURED_COLLECTION_QUERY = `#graphql
       height
     }
   }
-  query FeaturedCollection($country: CountryCode, $language: LanguageCode)
+  query HomeCollections($country: CountryCode, $language: LanguageCode)
     @inContext(country: $country, language: $language) {
-    collections(first: 1, sortKey: UPDATED_AT, reverse: true) {
+    collections(first: 10, sortKey: UPDATED_AT, reverse: true) {
       nodes {
-        ...FeaturedCollection
+        ...HomeCollection
       }
     }
   }

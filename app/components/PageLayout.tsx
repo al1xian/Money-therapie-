@@ -10,7 +10,6 @@ import {Footer} from '~/components/Footer';
 import {Header, HeaderMenu} from '~/components/Header';
 import {Marquee} from '~/components/Marquee';
 import {CartMain} from '~/components/CartMain';
-import {QuickViewProvider} from '~/components/QuickView';
 import {SearchIcon} from '~/components/Icons';
 import {
   SEARCH_ENDPOINT,
@@ -36,22 +35,20 @@ export function PageLayout({
 }: PageLayoutProps) {
   return (
     <Aside.Provider>
-      <QuickViewProvider>
-        <CartAside cart={cart} />
-        <SearchAside />
-        <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
-        <Marquee />
-        {header && (
-          <Header
-            header={header}
-            cart={cart}
-            isLoggedIn={isLoggedIn}
-            publicStoreDomain={publicStoreDomain}
-          />
-        )}
-        <main>{children}</main>
-        <Footer header={header} />
-      </QuickViewProvider>
+      <CartAside cart={cart} />
+      <SearchAside />
+      <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
+      <Marquee />
+      {header && (
+        <Header
+          header={header}
+          cart={cart}
+          isLoggedIn={isLoggedIn}
+          publicStoreDomain={publicStoreDomain}
+        />
+      )}
+      <main>{children}</main>
+      <Footer header={header} />
     </Aside.Provider>
   );
 }
