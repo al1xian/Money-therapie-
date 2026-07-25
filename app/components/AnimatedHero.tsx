@@ -96,7 +96,9 @@ export function AnimatedHero({
           decoding="async"
           className="hero__img hero__img--desktop"
         />
-        <div className="absolute inset-0 bg-black/55" />
+        {/* Lighter veil on mobile so the photo itself stays visible; the
+            larger desktop hero can afford the darker overlay for legibility. */}
+        <div className="absolute inset-0 bg-black/25 md:bg-black/55" />
       </motion.div>
 
       <motion.div

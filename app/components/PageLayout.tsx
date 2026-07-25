@@ -10,6 +10,7 @@ import {Footer} from '~/components/Footer';
 import {Header, HeaderMenu, type NavCollection} from '~/components/Header';
 import {Marquee} from '~/components/Marquee';
 import {CartMain} from '~/components/CartMain';
+import {NewsletterPopup} from '~/components/NewsletterPopup';
 import {SearchIcon} from '~/components/Icons';
 import {HeaderToneProvider} from '~/lib/header-tone';
 import {
@@ -61,6 +62,7 @@ export function PageLayout({
         )}
         <main className={isHome ? undefined : 'main--with-header-space'}>{children}</main>
         <Footer header={header} />
+        <NewsletterPopup />
       </HeaderToneProvider>
     </Aside.Provider>
   );

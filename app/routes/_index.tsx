@@ -7,6 +7,22 @@ import {CollectionsSlider} from '~/components/CollectionsSlider';
 import {AnimatedHero} from '~/components/AnimatedHero';
 import {Reveal} from '~/components/Reveal';
 import {Newsletter} from '~/components/Newsletter';
+import {Accordion} from '~/components/Accordion';
+
+const homeFaq = [
+  {
+    question: 'quels sont vos délais de livraison ?',
+    answer: 'nous livrons tous nos produits en 48h, avec une livraison rapide partout en france.',
+  },
+  {
+    question: 'vos produits sont-ils de qualité ?',
+    answer: 'oui, tous nos produits sont de qualité, sélectionnés avec soin avant leur mise en vente.',
+  },
+  {
+    question: 'puis-je être remboursé ?',
+    answer: 'le remboursement est autorisé uniquement après renvoi du produit.',
+  },
+];
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -60,7 +76,7 @@ export default function Homepage() {
         imageAlt="Deux personnes en tenue reda studio, ambiance urbaine"
         eyebrow="nouvelle collection"
         title="reda studio"
-        description="vêtements minimalistes, pensés pour durer."
+        description="designer pour des personnes avec de l'ambition."
         ctaButton={{
           text: 'découvrir',
           href: featured ? `/collections/${featured.handle}` : '/collections/all',
@@ -71,6 +87,17 @@ export default function Homepage() {
       <CollectionsSlider collections={data.collections} />
 
       <AllProducts products={data.allProducts} />
+
+      <Reveal as="section" className="home-faq">
+        <h2 className="section-title">questions fréquentes</h2>
+        <div className="pdp__accordions">
+          {homeFaq.map((item) => (
+            <Accordion key={item.question} title={item.question}>
+              <p>{item.answer}</p>
+            </Accordion>
+          ))}
+        </div>
+      </Reveal>
 
       <Reveal as="section">
         <Newsletter />
