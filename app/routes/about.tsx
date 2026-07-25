@@ -4,10 +4,10 @@ import {Reveal} from '~/components/Reveal';
 
 export const meta: Route.MetaFunction = () => {
   return [
-    {title: 'money therapy | à propos'},
+    {title: 'reda studio | à propos'},
     {
       name: 'description',
-      content: 'money therapy — un studio de vêtements minimalistes, pensés pour durer.',
+      content: 'reda studio — un studio de vêtements minimalistes, pensés pour durer.',
     },
   ];
 };
@@ -32,7 +32,7 @@ export default function About() {
     <div className="about">
       <Reveal as="section" className="about__intro">
         <p className="about__eyebrow">notre histoire</p>
-        <h1 className="about__title">money therapy</h1>
+        <h1 className="about__title">reda studio</h1>
         <p className="about__lead">
           un studio de vêtements pensés pour durer : des pièces essentielles,
           des matières choisies, une coupe nette.
@@ -42,7 +42,7 @@ export default function About() {
       <Reveal as="section" className="about__figure">
         <img
           src="/images/P1973928-2.webp"
-          alt="Deux personnes en tenue money therapy, ambiance urbaine"
+          alt="Deux personnes en tenue reda studio, ambiance urbaine"
           loading="lazy"
           decoding="async"
         />
@@ -52,7 +52,7 @@ export default function About() {
         <p className="about__eyebrow">notre approche</p>
         <h2>penser le vêtement dans la durée</h2>
         <p>
-          money therapy conçoit des vêtements sobres, pensés pour être portés
+          reda studio conçoit des vêtements sobres, pensés pour être portés
           longtemps plutôt que renouvelés à chaque saison. chaque pièce est
           choisie pour sa coupe, sa matière et sa capacité à traverser le
           temps sans se démoder.

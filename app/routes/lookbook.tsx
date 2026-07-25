@@ -1,7 +1,7 @@
 import type {Route} from './+types/lookbook';
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: 'money therapy | lookbook'}];
+  return [{title: 'reda studio | lookbook'}];
 };
 
 // Placeholder tiles — replace with real campaign imagery when available.

@@ -10,8 +10,8 @@ import {Newsletter} from '~/components/Newsletter';
 
 export const meta: Route.MetaFunction = () => {
   return [
-    {title: 'money therapy'},
-    {name: 'description', content: 'money therapy — vêtements minimalistes.'},
+    {title: 'reda studio'},
+    {name: 'description', content: 'reda studio — vêtements minimalistes.'},
   ];
 };
 
@@ -57,9 +57,9 @@ export default function Homepage() {
       <AnimatedHero
         imageMobileSrc="/images/P1973928-2.webp"
         imageDesktopSrc="/images/P1973928-2.webp"
-        imageAlt="Deux personnes en tenue money therapy, ambiance urbaine"
+        imageAlt="Deux personnes en tenue reda studio, ambiance urbaine"
         eyebrow="nouvelle collection"
-        title="money therapy"
+        title="reda studio"
         description="vêtements minimalistes, pensés pour durer."
         ctaButton={{
           text: 'découvrir',

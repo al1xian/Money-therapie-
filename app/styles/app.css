@@ -116,6 +116,38 @@
   background: var(--color-paper);
   display: flex;
   align-items: center;
+  cursor: pointer;
+  transform: translateY(0);
+  opacity: 1;
+  transition:
+    transform 320ms var(--ease-out-soft),
+    opacity 320ms var(--ease-out-soft);
+}
+
+/* Only shown at the very top of the page — as soon as the user scrolls, it
+   slides up out of the way instead of permanently eating into the fixed
+   header's space (see .site-header--scrolled, which shifts up to replace
+   it at the same moment). */
+.marquee--hidden {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.marquee--pulse {
+  animation: marquee-pulse 320ms var(--ease-out-soft);
+}
+
+@keyframes marquee-pulse {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(0.97);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .marquee__track {
@@ -161,6 +193,7 @@
   border-bottom: 1px solid var(--color-line);
   color: var(--color-ink);
   transition:
+    top 320ms var(--ease-out-soft),
     background-color 300ms var(--ease-out-soft),
     border-color 300ms var(--ease-out-soft),
     color 300ms var(--ease-out-soft);
@@ -170,6 +203,12 @@
   .site-header {
     padding: 0 1.5rem;
   }
+}
+
+/* Moves up to replace the marquee the instant it hides on scroll, so there's
+   never a gap between the header and the top of the viewport. */
+.site-header--scrolled {
+  top: 0;
 }
 
 /* Only ever active on the homepage while the hero is in view (see

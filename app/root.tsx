@@ -112,7 +112,14 @@ async function loadCriticalData({context}: Route.LoaderArgs) {
     // Add other queries here, so that they are loaded in parallel
   ]);
 
-  return {header, navCollections: collections.nodes};
+  // Shopify auto-creates a "Home page" collection (handle "frontpage") on
+  // every store — it's not a real product category, so it's excluded from
+  // the nav built from real collections.
+  const navCollections = collections.nodes.filter(
+    (collection) => collection.handle !== 'frontpage' && collection.title.toLowerCase() !== 'home page',
+  );
+
+  return {header, navCollections};
 }
 
 /**
