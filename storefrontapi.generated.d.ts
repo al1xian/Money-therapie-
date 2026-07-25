@@ -377,6 +377,17 @@ export type FooterQuery = {
   >;
 };
 
+export type NavCollectionsQueryVariables = StorefrontAPI.Exact<{
+  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
+  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
+}>;
+
+export type NavCollectionsQuery = {
+  collections: {
+    nodes: Array<Pick<StorefrontAPI.Collection, 'id' | 'title' | 'handle'>>;
+  };
+};
+
 export type HomeCollectionFragment = Pick<
   StorefrontAPI.Collection,
   'id' | 'title' | 'handle'
@@ -1627,6 +1638,10 @@ interface GeneratedQueryTypes {
   '#graphql\n  query Footer(\n    $country: CountryCode\n    $footerMenuHandle: String!\n    $language: LanguageCode\n  ) @inContext(language: $language, country: $country) {\n    menu(handle: $footerMenuHandle) {\n      ...Menu\n    }\n  }\n  #graphql\n  fragment MenuItem on MenuItem {\n    id\n    resourceId\n    tags\n    title\n    type\n    url\n  }\n  fragment ChildMenuItem on MenuItem {\n    ...MenuItem\n  }\n  fragment ParentMenuItem on MenuItem {\n    ...MenuItem\n    items {\n      ...ChildMenuItem\n    }\n  }\n  fragment Menu on Menu {\n    id\n    items {\n      ...ParentMenuItem\n    }\n  }\n\n': {
     return: FooterQuery;
     variables: FooterQueryVariables;
+  };
+  '#graphql\n  query NavCollections($country: CountryCode, $language: LanguageCode)\n    @inContext(country: $country, language: $language) {\n    collections(first: 10, sortKey: UPDATED_AT, reverse: true) {\n      nodes {\n        id\n        title\n        handle\n      }\n    }\n  }\n': {
+    return: NavCollectionsQuery;
+    variables: NavCollectionsQueryVariables;
   };
   '#graphql\n  fragment HomeCollection on Collection {\n    id\n    title\n    handle\n    image {\n      id\n      url\n      altText\n      width\n      height\n    }\n  }\n  query HomeCollections($country: CountryCode, $language: LanguageCode)\n    @inContext(country: $country, language: $language) {\n    collections(first: 10, sortKey: UPDATED_AT, reverse: true) {\n      nodes {\n        ...HomeCollection\n      }\n    }\n  }\n': {
     return: HomeCollectionsQuery;

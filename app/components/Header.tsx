@@ -7,23 +7,28 @@ import {
 } from '@shopify/hydrogen';
 import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/Aside';
+import {useHeaderTone} from '~/lib/header-tone';
 import {BagIcon, BurgerIcon, SearchIcon} from '~/components/Icons';
+
+export type NavCollection = {id: string; title: string; handle: string};
 
 interface HeaderProps {
   header: HeaderQuery;
   cart: Promise<CartApiQueryFragment | null>;
   isLoggedIn: Promise<boolean>;
   publicStoreDomain: string;
+  navCollections: NavCollection[];
 }
 
 type Viewport = 'desktop' | 'mobile';
 
-export function Header({header, cart, publicStoreDomain}: HeaderProps) {
-  const {shop, menu} = header;
+export function Header({header, cart, navCollections}: HeaderProps) {
+  const {shop} = header;
   const {open} = useAside();
+  const {transparent} = useHeaderTone();
 
   return (
-    <header className="site-header">
+    <header className={`site-header ${transparent ? 'site-header--transparent' : ''}`}>
       <button
         className="site-header__icon-btn site-header__burger"
         onClick={() => open('mobile')}
@@ -36,12 +41,7 @@ export function Header({header, cart, publicStoreDomain}: HeaderProps) {
         {shop.name}
       </NavLink>
 
-      <HeaderMenu
-        menu={menu}
-        viewport="desktop"
-        primaryDomainUrl={header.shop.primaryDomain.url}
-        publicStoreDomain={publicStoreDomain}
-      />
+      <HeaderMenu collections={navCollections} viewport="desktop" />
 
       <div className="site-header__end">
         <span className="site-header__currency">EUR</span>
@@ -59,21 +59,14 @@ export function Header({header, cart, publicStoreDomain}: HeaderProps) {
 }
 
 export function HeaderMenu({
-  menu,
-  primaryDomainUrl,
+  collections,
   viewport,
-  publicStoreDomain,
 }: {
-  menu: HeaderProps['header']['menu'];
-  primaryDomainUrl: HeaderProps['header']['shop']['primaryDomain']['url'];
+  collections: NavCollection[];
   viewport: Viewport;
-  publicStoreDomain: HeaderProps['publicStoreDomain'];
 }) {
   const {close} = useAside();
-  const className =
-    viewport === 'desktop' ? 'site-header__nav' : 'mobile-nav';
-
-  const items = menu?.items?.length ? menu.items : FALLBACK_HEADER_MENU.items;
+  const className = viewport === 'desktop' ? 'site-header__nav' : 'mobile-nav';
 
   return (
     <nav className={className} role="navigation">
@@ -82,26 +75,17 @@ export function HeaderMenu({
           accueil
         </NavLink>
       )}
-      {items.map((item) => {
-        if (!item.url) return null;
-        const url =
-          item.url.includes('myshopify.com') ||
-          item.url.includes(publicStoreDomain) ||
-          item.url.includes(primaryDomainUrl)
-            ? new URL(item.url).pathname
-            : item.url;
-        return (
-          <NavLink
-            className={viewport === 'desktop' ? 'site-header__nav-link' : undefined}
-            key={item.id}
-            to={url}
-            onClick={close}
-            prefetch="intent"
-          >
-            {item.title.toLowerCase()}
-          </NavLink>
-        );
-      })}
+      {collections.map((collection) => (
+        <NavLink
+          className={viewport === 'desktop' ? 'site-header__nav-link' : undefined}
+          key={collection.id}
+          to={`/collections/${collection.handle}`}
+          onClick={close}
+          prefetch="intent"
+        >
+          {collection.title.toLowerCase()}
+        </NavLink>
+      ))}
     </nav>
   );
 }
@@ -144,13 +128,3 @@ function CartButton({count}: {count: number}) {
     </button>
   );
 }
-
-export const FALLBACK_HEADER_MENU = {
-  id: 'fallback-menu',
-  items: [
-    {id: 'm1', resourceId: null, tags: [], title: 'shop', type: 'HTTP', url: '/collections/all', items: []},
-    {id: 'm2', resourceId: null, tags: [], title: 'about', type: 'HTTP', url: '/about', items: []},
-    {id: 'm3', resourceId: null, tags: [], title: 'lookbook', type: 'HTTP', url: '/lookbook', items: []},
-    {id: 'm4', resourceId: null, tags: [], title: 'contact', type: 'HTTP', url: '/contact', items: []},
-  ],
-};

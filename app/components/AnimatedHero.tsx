@@ -1,7 +1,14 @@
-import type {ReactNode} from 'react';
+import {useEffect, useRef, type ReactNode} from 'react';
+import {Link} from 'react-router';
 import {motion} from 'framer-motion';
+import {useHeaderTone} from '~/lib/header-tone';
 
 type HeroCta = {text: string; href: string};
+
+// Matches the fixed header's total visual height (marquee + header) so the
+// header flips from transparent to solid exactly as its own bottom edge
+// clears the hero, not before.
+const HEADER_OFFSET_PX = 86;
 
 // Same stagger/entrance timing as the reference AnimatedHero component:
 // container staggers its children, each item slides up 20px while fading in.
@@ -47,8 +54,26 @@ export function AnimatedHero({
   ctaButton: HeroCta;
   secondaryCta?: HeroCta;
 }) {
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const {setTransparent} = useHeaderTone();
+
+  useEffect(() => {
+    const node = sectionRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setTransparent(entry.isIntersecting),
+      {rootMargin: `-${HEADER_OFFSET_PX}px 0px 0px 0px`},
+    );
+    observer.observe(node);
+    return () => {
+      observer.disconnect();
+      setTransparent(false);
+    };
+  }, [setTransparent]);
+
   return (
-    <section className="hero">
+    <section className="hero" ref={sectionRef}>
       <motion.div
         className="hero__media"
         initial={{opacity: 0, scale: 1.05}}
@@ -97,13 +122,13 @@ export function AnimatedHero({
           </motion.p>
         )}
         <motion.div variants={itemVariants} className="mt-7 flex flex-wrap items-center gap-3 sm:mt-9">
-          <a href={ctaButton.href} className={glassButtonClassName}>
+          <Link to={ctaButton.href} prefetch="intent" className={glassButtonClassName}>
             {ctaButton.text}
-          </a>
+          </Link>
           {secondaryCta && (
-            <a href={secondaryCta.href} className={glassButtonClassName}>
+            <Link to={secondaryCta.href} prefetch="intent" className={glassButtonClassName}>
               {secondaryCta.text}
-            </a>
+            </Link>
           )}
         </motion.div>
       </motion.div>

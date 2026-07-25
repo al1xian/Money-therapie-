@@ -154,8 +154,8 @@ export default function Product() {
 
         <div className="pdp__accordions">
           {descriptionHtml ? (
-            <Accordion title="détails" defaultOpen>
-              <div dangerouslySetInnerHTML={{__html: descriptionHtml}} />
+            <Accordion title="détails">
+              <div className="font-sans" dangerouslySetInnerHTML={{__html: descriptionHtml}} />
             </Accordion>
           ) : null}
           <Accordion title="coupe & taille">
@@ -206,7 +206,7 @@ export default function Product() {
           {(data) =>
             data?.productRecommendations?.length ? (
               <section className="pdp__related">
-                <h2>vous aimerez aussi</h2>
+                <h2>vous pourriez aimer</h2>
                 <div className="product-grid">
                   {data.productRecommendations.slice(0, 4).map((item) => (
                     <ProductItem key={item.id} product={item} />

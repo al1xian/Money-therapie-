@@ -105,6 +105,11 @@
 * --------------------------------------------------
 */
 .marquee {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 31;
   height: var(--marquee-height);
   overflow: hidden;
   border-bottom: 1px solid var(--color-line);
@@ -142,8 +147,10 @@
 * --------------------------------------------------
 */
 .site-header {
-  position: sticky;
-  top: 0;
+  position: fixed;
+  top: var(--marquee-height);
+  left: 0;
+  right: 0;
   z-index: 30;
   display: flex;
   align-items: center;
@@ -152,12 +159,48 @@
   padding: 0 1rem;
   background: var(--color-paper);
   border-bottom: 1px solid var(--color-line);
+  color: var(--color-ink);
+  transition:
+    background-color 300ms var(--ease-out-soft),
+    border-color 300ms var(--ease-out-soft),
+    color 300ms var(--ease-out-soft);
 }
 
 @media (min-width: 48em) {
   .site-header {
     padding: 0 1.5rem;
   }
+}
+
+/* Only ever active on the homepage while the hero is in view (see
+   AnimatedHero's IntersectionObserver) — glass look matching the hero's own
+   CTA buttons, white text/icons so they stay legible over the photo. */
+.site-header--transparent {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom-color: rgba(255, 255, 255, 0.25);
+  color: var(--color-paper);
+}
+
+.site-header--transparent .site-header__logo,
+.site-header--transparent .site-header__nav-link,
+.site-header--transparent .site-header__currency,
+.site-header--transparent .site-header__icon-btn {
+  color: var(--color-paper);
+}
+
+.site-header--transparent .site-header__cart-count {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+/* The marquee and header are both fixed and no longer reserve flow space —
+   every page needs that space reserved, except the homepage (its hero
+   intentionally starts at the very top, underneath the transparent
+   header/marquee). */
+.main--with-header-space {
+  padding-top: calc(var(--marquee-height) + var(--header-height));
 }
 
 .site-header__logo {
@@ -628,160 +671,6 @@
   }
 }
 
-/* Quick-view trigger — slides up on hover (desktop) / always tappable (mobile) */
-.product-card__quickview {
-  position: absolute;
-  left: 0.5rem;
-  right: 0.5rem;
-  bottom: 0.5rem;
-  padding: 0.6rem;
-  border: none;
-  background: var(--color-ink);
-  color: var(--color-paper);
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  text-transform: lowercase;
-  cursor: pointer;
-  border-radius: 4px;
-  opacity: 0;
-  transform: translateY(8px);
-  transition:
-    opacity 220ms var(--ease-out-soft),
-    transform 220ms var(--ease-out-soft);
-}
-
-@media (hover: hover) {
-  .product-card__media:hover .product-card__quickview {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@media (hover: none) {
-  .product-card__quickview {
-    opacity: 1;
-    transform: none;
-    background: rgba(17, 17, 17, 0.82);
-  }
-}
-
-/*
-* --------------------------------------------------
-* Aperçu rapide (quick view)
-* --------------------------------------------------
-*/
-.quickview-overlay {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.25rem;
-}
-
-.quickview-overlay .close-outside {
-  width: 100%;
-}
-
-.quickview {
-  position: relative;
-  background: var(--color-paper);
-  width: min(56rem, 100%);
-  max-height: 90vh;
-  overflow-y: auto;
-  display: grid;
-  grid-template-columns: 1fr;
-  transform: translateY(12px) scale(0.98);
-  opacity: 0;
-  transition:
-    transform 320ms var(--ease-out-soft),
-    opacity 320ms var(--ease-out-soft);
-}
-
-.quickview-overlay.expanded .quickview {
-  transform: translateY(0) scale(1);
-  opacity: 1;
-}
-
-@media (min-width: 40em) {
-  .quickview {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.quickview__close {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  z-index: 1;
-  background: var(--color-paper);
-  border: none;
-  border-radius: 999px;
-  width: 2rem;
-  height: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--color-ink);
-}
-
-.quickview__media {
-  position: relative;
-  aspect-ratio: 1/1;
-  background: var(--color-tile);
-  overflow: hidden;
-}
-
-.quickview__media img,
-.quickview__video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.quickview__info {
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-@media (min-width: 48em) {
-  .quickview__info {
-    padding: 2rem;
-  }
-}
-
-.quickview__title {
-  font-size: 1rem;
-  font-weight: 600;
-  margin: 0;
-}
-
-.quickview__price {
-  display: flex;
-  gap: 0.6rem;
-  font-size: 0.9rem;
-}
-
-.quickview__price s {
-  color: var(--color-muted);
-}
-
-.quickview__actions {
-  margin-top: 0.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.quickview__link {
-  text-align: center;
-  font-size: 0.78rem;
-  text-transform: lowercase;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
 .product-card__info {
   display: flex;
   flex-direction: column;
@@ -1106,7 +995,7 @@
 @media (min-width: 64em) {
   .pdp__info {
     position: sticky;
-    top: calc(var(--header-height) + 1.5rem);
+    top: calc(var(--marquee-height) + var(--header-height) + 1.5rem);
     align-self: start;
     padding-top: 1rem;
   }
@@ -1534,6 +1423,116 @@
   }
 }
 
+/*
+* --------------------------------------------------
+* Page "à propos"
+* --------------------------------------------------
+*/
+.about {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 3rem 1rem 5rem;
+}
+
+@media (min-width: 48em) {
+  .about {
+    padding: 4rem 1.5rem 6rem;
+  }
+}
+
+.about__eyebrow {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-muted);
+}
+
+.about__title {
+  margin-top: 0.5rem;
+  font-size: 1.6rem;
+}
+
+.about__lead {
+  margin-top: 1rem;
+  max-width: 42ch;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.about__figure {
+  margin: 3rem 0;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+  background: var(--color-tile);
+}
+
+.about__figure img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.about__block {
+  margin: 3rem 0;
+  max-width: 60ch;
+}
+
+.about__block h2 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.about__block p {
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  line-height: 1.75;
+}
+
+.about__values {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+  margin: 3rem 0;
+  padding-top: 2rem;
+  border-top: 1px solid var(--color-line);
+}
+
+@media (min-width: 48em) {
+  .about__values {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+}
+
+.about__value h3 {
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.about__value p {
+  font-size: 0.78rem;
+  color: var(--color-muted);
+  line-height: 1.7;
+}
+
+.about__cta {
+  margin-top: 3rem;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  background: var(--color-tile);
+}
+
+.about__cta h2 {
+  margin-bottom: 0.5rem;
+}
+
+.about__cta p {
+  margin-bottom: 1.5rem;
+  font-size: 0.82rem;
+  color: var(--color-muted);
+}
+
 .lookbook-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1594,117 +1593,6 @@
 .route-error {
   padding: 4rem 1rem;
   text-align: center;
-}
-
-/*
-* --------------------------------------------------
-* Aperçu rapide (quick view)
-* --------------------------------------------------
-*/
-.quickview-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  background: rgba(17, 17, 17, 0.4);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 250ms var(--ease-out-soft);
-}
-
-.quickview-overlay--open {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.quickview-backdrop {
-  position: absolute;
-  inset: 0;
-  border: none;
-  background: transparent;
-  cursor: default;
-  padding: 0;
-}
-
-.quickview {
-  background: var(--color-paper);
-  width: min(760px, 100%);
-  max-height: 90vh;
-  overflow-y: auto;
-  display: grid;
-  grid-template-columns: 1fr;
-  transform: translateY(12px);
-  transition: transform 280ms var(--ease-out-soft);
-}
-
-.quickview-overlay--open .quickview {
-  transform: translateY(0);
-}
-
-@media (min-width: 40em) {
-  .quickview {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.quickview__media {
-  aspect-ratio: 1/1;
-  background: var(--color-tile);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.quickview__media img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  padding: 8%;
-}
-
-.quickview__body {
-  padding: 1.5rem;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.quickview__close {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--color-ink);
-}
-
-.quickview__title {
-  font-size: 0.85rem;
-  text-transform: lowercase;
-}
-
-.quickview__price {
-  display: flex;
-  gap: 0.5rem;
-  font-size: 0.82rem;
-  margin-bottom: 0.5rem;
-}
-
-.quickview__price s {
-  color: var(--color-muted);
-}
-
-.quickview__link {
-  font-size: 0.75rem;
-  text-transform: lowercase;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  margin-top: 0.5rem;
 }
 
 /*

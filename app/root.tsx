@@ -12,7 +12,7 @@ import {
 } from 'react-router';
 import type {Route} from './+types/root';
 import favicon from '~/assets/favicon.svg';
-import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
+import {FOOTER_QUERY, HEADER_QUERY, NAV_COLLECTIONS_QUERY} from '~/lib/fragments';
 import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
@@ -101,17 +101,18 @@ export async function loader(args: Route.LoaderArgs) {
 async function loadCriticalData({context}: Route.LoaderArgs) {
   const {storefront} = context;
 
-  const [header] = await Promise.all([
+  const [header, {collections}] = await Promise.all([
     storefront.query(HEADER_QUERY, {
       cache: storefront.CacheLong(),
       variables: {
         headerMenuHandle: 'main-menu', // Adjust to your header menu handle
       },
     }),
+    storefront.query(NAV_COLLECTIONS_QUERY, {cache: storefront.CacheLong()}),
     // Add other queries here, so that they are loaded in parallel
   ]);
 
-  return {header};
+  return {header, navCollections: collections.nodes};
 }
 
 /**

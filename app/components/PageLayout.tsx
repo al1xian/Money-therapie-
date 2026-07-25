@@ -1,4 +1,4 @@
-import {Await, Link} from 'react-router';
+import {Await, Link, useLocation} from 'react-router';
 import {Suspense, useId} from 'react';
 import type {
   CartApiQueryFragment,
@@ -7,11 +7,11 @@ import type {
 } from 'storefrontapi.generated';
 import {Aside} from '~/components/Aside';
 import {Footer} from '~/components/Footer';
-import {Header, HeaderMenu} from '~/components/Header';
+import {Header, HeaderMenu, type NavCollection} from '~/components/Header';
 import {Marquee} from '~/components/Marquee';
 import {CartMain} from '~/components/CartMain';
 import {SearchIcon} from '~/components/Icons';
-import {QuickViewProvider} from '~/components/QuickView';
+import {HeaderToneProvider} from '~/lib/header-tone';
 import {
   SEARCH_ENDPOINT,
   SearchFormPredictive,
@@ -22,6 +22,7 @@ interface PageLayoutProps {
   cart: Promise<CartApiQueryFragment | null>;
   footer: Promise<FooterQuery | null>;
   header: HeaderQuery;
+  navCollections: NavCollection[];
   isLoggedIn: Promise<boolean>;
   publicStoreDomain: string;
   children?: React.ReactNode;
@@ -31,15 +32,23 @@ export function PageLayout({
   cart,
   children = null,
   header,
+  navCollections,
   isLoggedIn,
   publicStoreDomain,
 }: PageLayoutProps) {
+  // The header is fixed (see .site-header), so it no longer reserves layout
+  // space itself — every route needs that space reserved via padding,
+  // except the homepage, whose hero is meant to start at the very top and
+  // show through the header while it's transparent.
+  const {pathname} = useLocation();
+  const isHome = pathname === '/';
+
   return (
     <Aside.Provider>
-      <QuickViewProvider>
+      <HeaderToneProvider>
         <CartAside cart={cart} />
         <SearchAside />
-        <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
+        <MobileMenuAside collections={navCollections} />
         <Marquee />
         {header && (
           <Header
@@ -47,11 +56,12 @@ export function PageLayout({
             cart={cart}
             isLoggedIn={isLoggedIn}
             publicStoreDomain={publicStoreDomain}
+            navCollections={navCollections}
           />
         )}
-        <main>{children}</main>
+        <main className={isHome ? undefined : 'main--with-header-space'}>{children}</main>
         <Footer header={header} />
-      </QuickViewProvider>
+      </HeaderToneProvider>
     </Aside.Provider>
   );
 }
@@ -148,21 +158,10 @@ function SearchAside() {
   );
 }
 
-function MobileMenuAside({
-  header,
-  publicStoreDomain,
-}: {
-  header: PageLayoutProps['header'];
-  publicStoreDomain: PageLayoutProps['publicStoreDomain'];
-}) {
+function MobileMenuAside({collections}: {collections: NavCollection[]}) {
   return (
     <Aside type="mobile" heading="menu">
-      <HeaderMenu
-        menu={header?.menu}
-        viewport="mobile"
-        primaryDomainUrl={header?.shop?.primaryDomain?.url ?? ''}
-        publicStoreDomain={publicStoreDomain}
-      />
+      <HeaderMenu collections={collections} viewport="mobile" />
     </Aside>
   );
 }

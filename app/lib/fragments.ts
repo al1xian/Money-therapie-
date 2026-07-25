@@ -240,3 +240,18 @@ export const FOOTER_QUERY = `#graphql
   }
   ${MENU_FRAGMENT}
 ` as const;
+
+// Real Shopify collections drive the header nav (t-shirts, shorts, etc.)
+// instead of a manually-configured menu.
+export const NAV_COLLECTIONS_QUERY = `#graphql
+  query NavCollections($country: CountryCode, $language: LanguageCode)
+    @inContext(country: $country, language: $language) {
+    collections(first: 10, sortKey: UPDATED_AT, reverse: true) {
+      nodes {
+        id
+        title
+        handle
+      }
+    }
+  }
+` as const;

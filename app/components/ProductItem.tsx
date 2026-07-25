@@ -9,7 +9,6 @@ import type {
 import {useVariantUrl} from '~/lib/variants';
 import {useNearViewport} from '~/lib/useNearViewport';
 import {getProductVideo} from '~/lib/media';
-import {useQuickView} from '~/components/QuickView';
 
 type GridProduct =
   | CollectionItemFragment
@@ -26,7 +25,6 @@ export function ProductItem({
 }) {
   const variantUrl = useVariantUrl(product.handle);
   const {ref, near} = useNearViewport<HTMLDivElement>();
-  const {open: openQuickView} = useQuickView();
   const image = product.featuredImage;
 
   const images = 'images' in product ? product.images?.nodes ?? [] : [];
@@ -38,10 +36,6 @@ export function ProductItem({
       ? product.compareAtPriceRange?.minVariantPrice
       : undefined;
   const onSale = compareAt && Number(compareAt.amount) > Number(price.amount);
-  // Quick view needs the fuller shape (options + variants) that only the
-  // homepage's HomeProduct fragment carries — collection/related-product
-  // cards elsewhere use lighter fragments and simply don't get the trigger.
-  const canQuickView = 'media' in product && 'variants' in product;
 
   return (
     <Link className="product-card" prefetch="intent" to={variantUrl}>
@@ -82,18 +76,6 @@ export function ProductItem({
             sizes="(min-width: 64em) 25vw, (min-width: 48em) 33vw, 50vw"
             className="product-card__img product-card__img--alt"
           />
-        )}
-        {canQuickView && (
-          <button
-            type="button"
-            className="product-card__quickview"
-            onClick={(event) => {
-              event.preventDefault();
-              openQuickView(product as HomeProductFragment);
-            }}
-          >
-            aperçu rapide
-          </button>
         )}
       </div>
       <div className="product-card__info">
