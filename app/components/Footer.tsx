@@ -14,7 +14,7 @@ const FOOTER_LINKS = [
 ];
 
 export function Footer({header}: FooterProps) {
-  const shopName = header?.shop?.name ?? 'money therapy';
+  const shopName = header?.shop?.name ?? 'reda studio';
   const year = new Date().getFullYear();
 
   return (

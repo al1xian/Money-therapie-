@@ -2,7 +2,7 @@ import {Form, useActionData, useNavigation} from 'react-router';
 import type {Route} from './+types/contact';
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: 'money therapy | contact'}];
+  return [{title: 'reda studio | contact'}];
 };
 
 type ActionData = {ok: boolean; error?: string};

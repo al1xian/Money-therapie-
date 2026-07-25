@@ -25,10 +25,18 @@ type Viewport = 'desktop' | 'mobile';
 export function Header({header, cart, navCollections}: HeaderProps) {
   const {shop} = header;
   const {open} = useAside();
-  const {transparent} = useHeaderTone();
+  const {transparent, scrolled} = useHeaderTone();
+
+  const headerClassName = [
+    'site-header',
+    transparent && 'site-header--transparent',
+    scrolled && 'site-header--scrolled',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
-    <header className={`site-header ${transparent ? 'site-header--transparent' : ''}`}>
+    <header className={headerClassName}>
       <button
         className="site-header__icon-btn site-header__burger"
         onClick={() => open('mobile')}
