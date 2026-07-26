@@ -9,6 +9,8 @@ import type {
 import {useVariantUrl} from '~/lib/variants';
 import {useNearViewport} from '~/lib/useNearViewport';
 import {getProductVideo} from '~/lib/media';
+import {parseRating} from '~/lib/rating';
+import {StarRating} from '~/components/StarRating';
 
 type GridProduct =
   | CollectionItemFragment
@@ -36,6 +38,13 @@ export function ProductItem({
       ? product.compareAtPriceRange?.minVariantPrice
       : undefined;
   const onSale = compareAt && Number(compareAt.amount) > Number(price.amount);
+
+  // Only shown when the shop actually publishes review metafields — never a
+  // placeholder or invented score.
+  const rating =
+    'rating' in product
+      ? parseRating(product.rating, 'ratingCount' in product ? product.ratingCount : null)
+      : null;
 
   return (
     <Link className="product-card" prefetch="intent" to={variantUrl}>
@@ -88,6 +97,13 @@ export function ProductItem({
             </s>
           )}
         </div>
+        {rating && (
+          <StarRating
+            rating={rating.value}
+            count={rating.count}
+            className="product-card__rating"
+          />
+        )}
       </div>
     </Link>
   );

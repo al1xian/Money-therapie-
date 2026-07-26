@@ -1,4 +1,5 @@
 import type {Review} from '~/data/reviews';
+import {StarRating} from '~/components/StarRating';
 
 const AVATAR_PALETTE = ['#111111', '#3d3d3a', '#6b6b66', '#8a8a86'];
 
@@ -20,10 +21,18 @@ function avatarColor(name: string): string {
   return AVATAR_PALETTE[hash % AVATAR_PALETTE.length];
 }
 
-/** Carte d'avis : citation, puis avatar + nom + libellé. */
+/**
+ * Review card: rating, headline, body, then the author.
+ *
+ * Only fields that exist in the review data are rendered. There is no date or
+ * city here because that information isn't in the data, and no "verified"
+ * badge because nothing verifies these.
+ */
 function TestimonialCard({review}: {review: Review}) {
   return (
     <div className="testimonial-card">
+      <StarRating rating={review.rating} className="testimonial-card__stars" />
+      <h4 className="testimonial-card__headline">{review.title}</h4>
       <p className="testimonial-card__quote">&ldquo;{review.text}&rdquo;</p>
       <div className="testimonial-card__author">
         <span
@@ -34,7 +43,7 @@ function TestimonialCard({review}: {review: Review}) {
           {initials(review.name)}
         </span>
         <div>
-          <h4 className="testimonial-card__name">{review.name}</h4>
+          <p className="testimonial-card__name">{review.name}</p>
           <p className="testimonial-card__role">avis client</p>
         </div>
       </div>

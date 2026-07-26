@@ -1329,17 +1329,31 @@
   box-shadow: 0 10px 15px -3px rgba(17, 17, 17, 0.07), 0 4px 6px -4px rgba(17, 17, 17, 0.06);
 }
 
+.testimonial-card__stars {
+  margin-bottom: -0.25rem;
+}
+
+.testimonial-card__headline {
+  font-size: 0.85rem;
+  text-transform: lowercase;
+  margin: 0;
+}
+
 .testimonial-card__quote {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   line-height: 1.6;
   color: var(--color-ink);
+  overflow-wrap: break-word;
 }
 
 .testimonial-card__author {
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-top: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--color-line);
+  width: 100%;
 }
 
 .testimonial-card__avatar {
@@ -1644,7 +1658,12 @@
 }
 
 /*
-* Gallery — one markup, two layouts
+* Gallery — one image list, two layouts
+*
+* Mobile: a horizontal scroll-snap slider with dots.
+* Desktop: vertical thumbnails beside one large frame; the slides are stacked
+* in that frame and cross-fade. The list is rendered once, so no image is
+* duplicated in the DOM or downloaded twice.
 */
 .gallery {
   position: relative;
@@ -1656,7 +1675,11 @@
   background: var(--color-tile);
 }
 
-/* Mobile: horizontal, one image per screen, snap on touch. */
+/* Thumbnails are a desktop affordance; on touch the dots + swipe do the job. */
+.gallery__thumbs {
+  display: none;
+}
+
 .gallery__track {
   display: flex;
   overflow-x: auto;
@@ -1678,7 +1701,8 @@
 }
 
 /* `contain` keeps every source ratio intact — images are never stretched and
-   never cropped, whatever the shop uploads. */
+   never cropped, whatever the shop uploads. The aspect-ratio box reserves the
+   space before the image arrives, so nothing shifts on load. */
 .gallery__slide img {
   width: 100%;
   height: 100%;
@@ -1708,23 +1732,87 @@
   background: var(--color-ink);
 }
 
-/* Desktop: the same list becomes a tall vertical stack of large images. That
-   height is what gives the sticky buy box room to travel. */
 @media (min-width: 64em) {
+  /* Thumbnail rail on the left, main frame on the right. */
+  .gallery {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .gallery__thumbs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .gallery__thumb {
+    aspect-ratio: 4 / 5;
+    padding: 0;
+    border: 1px solid var(--color-line);
+    border-radius: 3px;
+    background: var(--color-paper);
+    cursor: pointer;
+    overflow: hidden;
+    opacity: 0.6;
+    transition:
+      opacity 200ms var(--ease-out-soft),
+      border-color 200ms var(--ease-out-soft);
+  }
+
+  .gallery__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 4%;
+  }
+
+  .gallery__thumb:hover {
+    opacity: 1;
+  }
+
+  .gallery__thumb--active {
+    opacity: 1;
+    border-color: var(--color-ink);
+  }
+
+  /* All slides share one grid cell, so they stack in the same frame. */
   .gallery__track {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
+    grid-template-columns: minmax(0, 1fr);
     overflow: visible;
     scroll-snap-type: none;
   }
 
   .gallery__slide {
+    grid-column: 1;
+    grid-row: 1;
     flex: none;
+    opacity: 0;
+    transform: translateX(1.25rem);
+    pointer-events: none;
+    transition:
+      opacity 420ms var(--ease-out-soft),
+      transform 420ms var(--ease-out-soft);
+  }
+
+  .gallery__slide--active {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
   }
 
   .gallery__dots {
     display: none;
+  }
+}
+
+/* Respect reduced-motion: swap instantly instead of gliding. */
+@media (prefers-reduced-motion: reduce) {
+  .gallery__slide {
+    transition: none;
+    transform: none;
   }
 }
 
@@ -2193,8 +2281,167 @@
 }
 
 /*
-* Recommendations + reviews
+* Collapsible description
 */
+.description__trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 0 0.75rem;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--color-line);
+  cursor: pointer;
+  color: var(--color-ink);
+  text-align: left;
+}
+
+.description__label {
+  font-size: 0.85rem;
+  text-transform: lowercase;
+  letter-spacing: 0.04em;
+}
+
+.description__chevron {
+  flex-shrink: 0;
+  transition: transform 300ms var(--ease-out-soft);
+}
+
+.description--open .description__chevron {
+  transform: rotate(180deg);
+}
+
+.description__intro {
+  margin-top: 0.9rem;
+  font-size: 0.8rem;
+  line-height: 1.65;
+  color: var(--color-muted);
+  overflow-wrap: break-word;
+}
+
+/* 0fr -> 1fr animates to the content's natural height. A max-height guess
+   would either clip long copy or make short copy ease from an oversized
+   value. */
+.description__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 320ms var(--ease-out-soft);
+}
+
+.description--open .description__panel {
+  grid-template-rows: 1fr;
+}
+
+.description__inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.description--open .description__inner {
+  padding-top: 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .description__panel {
+    transition: none;
+  }
+}
+
+/*
+* Star ratings
+*/
+.stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.stars__icons {
+  display: inline-flex;
+  gap: 1px;
+  line-height: 0;
+}
+
+.stars__star-bg {
+  fill: var(--color-line);
+}
+
+.stars__star-fg {
+  fill: var(--color-ink);
+}
+
+.stars__value {
+  font-size: 0.72rem;
+}
+
+.stars__count {
+  font-size: 0.72rem;
+  color: var(--color-muted);
+}
+
+/*
+* Recommendations
+*
+* Same markup both ways: a touch slider on mobile, a grid on desktop.
+*/
+.related-rail {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  /* Bleed to the screen edges so the row reads as a rail, while the negative
+     margin exactly cancels .pdp's padding (no sideways page scroll). */
+  margin-inline: -1rem;
+  padding-inline: 1rem;
+}
+
+.related-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.related-rail__item {
+  flex: 0 0 44%;
+  scroll-snap-align: start;
+  min-width: 0;
+}
+
+@media (min-width: 40em) {
+  .related-rail__item {
+    flex-basis: 30%;
+  }
+}
+
+@media (min-width: 64em) {
+  .related-rail {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 1rem;
+    overflow: visible;
+    scroll-snap-type: none;
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+
+  .related-rail__item {
+    flex: none;
+  }
+
+  /* A 6th+ card would break the 5-up rhythm, so trim the overflow on desktop
+     while the mobile rail still scrolls through all of them. */
+  .related-rail__item:nth-child(n + 6) {
+    display: none;
+  }
+}
+
+.product-card__rating {
+  margin-top: 0.15rem;
+}
+
 .pdp__related h2 {
   padding: 0;
 }

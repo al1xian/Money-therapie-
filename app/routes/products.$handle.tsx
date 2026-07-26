@@ -12,6 +12,7 @@ import {
 import {ProductGallery} from '~/components/ProductGallery';
 import {ProductPurchase} from '~/components/ProductPurchase';
 import {ProductSpecs, type SpecRow} from '~/components/ProductSpecs';
+import {ProductDescription} from '~/components/ProductDescription';
 import type {SizeEntry} from '~/components/ProductSizeGuide';
 import {Accordion} from '~/components/Accordion';
 import {ProductItem} from '~/components/ProductItem';
@@ -33,7 +34,11 @@ export const meta: Route.MetaFunction = ({data}) => {
 
 export async function loader(args: Route.LoaderArgs) {
   const criticalData = await loadCriticalData(args);
-  const deferredData = loadDeferredData(args, criticalData.product.id);
+  const deferredData = loadDeferredData(
+    args,
+    criticalData.product.id,
+    criticalData.product.handle,
+  );
   return {...deferredData, ...criticalData};
 }
 
@@ -60,13 +65,48 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   return {product};
 }
 
-function loadDeferredData({context}: Route.LoaderArgs, productId: string) {
-  const recommended = context.storefront
-    .query(PRODUCT_RECOMMENDATIONS_QUERY, {variables: {productId}})
-    .catch((error: Error) => {
-      console.error(error);
-      return null;
-    });
+const MIN_RECOMMENDATIONS = 5;
+const MAX_RECOMMENDATIONS = 8;
+
+/**
+ * Shopify's `productRecommendations` often returns fewer than a full row (and
+ * nothing at all for a brand-new product). To keep the row filled we top it up
+ * with best sellers, de-duplicated and with the current product removed — real
+ * catalogue products either way, never placeholders.
+ */
+function loadDeferredData(
+  {context}: Route.LoaderArgs,
+  productId: string,
+  handle: string,
+) {
+  const recommended = Promise.all([
+    context.storefront
+      .query(PRODUCT_RECOMMENDATIONS_QUERY, {variables: {productId}})
+      .catch((error: Error) => {
+        console.error(error);
+        return null;
+      }),
+    context.storefront
+      .query(FALLBACK_PRODUCTS_QUERY, {variables: {first: 12}})
+      .catch((error: Error) => {
+        console.error(error);
+        return null;
+      }),
+  ]).then(([recos, fallback]) => {
+    const seen = new Set<string>([productId]);
+    const merged = [];
+    for (const item of [
+      ...(recos?.productRecommendations ?? []),
+      ...(fallback?.products?.nodes ?? []),
+    ]) {
+      if (!item || seen.has(item.id) || item.handle === handle) continue;
+      seen.add(item.id);
+      merged.push(item);
+      if (merged.length >= MAX_RECOMMENDATIONS) break;
+    }
+    return merged;
+  });
+
   return {recommended};
 }
 
@@ -152,14 +192,13 @@ export default function Product() {
         </aside>
       </div>
 
-      {/* Long-form content, full width, in the order the brief defines. */}
+      {/* Long-form content, full width, below the main product info. */}
       <div className="pdp__details">
         {descriptionHtml && (
           <section className="pdp__section">
-            <h2 className="pdp__section-title">description</h2>
-            <div
-              className="pdp__prose"
-              dangerouslySetInnerHTML={{__html: descriptionHtml}}
+            <ProductDescription
+              html={descriptionHtml}
+              intro={shortenDescription(description ?? '')}
             />
           </section>
         )}
@@ -183,13 +222,19 @@ export default function Product() {
 
       <Suspense fallback={null}>
         <Await resolve={recommended}>
-          {(data) =>
-            data?.productRecommendations?.length ? (
-              <section className="pdp__related">
-                <h2 className="pdp__section-title">vous pourriez aimer</h2>
-                <div className="product-grid">
-                  {data.productRecommendations.slice(0, 4).map((item) => (
-                    <ProductItem key={item.id} product={item} />
+          {(items) =>
+            items.length ? (
+              <section className="pdp__related" aria-labelledby="related-heading">
+                <h2 className="pdp__section-title" id="related-heading">
+                  vous aimerez aussi
+                </h2>
+                {/* Grid on desktop, touch slider on mobile — same markup, CSS
+                    switches between them (see .related-rail). */}
+                <div className="related-rail">
+                  {items.map((item) => (
+                    <div className="related-rail__item" key={item.id}>
+                      <ProductItem product={item} />
+                    </div>
                   ))}
                 </div>
               </section>
@@ -324,7 +369,7 @@ const PRODUCT_QUERY = `#graphql
   ${PRODUCT_FRAGMENT}
 ` as const;
 
-const PRODUCT_RECOMMENDATIONS_QUERY = `#graphql
+const RECO_PRODUCT_FRAGMENT = `#graphql
   fragment RecoMoney on MoneyV2 {
     amount
     currencyCode
@@ -334,6 +379,14 @@ const PRODUCT_RECOMMENDATIONS_QUERY = `#graphql
     title
     handle
     availableForSale
+    # Standard Shopify review metafields, written by review apps. Absent when
+    # the shop has no review app — the UI then shows no rating at all.
+    rating: metafield(namespace: "reviews", key: "rating") {
+      value
+    }
+    ratingCount: metafield(namespace: "reviews", key: "rating_count") {
+      value
+    }
     featuredImage {
       id
       url
@@ -383,6 +436,9 @@ const PRODUCT_RECOMMENDATIONS_QUERY = `#graphql
       }
     }
   }
+` as const;
+
+const PRODUCT_RECOMMENDATIONS_QUERY = `#graphql
   query ProductRecommendations(
     $productId: ID!
     $country: CountryCode
@@ -392,4 +448,21 @@ const PRODUCT_RECOMMENDATIONS_QUERY = `#graphql
       ...RecoProduct
     }
   }
+  ${RECO_PRODUCT_FRAGMENT}
+` as const;
+
+/** Tops the recommendation row up to a full set with real catalogue products. */
+const FALLBACK_PRODUCTS_QUERY = `#graphql
+  query PdpFallbackProducts(
+    $first: Int
+    $country: CountryCode
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
+    products(first: $first, sortKey: BEST_SELLING) {
+      nodes {
+        ...RecoProduct
+      }
+    }
+  }
+  ${RECO_PRODUCT_FRAGMENT}
 ` as const;

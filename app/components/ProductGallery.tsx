@@ -10,17 +10,18 @@ type GalleryImage = {
 };
 
 /**
- * Product gallery, one DOM structure for every viewport — CSS switches the
- * layout, so the markup is never duplicated per breakpoint:
+ * Product gallery — a single image list that CSS lays out two ways, so no
+ * image is ever duplicated in the DOM or downloaded twice:
  *
- * - mobile / tablet: horizontal scroll-snap slider, one image per screen,
- *   driven by touch. Dots reflect and control the position.
- * - desktop (>= 64em): the same list becomes a vertical stack of large
- *   images. That makes the gallery column tall, which is what gives the
- *   sticky purchase panel beside it room to travel.
+ * - desktop (>= 64em): the slides are stacked in one large frame and only the
+ *   active one is visible. Picking a thumbnail cross-fades the new image in
+ *   with a slight horizontal glide.
+ * - mobile / tablet: the same slides become a horizontal scroll-snap slider
+ *   driven by touch, with dots that reflect and control the position.
  *
- * Images sit in fixed-aspect boxes with `object-fit: contain`, so nothing is
- * ever stretched or cropped whatever the source ratio.
+ * Each slide is a fixed-aspect box with `object-fit: contain`: the space is
+ * reserved before the image loads (no layout shift) and no source ratio is
+ * ever stretched or cropped.
  */
 export function ProductGallery({
   images,
@@ -32,9 +33,13 @@ export function ProductGallery({
   const trackRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
 
-  // Keeps the dots in sync while the user swipes. Only ever meaningful on the
-  // mobile slider — on desktop the track isn't horizontally scrollable, so
-  // this simply never fires.
+  // Reset when the product changes (this component gets reused across routes).
+  useEffect(() => {
+    setActive(0);
+  }, [images]);
+
+  // Keeps the active index in sync while swiping. Only fires on the mobile
+  // slider — on desktop the track isn't horizontally scrollable.
   useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
@@ -46,40 +51,75 @@ export function ProductGallery({
     return () => track.removeEventListener('scroll', onScroll);
   }, []);
 
-  const goTo = (index: number) => {
-    const track = trackRef.current;
-    if (!track) return;
+  const select = (index: number) => {
     const clamped = Math.max(0, Math.min(index, images.length - 1));
-    track.scrollTo({left: track.clientWidth * clamped, behavior: 'smooth'});
+    setActive(clamped);
+    // If the track is actually scrollable (mobile), move it too.
+    const track = trackRef.current;
+    if (track && track.clientWidth > 0 && track.scrollWidth > track.clientWidth + 1) {
+      track.scrollTo({left: track.clientWidth * clamped, behavior: 'smooth'});
+    }
   };
 
   if (images.length === 0) {
     return <div className="gallery gallery--empty" aria-hidden="true" />;
   }
 
+  const multiple = images.length > 1;
+
   return (
     <div className="gallery">
+      {multiple && (
+        <div className="gallery__thumbs" role="tablist" aria-label="Images du produit">
+          {images.map((image, index) => (
+            <button
+              type="button"
+              key={image.id ?? `thumb-${image.url}-${index}`}
+              className={`gallery__thumb ${index === active ? 'gallery__thumb--active' : ''}`}
+              onClick={() => select(index)}
+              role="tab"
+              aria-selected={index === active}
+              aria-label={`Voir l'image ${index + 1} sur ${images.length}`}
+            >
+              <Image
+                data={image}
+                alt={image.altText || `${title} — miniature ${index + 1}`}
+                sizes="80px"
+                loading="lazy"
+              />
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="gallery__track" ref={trackRef}>
         {images.map((image, index) => (
-          <div className="gallery__slide" key={image.id ?? `${image.url}-${index}`}>
+          <div
+            className={`gallery__slide ${index === active ? 'gallery__slide--active' : ''}`}
+            key={image.id ?? `${image.url}-${index}`}
+            aria-hidden={index === active ? undefined : true}
+          >
             <Image
               data={image}
-              alt={image.altText || title}
-              sizes="(min-width: 64em) 55vw, 100vw"
+              alt={
+                image.altText ||
+                (images.length > 1 ? `${title} — image ${index + 1}` : title)
+              }
+              sizes="(min-width: 64em) 48vw, 100vw"
               loading={index === 0 ? 'eager' : 'lazy'}
             />
           </div>
         ))}
       </div>
 
-      {images.length > 1 && (
+      {multiple && (
         <div className="gallery__dots">
           {images.map((image, index) => (
             <button
               type="button"
               key={image.id ?? `dot-${image.url}-${index}`}
               className={`gallery__dot ${index === active ? 'gallery__dot--active' : ''}`}
-              onClick={() => goTo(index)}
+              onClick={() => select(index)}
               aria-label={`Voir l'image ${index + 1} sur ${images.length}`}
               aria-current={index === active}
             />
