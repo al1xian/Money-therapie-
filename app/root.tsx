@@ -62,11 +62,11 @@ export function links() {
       href: 'https://shop.app',
     },
     // Favicon served from /public so the logo can be swapped by replacing the
-    // files, with no rebuild of a bundled asset. SVG first for crisp scaling
-    // on desktop, a 32px PNG for browsers that ignore SVG icons, and an
-    // apple-touch-icon for iOS home-screen / mobile bookmarks.
-    {rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg'},
+    // files, with no rebuild of a bundled asset. The .ico bundles 16/32/48px
+    // and is the most reliable fallback; the 32px PNG is preferred by modern
+    // browsers, and apple-touch-icon covers iOS home-screen / bookmarks.
     {rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32.png'},
+    {rel: 'icon', sizes: '48x48', href: '/favicon.ico'},
     {rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png'},
   ];
 }
