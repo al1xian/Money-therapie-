@@ -9,22 +9,25 @@ import {
   getAdjacentAndFirstAvailableVariants,
   useSelectedOptionInUrlParam,
 } from '@shopify/hydrogen';
-import {ProductPrice} from '~/components/ProductPrice';
 import {ProductGallery} from '~/components/ProductGallery';
-import {ProductForm} from '~/components/ProductForm';
-import {AddToCartButton} from '~/components/AddToCartButton';
-import {BuyNowButton} from '~/components/BuyNowButton';
+import {ProductPurchase} from '~/components/ProductPurchase';
+import {ProductSpecs, type SpecRow} from '~/components/ProductSpecs';
+import type {SizeEntry} from '~/components/ProductSizeGuide';
 import {Accordion} from '~/components/Accordion';
 import {ProductItem} from '~/components/ProductItem';
 import {ProductReviews} from '~/components/ProductReviews';
-import {useAside} from '~/components/Aside';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {productFaq} from '~/data/faq';
 
 export const meta: Route.MetaFunction = ({data}) => {
+  const product = data?.product;
   return [
-    {title: `reda studio | ${data?.product.title ?? ''}`},
-    {rel: 'canonical', href: `/products/${data?.product.handle}`},
+    {title: `reda studio | ${product?.title ?? ''}`},
+    {
+      name: 'description',
+      content: product?.seo?.description || product?.description?.slice(0, 155) || '',
+    },
+    {rel: 'canonical', href: `/products/${product?.handle}`},
   ];
 };
 
@@ -67,6 +70,15 @@ function loadDeferredData({context}: Route.LoaderArgs, productId: string) {
   return {recommended};
 }
 
+/** First sentence of the product description, for the short blurb in the buy box. */
+function shortenDescription(description: string): string {
+  const trimmed = description.trim();
+  if (!trimmed) return '';
+  const firstSentence = trimmed.split(/(?<=[.!?])\s/)[0];
+  const blurb = firstSentence.length > 20 ? firstSentence : trimmed;
+  return blurb.length > 180 ? `${blurb.slice(0, 177).trimEnd()}…` : blurb;
+}
+
 export default function Product() {
   const {product, recommended} = useLoaderData<typeof loader>();
 
@@ -77,14 +89,13 @@ export default function Product() {
 
   useSelectedOptionInUrlParam(selectedVariant.selectedOptions);
 
-  const {open: openAside} = useAside();
-
   const productOptions = getProductOptions({
     ...product,
     selectedOrFirstAvailableVariant: selectedVariant,
   });
 
-  const {title, descriptionHtml} = product;
+  const {title, description, descriptionHtml, vendor, productType} = product;
+
   const galleryImages = product.images.nodes.length
     ? product.images.nodes
     : selectedVariant?.image
@@ -92,86 +103,82 @@ export default function Product() {
       : [];
 
   const available = Boolean(selectedVariant?.availableForSale);
-  const qty = selectedVariant?.quantityAvailable ?? null;
-  const priceAmount = Number(selectedVariant?.price?.amount ?? 0);
-  const compareAmount = Number(selectedVariant?.compareAtPrice?.amount ?? 0);
-  const discountPct =
-    compareAmount > priceAmount && compareAmount > 0
-      ? Math.round((1 - priceAmount / compareAmount) * 100)
-      : 0;
 
-  const stock = !available
-    ? {className: 'pdp__stock--out', label: 'épuisé'}
-    : qty !== null && qty > 0 && qty <= 5
-      ? {className: 'pdp__stock--low', label: 'stock limité'}
-      : {className: 'pdp__stock--in', label: 'en stock'};
+  // Real size values for this product, with their live availability. Used by
+  // the size guide; empty for products that have no size option at all.
+  const sizeOption = productOptions.find((option) =>
+    /taille|size|pointure/i.test(option.name),
+  );
+  const sizes: SizeEntry[] = (sizeOption?.optionValues ?? []).map((value) => ({
+    name: value.name,
+    available: value.available,
+  }));
 
-  const addLines = selectedVariant
-    ? [{merchandiseId: selectedVariant.id, quantity: 1}]
-    : [];
+  // Characteristics, sourced only from Shopify fields. ProductSpecs drops any
+  // row whose value is missing, so this adapts to every product in the catalogue.
+  const specRows: SpecRow[] = [
+    {label: 'référence', value: selectedVariant?.sku},
+    {label: 'marque', value: vendor},
+    {label: 'catégorie', value: productType},
+    ...productOptions.map((option) => ({
+      label: option.name.toLowerCase(),
+      value: option.optionValues.map((value) => value.name).join(' · '),
+    })),
+  ];
 
   return (
     <div className="pdp">
-      {/* Gallery + info live in their own container so the sticky info block's
-          containing block stops at the bottom of the gallery. Anything below
-          (recommendations, reviews) must stay OUTSIDE .pdp__main, otherwise
-          the sticky block can travel over it — see .pdp__info in app.css. */}
+      {/* Gallery + buy box only. A sticky element is clamped to its grid
+          CONTAINER's box (not to its own grid area), so every section that
+          comes after the gallery must stay OUTSIDE this wrapper — otherwise
+          the sticky panel can travel down over them. */}
       <div className="pdp__main">
         <div className="pdp__gallery">
-          <ProductGallery images={galleryImages} />
+          <ProductGallery images={galleryImages} title={title} />
         </div>
 
-        <div className="pdp__info">
-          <h1 className="pdp__title">{title}</h1>
-          <div className="pdp__price">
-            <ProductPrice
-              price={selectedVariant?.price}
-              compareAtPrice={selectedVariant?.compareAtPrice}
+        <aside className="pdp__buy">
+          <ProductPurchase
+            title={title}
+            price={selectedVariant?.price}
+            compareAtPrice={selectedVariant?.compareAtPrice}
+            productOptions={productOptions}
+            sizes={sizes}
+            available={available}
+            quantityAvailable={selectedVariant?.quantityAvailable ?? null}
+            shortDescription={shortenDescription(description ?? '')}
+            variantId={selectedVariant?.id}
+          />
+        </aside>
+      </div>
+
+      {/* Long-form content, full width, in the order the brief defines. */}
+      <div className="pdp__details">
+        {descriptionHtml && (
+          <section className="pdp__section">
+            <h2 className="pdp__section-title">description</h2>
+            <div
+              className="pdp__prose"
+              dangerouslySetInnerHTML={{__html: descriptionHtml}}
             />
-            {discountPct > 0 && <span className="pdp__discount">−{discountPct}%</span>}
-          </div>
-          <p className="pdp__tax-note">
-            taxes incluses · <a href="/policies/shipping-policy">frais de port</a> calculés au paiement.
-          </p>
+          </section>
+        )}
 
-          <div className={`pdp__stock ${stock.className}`}>
-            <span className="pdp__stock-dot" />
-            {stock.label}
-          </div>
+        <section className="pdp__section">
+          <h2 className="pdp__section-title">caractéristiques</h2>
+          <ProductSpecs rows={specRows} />
+        </section>
 
-          <ProductForm productOptions={productOptions} />
-
-          <div className="pdp__buttons">
-            <AddToCartButton
-              className="btn btn--full btn--outline"
-              disabled={!available}
-              onClick={() => openAside('cart')}
-              lines={addLines}
-            >
-              {available ? 'ajouter au panier' : 'épuisé'}
-            </AddToCartButton>
-            <BuyNowButton disabled={!available} lines={addLines}>
-              acheter maintenant
-            </BuyNowButton>
-          </div>
-
-          <p className="pdp__reassurance">
-            échanges gratuits · retours 30 jours · paiement sécurisé
-          </p>
-
+        <section className="pdp__section">
+          <h2 className="pdp__section-title">questions fréquentes</h2>
           <div className="pdp__accordions">
-            {descriptionHtml ? (
-              <Accordion title="détails">
-                <div className="font-normal" dangerouslySetInnerHTML={{__html: descriptionHtml}} />
-              </Accordion>
-            ) : null}
             {productFaq.map((item) => (
               <Accordion key={item.question} title={item.question}>
                 <p>{item.answer}</p>
               </Accordion>
             ))}
           </div>
-        </div>
+        </section>
       </div>
 
       <Suspense fallback={null}>
@@ -179,7 +186,7 @@ export default function Product() {
           {(data) =>
             data?.productRecommendations?.length ? (
               <section className="pdp__related">
-                <h2>vous pourriez aimer</h2>
+                <h2 className="pdp__section-title">vous pourriez aimer</h2>
                 <div className="product-grid">
                   {data.productRecommendations.slice(0, 4).map((item) => (
                     <ProductItem key={item.id} product={item} />
@@ -257,6 +264,7 @@ const PRODUCT_FRAGMENT = `#graphql
     id
     title
     vendor
+    productType
     handle
     descriptionHtml
     description

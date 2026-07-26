@@ -85,6 +85,19 @@
   opacity: 0.6;
 }
 
+/* Secondary action: outlined on paper, inverting on hover. Pairs with the
+   solid .btn as the "add to cart" / "buy now" duo on the product page. */
+.btn--outline {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  border: 1px solid var(--color-ink);
+}
+
+.btn--outline:hover:not(:disabled) {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+
 .badge-sale {
   position: absolute;
   top: 0.75rem;
@@ -1573,57 +1586,84 @@
 * Page produit
 * --------------------------------------------------
 */
+
+/* Page shell: a single vertical stack. Every long section below the buy box
+   is a direct child here so it spans the full page width. */
 .pdp {
-  display: grid;
-  gap: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
   padding: 1rem;
 }
 
 @media (min-width: 64em) {
   .pdp {
+    gap: 3.5rem;
     padding: 1.5rem;
   }
 }
 
-/* Two-column product section. This is deliberately its own container rather
-   than putting the columns on .pdp: a sticky element is clamped to its grid
-   CONTAINER's box, not to its own grid area, so while the recommendations and
-   reviews rows lived in the same grid as .pdp__info, the info block could keep
-   sticking all the way to the bottom of .pdp and slide over them. Keep those
-   sections outside .pdp__main. */
+/*
+* Product section: gallery + buy box
+*
+* This wrapper exists purely to bound the sticky buy box. A sticky element is
+* clamped to its grid CONTAINER's box, not to its own grid area, so if the
+* sections that follow shared a grid with the buy box, the buy box could keep
+* sticking past the gallery and slide over them. Nothing below the gallery may
+* be moved inside .pdp__main.
+*
+* Do not add height, min-height, overflow, transform or filter to .pdp__main
+* or any of its ancestors: each of those either breaks sticky outright or
+* turns an ancestor into the scroll container.
+*/
 .pdp__main {
   display: grid;
+  grid-template-columns: 1fr;
   gap: 1.5rem;
 }
 
 @media (min-width: 64em) {
   .pdp__main {
-    grid-template-columns: minmax(0, 58fr) minmax(0, 42fr);
+    grid-template-columns: minmax(0, 57fr) minmax(0, 43fr);
     gap: 3rem;
+    align-items: start;
   }
 }
 
 .pdp__gallery {
-  position: relative;
+  min-width: 0;
 }
 
+/* Mobile: edge-to-edge. The negative inline margin exactly cancels .pdp's
+   1rem padding, so the images fill the viewport width without ever making
+   the page scroll sideways. */
+@media (max-width: 63.99em) {
+  .pdp__gallery {
+    margin-inline: -1rem;
+  }
+}
+
+/*
+* Gallery — one markup, two layouts
+*/
 .gallery {
   position: relative;
   background: var(--color-paper);
 }
 
+.gallery--empty {
+  aspect-ratio: 4 / 5;
+  background: var(--color-tile);
+}
+
+/* Mobile: horizontal, one image per screen, snap on touch. */
 .gallery__track {
   display: flex;
   overflow-x: auto;
+  overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
-  aspect-ratio: 4/5;
-}
-
-@media (min-width: 48em) {
-  .gallery__track {
-    aspect-ratio: 1/1;
-  }
+  -webkit-overflow-scrolling: touch;
 }
 
 .gallery__track::-webkit-scrollbar {
@@ -1632,48 +1672,25 @@
 
 .gallery__slide {
   flex: 0 0 100%;
-  scroll-snap-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  scroll-snap-align: start;
+  aspect-ratio: 4 / 5;
+  min-width: 0;
 }
 
+/* `contain` keeps every source ratio intact — images are never stretched and
+   never cropped, whatever the shop uploads. */
 .gallery__slide img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  padding: 8%;
-}
-
-.gallery__arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--color-ink);
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1;
-}
-
-.gallery__arrow--prev {
-  left: 0.25rem;
-}
-
-.gallery__arrow--next {
-  right: 0.25rem;
+  padding: 2%;
 }
 
 .gallery__dots {
   display: flex;
   justify-content: center;
   gap: 0.45rem;
-  padding: 0.9rem 0;
+  padding: 0.9rem 0 0;
 }
 
 .gallery__dot {
@@ -1684,129 +1701,164 @@
   padding: 0;
   background: var(--color-line);
   cursor: pointer;
-  transition: background 200ms;
+  transition: background 200ms var(--ease-out-soft);
 }
 
 .gallery__dot--active {
   background: var(--color-ink);
 }
 
-.pdp__info {
+/* Desktop: the same list becomes a tall vertical stack of large images. That
+   height is what gives the sticky buy box room to travel. */
+@media (min-width: 64em) {
+  .gallery__track {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    overflow: visible;
+    scroll-snap-type: none;
+  }
+
+  .gallery__slide {
+    flex: none;
+  }
+
+  .gallery__dots {
+    display: none;
+  }
+}
+
+/*
+* Buy box
+*
+* `position: sticky` + `align-self: start` on desktop only. `align-self` is
+* required: stretched to the full row height the element has no room to move.
+* Long content lives in .pdp__details, which keeps this panel short.
+*/
+.pdp__buy {
+  min-width: 0;
+}
+
+@media (min-width: 64em) {
+  .pdp__buy {
+    position: sticky;
+    top: calc(var(--header-height) + 1.5rem);
+    align-self: start;
+    /* Safety net for short screens (a 1024x768 or 1280x800 laptop) and for
+       when the size guide is expanded: if the panel is ever taller than the
+       space under the header it scrolls within itself, instead of stranding
+       its lower half — the buy button included — permanently off-screen while
+       stuck. Overflow on the sticky element itself is safe; only overflow on
+       an ANCESTOR would break sticky. No scrollbar appears while it fits. */
+    max-height: calc(100vh - var(--header-height) - 3rem);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    overscroll-behavior-y: contain;
+  }
+}
+
+.buybox {
   display: flex;
   flex-direction: column;
 }
 
-/* Desktop only: follows the scroll while the gallery is still beside it, then
-   stops flush with the bottom of the gallery. `align-self: start` is required —
-   without it the item stretches to the full row height and has no room to
-   travel. Do not add `height`, `overflow` or `transform` to .pdp__main or its
-   ancestors: any of those would break or extend the sticky behaviour.
-   On mobile the block stays in normal flow, under the images. */
-@media (min-width: 64em) {
-  .pdp__info {
-    position: sticky;
-    top: calc(var(--header-height) + 1.5rem);
-    align-self: start;
-    padding-top: 1rem;
-  }
-}
-
-.pdp__title {
-  font-size: 0.85rem;
-  margin-bottom: 0.35rem;
-}
-
-.pdp__price {
-  font-size: 0.85rem;
-  display: flex;
-  align-items: baseline;
-  gap: 0.6rem;
+.buybox__title {
+  font-size: 1rem;
+  line-height: 1.35;
+  overflow-wrap: break-word;
   margin-bottom: 0.5rem;
 }
 
-.pdp__price s {
+@media (min-width: 64em) {
+  .buybox__title {
+    font-size: 1.15rem;
+  }
+}
+
+.buybox__price {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+  margin-bottom: 0.4rem;
+}
+
+.buybox__price s {
   color: var(--color-muted);
 }
 
-.pdp__discount {
+.buybox__discount {
   color: var(--color-sale);
 }
 
-.pdp__tax-note {
+.buybox__tax {
   font-size: 0.72rem;
   color: var(--color-muted);
-  margin-bottom: 1rem;
 }
 
-.pdp__tax-note a {
+.buybox__tax a {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
-.pdp__stock {
+.buybox__blurb {
+  font-size: 0.82rem;
+  line-height: 1.6;
+  overflow-wrap: break-word;
+  margin-top: 0.85rem;
+}
+
+.buybox__stock {
   display: flex;
   align-items: center;
   gap: 0.45rem;
   font-size: 0.75rem;
   text-transform: lowercase;
-  margin-bottom: 1.25rem;
+  margin: 1rem 0;
 }
 
-.pdp__stock-dot {
+.buybox__stock-dot {
   width: 8px;
   height: 8px;
   border-radius: 999px;
   flex-shrink: 0;
 }
 
-.pdp__stock--in .pdp__stock-dot {
+.buybox__stock--in .buybox__stock-dot {
   background: #2e7d32;
 }
 
-.pdp__stock--low .pdp__stock-dot {
+.buybox__stock--low .buybox__stock-dot {
   background: #e07b39;
 }
 
-.pdp__stock--out .pdp__stock-dot {
+.buybox__stock--out .buybox__stock-dot {
   background: var(--color-muted);
 }
 
-.pdp__buttons {
+.buybox__actions {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
-  margin-bottom: 1.5rem;
+  margin-top: 1.25rem;
 }
 
-.btn--outline {
-  background: var(--color-paper);
-  color: var(--color-ink);
-  border: 1px solid var(--color-ink);
-}
-
-.btn--outline:hover:not(:disabled) {
-  background: var(--color-ink);
-  color: var(--color-paper);
-}
-
-.pdp__description {
-  color: var(--color-ink);
-  margin-bottom: 1.25rem;
-}
-
-.pdp__description p {
-  margin-bottom: 0.75rem;
-}
-
-.pdp__size-guide {
-  font-size: 0.78rem;
+.buybox__perks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-line);
+  font-size: 0.75rem;
+  color: var(--color-muted);
   text-transform: lowercase;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  width: fit-content;
-  margin-bottom: 1.25rem;
 }
 
+/*
+* Variant / size selectors
+*/
 .pdp__option-label {
   font-size: 0.78rem;
   text-transform: lowercase;
@@ -1815,14 +1867,16 @@
 
 .option-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(3.25rem, 1fr));
   gap: 0.5rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
 }
 
+/* Comfortable touch targets: 46px tall, never narrower than a fingertip. */
 .option-btn {
   position: relative;
-  min-height: 42px;
+  min-height: 46px;
+  padding: 0 0.5rem;
   border: 1px solid var(--color-line);
   background: var(--color-paper);
   color: var(--color-ink);
@@ -1831,9 +1885,9 @@
   cursor: pointer;
   border-radius: 4px;
   transition:
-    background 150ms,
-    color 150ms,
-    border-color 150ms;
+    background 150ms var(--ease-out-soft),
+    color 150ms var(--ease-out-soft),
+    border-color 150ms var(--ease-out-soft);
 }
 
 .option-btn:hover:not(:disabled) {
@@ -1863,13 +1917,237 @@
   );
 }
 
-.pdp__reassurance {
-  text-align: center;
-  font-size: 0.75rem;
-  color: var(--color-ink);
-  margin: 1rem 0 1.5rem;
+.option-swatch {
+  display: inline-block;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 50%;
+  border: 1px solid var(--color-line);
+  overflow: hidden;
+  vertical-align: middle;
 }
 
+.option-swatch img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/*
+* Size guide
+*/
+.size-guide {
+  margin-bottom: 1rem;
+}
+
+.size-guide__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--color-ink);
+  font-size: 0.78rem;
+  text-transform: lowercase;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.size-guide__chevron {
+  transition: transform 250ms var(--ease-out-soft);
+}
+
+.size-guide__toggle[aria-expanded='true'] .size-guide__chevron {
+  transform: rotate(180deg);
+}
+
+.size-guide__panel {
+  margin-top: 0.9rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--color-line);
+  border-radius: 4px;
+}
+
+.size-guide__list {
+  display: flex;
+  flex-direction: column;
+}
+
+.size-guide__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--color-line);
+  font-size: 0.78rem;
+}
+
+.size-guide__row:last-child {
+  border-bottom: none;
+}
+
+.size-guide__size {
+  text-transform: uppercase;
+}
+
+.size-guide__stock {
+  font-size: 0.72rem;
+  text-transform: lowercase;
+}
+
+.size-guide__stock--in {
+  color: var(--color-ink);
+}
+
+.size-guide__stock--out {
+  color: var(--color-muted);
+}
+
+.size-guide__note {
+  margin-top: 0.9rem;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: var(--color-muted);
+}
+
+.size-guide__note a {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/*
+* Quantity stepper
+*/
+.quantity {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.quantity__label {
+  font-size: 0.78rem;
+  text-transform: lowercase;
+}
+
+.quantity__control {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-line);
+  border-radius: 4px;
+}
+
+.quantity__btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-ink);
+  font-size: 0.95rem;
+  transition: background 150ms var(--ease-out-soft);
+}
+
+.quantity__btn:hover:not(:disabled) {
+  background: var(--color-tile);
+}
+
+.quantity__btn:disabled {
+  color: var(--color-muted);
+  cursor: not-allowed;
+}
+
+.quantity__value {
+  min-width: 2.25rem;
+  text-align: center;
+  font-size: 0.82rem;
+}
+
+/*
+* Long-form sections (full width, below the product section)
+*/
+.pdp__details {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+@media (min-width: 64em) {
+  .pdp__details {
+    gap: 3rem;
+    max-width: 68ch;
+  }
+}
+
+.pdp__section-title {
+  font-size: 0.85rem;
+  text-transform: lowercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 1rem;
+}
+
+.pdp__prose {
+  font-size: 0.82rem;
+  line-height: 1.75;
+  font-weight: 400;
+  overflow-wrap: break-word;
+}
+
+.pdp__prose p {
+  margin-bottom: 0.85rem;
+}
+
+.pdp__prose p:last-child {
+  margin-bottom: 0;
+}
+
+.pdp__prose img {
+  max-width: 100%;
+  height: auto;
+}
+
+/*
+* Characteristics
+*/
+.specs {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--color-line);
+}
+
+.specs__row {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.specs__label {
+  flex: 0 0 9rem;
+  font-size: 0.75rem;
+  text-transform: lowercase;
+  color: var(--color-muted);
+}
+
+.specs__value {
+  margin: 0;
+  font-size: 0.8rem;
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+
+/*
+* FAQ accordions
+*/
 .pdp__accordions {
   border-top: 1px solid var(--color-line);
 }
@@ -1883,6 +2161,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 1rem;
   padding: 0.9rem 0;
   background: none;
   border: none;
@@ -1890,9 +2169,11 @@
   font-size: 0.8rem;
   text-transform: lowercase;
   color: var(--color-ink);
+  text-align: left;
 }
 
 .accordion__chevron {
+  flex-shrink: 0;
   transition: transform 250ms var(--ease-out-soft);
 }
 
@@ -1911,21 +2192,21 @@
   line-height: 1.7;
 }
 
-.pdp__related {
-  padding-top: 2rem;
-}
-
+/*
+* Recommendations + reviews
+*/
 .pdp__related h2 {
-  padding: 0 0 0.25rem;
+  padding: 0;
 }
 
+/* Cancels .pdp's padding so the scrolling review rows run edge to edge. */
 .pdp__reviews {
-  margin: 0 -1rem;
+  margin-inline: -1rem;
 }
 
 @media (min-width: 64em) {
   .pdp__reviews {
-    margin: 0 -1.5rem;
+    margin-inline: -1.5rem;
   }
 }
 
