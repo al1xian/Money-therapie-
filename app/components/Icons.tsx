@@ -78,31 +78,6 @@ export function InstagramIcon({className}: IconProps) {
   );
 }
 
-export function StarIcon({className, fill = 1}: IconProps & {fill?: number}) {
-  const id = `star-clip-${Math.round(fill * 100)}`;
-  return (
-    <svg className={className} width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">
-      <defs>
-        <clipPath id={id}>
-          <rect x="0" y="0" width={16 * Math.max(0, Math.min(1, fill))} height="16" />
-        </clipPath>
-      </defs>
-      <path
-        d="M8 1.4l1.9 4.02 4.35.63-3.15 3.13.74 4.42L8 11.5l-3.84 2.1.74-4.42L1.75 6.05l4.35-.63L8 1.4z"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M8 1.4l1.9 4.02 4.35.63-3.15 3.13.74 4.42L8 11.5l-3.84 2.1.74-4.42L1.75 6.05l4.35-.63L8 1.4z"
-        fill="currentColor"
-        clipPath={`url(#${id})`}
-      />
-    </svg>
-  );
-}
-
 export function TiktokIcon({className}: IconProps) {
   return (
     <svg className={className} width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -113,6 +88,56 @@ export function TiktokIcon({className}: IconProps) {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+    </svg>
+  );
+}
+
+export function QuestionIcon({className}: IconProps) {
+  return (
+    <svg className={className} width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.1" />
+      <path
+        d="M6.15 6.3c0-1.05.8-1.75 1.85-1.75s1.85.65 1.85 1.6c0 .95-.65 1.25-1.25 1.65-.5.32-.75.62-.75 1.1"
+        stroke="currentColor"
+        strokeWidth="1.1"
+        strokeLinecap="round"
+      />
+      <circle cx="8" cy="11.15" r="0.5" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function GridIcon({className}: IconProps) {
+  return (
+    <svg className={className} width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.1" />
+      <rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.1" />
+      <rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.1" />
+      <rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.1" />
+    </svg>
+  );
+}
+
+export function GearIcon({className}: IconProps) {
+  return (
+    <svg className={className} width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <circle cx="8" cy="8" r="2.4" stroke="currentColor" strokeWidth="1.1" />
+      <path
+        d="M8 1.6v1.6M8 12.8v1.6M14.4 8h-1.6M3.2 8H1.6M12.35 3.65l-1.13 1.13M4.78 11.17l-1.13 1.13M12.35 12.35l-1.13-1.13M4.78 4.83L3.65 3.65"
+        stroke="currentColor"
+        strokeWidth="1.1"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+export function PersonIcon({className}: IconProps) {
+  return (
+    <svg className={className} width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.1" />
+      <circle cx="8" cy="5.7" r="1.5" stroke="currentColor" strokeWidth="1.1" />
+      <path d="M4.8 11.6c.6-1.75 1.8-2.7 3.2-2.7s2.6.95 3.2 2.7" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
     </svg>
   );
 }

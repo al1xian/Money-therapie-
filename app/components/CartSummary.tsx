@@ -8,7 +8,7 @@ type CartSummaryProps = {
   layout: CartLayout;
 };
 
-// Free-shipping threshold (EUR). Keep in sync with the marquee copy.
+// Free-shipping threshold (EUR).
 const FREE_SHIPPING_THRESHOLD = 150;
 
 export function CartSummary({cart}: CartSummaryProps) {

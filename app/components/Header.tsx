@@ -25,12 +25,11 @@ type Viewport = 'desktop' | 'mobile';
 export function Header({header, cart, navCollections}: HeaderProps) {
   const {shop} = header;
   const {open} = useAside();
-  const {transparent, scrolled} = useHeaderTone();
+  const {transparent} = useHeaderTone();
 
   const headerClassName = [
     'site-header',
     transparent && 'site-header--transparent',
-    scrolled && 'site-header--scrolled',
   ]
     .filter(Boolean)
     .join(' ');

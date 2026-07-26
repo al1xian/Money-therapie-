@@ -1,6 +1,6 @@
 import type {Route} from './+types/faq';
 import {Reveal} from '~/components/Reveal';
-import {Accordion} from '~/components/Accordion';
+import {BigFaqAccordion} from '~/components/BigFaqAccordion';
 import {generalFaq, productFaq} from '~/data/faq';
 
 export const meta: Route.MetaFunction = () => {
@@ -23,24 +23,12 @@ export default function Faq() {
 
       <Reveal as="section">
         <h2 className="faq-page__group-title">commande &amp; livraison</h2>
-        <div className="pdp__accordions">
-          {generalFaq.map((item) => (
-            <Accordion key={item.question} title={item.question}>
-              <p>{item.answer}</p>
-            </Accordion>
-          ))}
-        </div>
+        <BigFaqAccordion items={generalFaq} />
       </Reveal>
 
       <Reveal as="section">
         <h2 className="faq-page__group-title">nos produits</h2>
-        <div className="pdp__accordions">
-          {productFaq.map((item) => (
-            <Accordion key={item.question} title={item.question}>
-              <p>{item.answer}</p>
-            </Accordion>
-          ))}
-        </div>
+        <BigFaqAccordion items={productFaq} />
       </Reveal>
     </div>
   );

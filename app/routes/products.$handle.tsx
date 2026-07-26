@@ -166,8 +166,6 @@ export default function Product() {
             </Accordion>
           ))}
         </div>
-
-        <ProductReviews productId={product.id} productTitle={title} />
       </div>
 
       <Suspense fallback={null}>
@@ -186,6 +184,10 @@ export default function Product() {
           }
         </Await>
       </Suspense>
+
+      <div className="pdp__reviews">
+        <ProductReviews productId={product.id} productTitle={title} />
+      </div>
 
       <Analytics.ProductView
         data={{

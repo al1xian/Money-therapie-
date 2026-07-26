@@ -5,10 +5,9 @@ import {useHeaderTone} from '~/lib/header-tone';
 
 type HeroCta = {text: string; href: string};
 
-// Matches the fixed header's total visual height (marquee + header) so the
-// header flips from transparent to solid exactly as its own bottom edge
-// clears the hero, not before.
-const HEADER_OFFSET_PX = 86;
+// Matches the fixed header's visual height so it flips from transparent to
+// solid exactly as its own bottom edge clears the hero, not before.
+const HEADER_OFFSET_PX = 56;
 
 // Same stagger/entrance timing as the reference AnimatedHero component:
 // container staggers its children, each item slides up 20px while fading in.
