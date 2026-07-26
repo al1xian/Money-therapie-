@@ -14,6 +14,7 @@ import {ProductPurchase} from '~/components/ProductPurchase';
 import {ProductSpecs, type SpecRow} from '~/components/ProductSpecs';
 import {ProductDescription} from '~/components/ProductDescription';
 import {VisionSection} from '~/components/VisionSection';
+import {CollectionShowcase} from '~/components/CollectionShowcase';
 import type {SizeEntry} from '~/components/ProductSizeGuide';
 import {Accordion} from '~/components/Accordion';
 import {ProductItem} from '~/components/ProductItem';
@@ -66,7 +67,6 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   return {product};
 }
 
-const MIN_RECOMMENDATIONS = 5;
 const MAX_RECOMMENDATIONS = 8;
 
 /**
@@ -108,7 +108,26 @@ function loadDeferredData(
     return merged;
   });
 
-  return {recommended};
+  // Real collections for the showcase closing the page, so every tile links
+  // somewhere that exists. The two handles Shopify creates by default carry no
+  // editorial meaning, so they're filtered out — same rule as the header nav.
+  const showcaseCollections = context.storefront
+    .query(SHOWCASE_COLLECTIONS_QUERY, {variables: {first: 10}})
+    .then((data) =>
+      (data?.collections?.nodes ?? [])
+        .filter(
+          (collection) =>
+            collection.handle !== 'frontpage' &&
+            collection.title.toLowerCase() !== 'home page',
+        )
+        .slice(0, 4),
+    )
+    .catch((error: Error) => {
+      console.error(error);
+      return [];
+    });
+
+  return {recommended, showcaseCollections};
 }
 
 /** First sentence of the product description, for the short blurb in the buy box. */
@@ -121,7 +140,7 @@ function shortenDescription(description: string): string {
 }
 
 export default function Product() {
-  const {product, recommended} = useLoaderData<typeof loader>();
+  const {product, recommended, showcaseCollections} = useLoaderData<typeof loader>();
 
   const selectedVariant = useOptimisticVariant(
     product.selectedOrFirstAvailableVariant,
@@ -250,6 +269,18 @@ export default function Product() {
       <div className="pdp__reviews">
         <ProductReviews productId={product.id} productTitle={title} />
       </div>
+
+      {/* Closing the page: full-bleed collection tiles. */}
+      <Suspense fallback={null}>
+        <Await resolve={showcaseCollections}>
+          {(collections) => (
+            <CollectionShowcase
+              collections={collections}
+              heading="rejoignez la communauté"
+            />
+          )}
+        </Await>
+      </Suspense>
 
       <Analytics.ProductView
         data={{
@@ -453,6 +484,30 @@ const PRODUCT_RECOMMENDATIONS_QUERY = `#graphql
     }
   }
   ${RECO_PRODUCT_FRAGMENT}
+` as const;
+
+/** Collections for the showcase tiles that close the product page. */
+const SHOWCASE_COLLECTIONS_QUERY = `#graphql
+  query PdpShowcaseCollections(
+    $first: Int
+    $country: CountryCode
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
+    collections(first: $first, sortKey: UPDATED_AT, reverse: true) {
+      nodes {
+        id
+        title
+        handle
+        image {
+          id
+          url
+          altText
+          width
+          height
+        }
+      }
+    }
+  }
 ` as const;
 
 /** Tops the recommendation row up to a full set with real catalogue products. */

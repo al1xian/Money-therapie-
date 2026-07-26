@@ -1420,6 +1420,27 @@ export type ProductRecommendationsQuery = {
   >;
 };
 
+export type PdpShowcaseCollectionsQueryVariables = StorefrontAPI.Exact<{
+  first?: StorefrontAPI.InputMaybe<StorefrontAPI.Scalars['Int']['input']>;
+  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
+  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
+}>;
+
+export type PdpShowcaseCollectionsQuery = {
+  collections: {
+    nodes: Array<
+      Pick<StorefrontAPI.Collection, 'id' | 'title' | 'handle'> & {
+        image?: StorefrontAPI.Maybe<
+          Pick<
+            StorefrontAPI.Image,
+            'id' | 'url' | 'altText' | 'width' | 'height'
+          >
+        >;
+      }
+    >;
+  };
+};
+
 export type PdpFallbackProductsQueryVariables = StorefrontAPI.Exact<{
   first?: StorefrontAPI.InputMaybe<StorefrontAPI.Scalars['Int']['input']>;
   country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
@@ -1768,6 +1789,10 @@ interface GeneratedQueryTypes {
   '#graphql\n  query ProductRecommendations(\n    $productId: ID!\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    productRecommendations(productId: $productId) {\n      ...RecoProduct\n    }\n  }\n  #graphql\n  fragment RecoMoney on MoneyV2 {\n    amount\n    currencyCode\n  }\n  fragment RecoProduct on Product {\n    id\n    title\n    handle\n    availableForSale\n    # Standard Shopify review metafields, written by review apps. Absent when\n    # the shop has no review app — the UI then shows no rating at all.\n    rating: metafield(namespace: "reviews", key: "rating") {\n      value\n    }\n    ratingCount: metafield(namespace: "reviews", key: "rating_count") {\n      value\n    }\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n    images(first: 2) {\n      nodes {\n        id\n        url\n        altText\n        width\n        height\n      }\n    }\n    priceRange {\n      minVariantPrice {\n        ...RecoMoney\n      }\n    }\n    compareAtPriceRange {\n      minVariantPrice {\n        ...RecoMoney\n      }\n    }\n    options {\n      name\n      optionValues {\n        name\n      }\n    }\n    variants(first: 20) {\n      nodes {\n        id\n        availableForSale\n        selectedOptions {\n          name\n          value\n        }\n        price {\n          ...RecoMoney\n        }\n        compareAtPrice {\n          ...RecoMoney\n        }\n      }\n    }\n  }\n\n': {
     return: ProductRecommendationsQuery;
     variables: ProductRecommendationsQueryVariables;
+  };
+  '#graphql\n  query PdpShowcaseCollections(\n    $first: Int\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    collections(first: $first, sortKey: UPDATED_AT, reverse: true) {\n      nodes {\n        id\n        title\n        handle\n        image {\n          id\n          url\n          altText\n          width\n          height\n        }\n      }\n    }\n  }\n': {
+    return: PdpShowcaseCollectionsQuery;
+    variables: PdpShowcaseCollectionsQueryVariables;
   };
   '#graphql\n  query PdpFallbackProducts(\n    $first: Int\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    products(first: $first, sortKey: BEST_SELLING) {\n      nodes {\n        ...RecoProduct\n      }\n    }\n  }\n  #graphql\n  fragment RecoMoney on MoneyV2 {\n    amount\n    currencyCode\n  }\n  fragment RecoProduct on Product {\n    id\n    title\n    handle\n    availableForSale\n    # Standard Shopify review metafields, written by review apps. Absent when\n    # the shop has no review app — the UI then shows no rating at all.\n    rating: metafield(namespace: "reviews", key: "rating") {\n      value\n    }\n    ratingCount: metafield(namespace: "reviews", key: "rating_count") {\n      value\n    }\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n    images(first: 2) {\n      nodes {\n        id\n        url\n        altText\n        width\n        height\n      }\n    }\n    priceRange {\n      minVariantPrice {\n        ...RecoMoney\n      }\n    }\n    compareAtPriceRange {\n      minVariantPrice {\n        ...RecoMoney\n      }\n    }\n    options {\n      name\n      optionValues {\n        name\n      }\n    }\n    variants(first: 20) {\n      nodes {\n        id\n        availableForSale\n        selectedOptions {\n          name\n          value\n        }\n        price {\n          ...RecoMoney\n        }\n        compareAtPrice {\n          ...RecoMoney\n        }\n      }\n    }\n  }\n\n': {
     return: PdpFallbackProductsQuery;
