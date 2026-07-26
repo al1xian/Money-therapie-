@@ -16,9 +16,26 @@ export const meta: Route.MetaFunction = () => {
   ];
 };
 
-/** Preload the hero image (LCP element on the homepage). */
+/**
+ * Preload the hero image (LCP element on the homepage). Mobile and desktop
+ * use different crops, so each preload is scoped with `media` to avoid
+ * downloading both.
+ */
 export function links() {
-  return [{rel: 'preload', as: 'image', href: '/images/P1973928-2.webp'}];
+  return [
+    {
+      rel: 'preload',
+      as: 'image',
+      href: '/images/hero-mobile.webp',
+      media: '(max-width: 47.99em)',
+    },
+    {
+      rel: 'preload',
+      as: 'image',
+      href: '/images/P1973928-2.webp',
+      media: '(min-width: 48em)',
+    },
+  ];
 }
 
 export async function loader(args: Route.LoaderArgs) {
@@ -56,7 +73,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <AnimatedHero
-        imageMobileSrc="/images/P1973928-2.webp"
+        imageMobileSrc="/images/hero-mobile.webp"
         imageDesktopSrc="/images/P1973928-2.webp"
         imageAlt="Deux personnes en tenue reda studio, ambiance urbaine"
         eyebrow="nouvelle collection"

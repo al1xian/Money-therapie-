@@ -24,8 +24,12 @@ const itemVariants = {
   visible: {y: 0, opacity: 1, transition: {duration: 0.6, ease: 'easeOut' as const}},
 };
 
+// `hero__cta` carries the white text colour (see app.css). It can't be left
+// to Tailwind's `text-white`: that utility sits in `@layer utilities`, while
+// reset.css's `a { color: var(--color-ink) }` is unlayered — and unlayered
+// declarations beat layered ones, so the utility loses on these links.
 const glassButtonClassName =
-  'inline-flex items-center justify-center border border-white/25 bg-white/10 px-6 py-3 text-[11px] uppercase tracking-[0.14em] text-white backdrop-blur-sm transition-colors duration-200 hover:bg-white/20 sm:px-8 sm:py-4 sm:text-xs';
+  'hero__cta inline-flex items-center justify-center border border-white/25 bg-white/10 px-6 py-3 text-[11px] uppercase tracking-[0.14em] backdrop-blur-sm transition-colors duration-200 hover:bg-white/20 sm:px-8 sm:py-4 sm:text-xs';
 
 /**
  * Homepage hero banner: full-bleed photo with a dark overlay, staggered

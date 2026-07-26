@@ -1,5 +1,4 @@
 import type {Review} from '~/data/reviews';
-import {Reveal} from '~/components/Reveal';
 
 const AVATAR_PALETTE = ['#111111', '#3d3d3a', '#6b6b66', '#8a8a86'];
 
@@ -21,46 +20,55 @@ function avatarColor(name: string): string {
   return AVATAR_PALETTE[hash % AVATAR_PALETTE.length];
 }
 
+/** Carte d'avis : citation, puis avatar + nom + libellé. */
 function TestimonialCard({review}: {review: Review}) {
   return (
-    <article className="testimonials__card">
-      <p className="testimonials__quote">&ldquo;{review.text}&rdquo;</p>
-      <div className="testimonials__meta">
+    <div className="testimonial-card">
+      <p className="testimonial-card__quote">&ldquo;{review.text}&rdquo;</p>
+      <div className="testimonial-card__author">
         <span
-          className="testimonials__avatar"
+          className="testimonial-card__avatar"
           style={{background: avatarColor(review.name)}}
           aria-hidden="true"
         >
           {initials(review.name)}
         </span>
-        <span className="testimonials__name">{review.name}</span>
+        <div>
+          <h4 className="testimonial-card__name">{review.name}</h4>
+          <p className="testimonial-card__role">avis client</p>
+        </div>
       </div>
-    </article>
+    </div>
   );
 }
 
-function ScrollRow({
+/**
+ * Défilement horizontal infini : le contenu est rendu deux fois et la piste
+ * est translatée de -50%, ce qui rend la boucle invisible.
+ */
+function HorizontalScroller({
   reviews,
-  direction,
   speed,
+  direction,
 }: {
   reviews: Review[];
-  direction: 'left' | 'right';
   speed: string;
+  direction: 'left' | 'right';
 }) {
   if (!reviews.length) return null;
+
   return (
-    <div className="testimonials__row">
+    <div className="scroller">
       <div
-        className={`testimonials__track testimonials__track--${direction}`}
+        className={`scroller__track scroller__track--${direction}`}
         style={{'--scroll-duration': speed} as React.CSSProperties}
       >
-        <div className="testimonials__group">
+        <div className="scroller__group">
           {reviews.map((review) => (
             <TestimonialCard key={`a-${review.name}`} review={review} />
           ))}
         </div>
-        <div className="testimonials__group" aria-hidden="true">
+        <div className="scroller__group" aria-hidden="true">
           {reviews.map((review) => (
             <TestimonialCard key={`b-${review.name}`} review={review} />
           ))}
@@ -70,8 +78,11 @@ function ScrollRow({
   );
 }
 
-const ROW_DIRECTIONS: Array<'left' | 'right'> = ['left', 'right', 'left'];
-const ROW_SPEEDS = ['46s', '38s', '54s'];
+const ROWS: Array<{speed: string; direction: 'left' | 'right'}> = [
+  {speed: '50s', direction: 'left'},
+  {speed: '40s', direction: 'right'},
+  {speed: '60s', direction: 'left'},
+];
 
 export function ReviewsSection({
   heading,
@@ -84,26 +95,31 @@ export function ReviewsSection({
 }) {
   if (!reviews.length) return null;
 
+  // Répartition en 3 rangées, dans l'ordre, pour que chaque rangée ait un
+  // contenu distinct.
   const rows: Review[][] = [[], [], []];
   reviews.forEach((review, index) => rows[index % rows.length]?.push(review));
 
   return (
-    <Reveal as="section" className="testimonials">
+    <section className="testimonials">
       <div className="testimonials__head">
-        <h2 className="section-title">{heading}</h2>
-        {subheading ? <p className="testimonials__subheading">{subheading}</p> : null}
+        <h2 className="testimonials__title">{heading}</h2>
+        {subheading ? <p className="testimonials__subtitle">{subheading}</p> : null}
       </div>
+
       <div className="testimonials__rows">
         {rows.map((row, index) => (
-          <ScrollRow
-            // eslint-disable-next-line react/no-array-index-key -- rows is a fixed-length static array, never reordered
+          <HorizontalScroller
+            // eslint-disable-next-line react/no-array-index-key -- tableau statique de longueur fixe, jamais réordonné
             key={index}
             reviews={row}
-            direction={ROW_DIRECTIONS[index % ROW_DIRECTIONS.length]}
-            speed={ROW_SPEEDS[index % ROW_SPEEDS.length]}
+            speed={ROWS[index].speed}
+            direction={ROWS[index].direction}
           />
         ))}
       </div>
-    </Reveal>
+
+      <div className="testimonials__glow" aria-hidden="true" />
+    </section>
   );
 }
