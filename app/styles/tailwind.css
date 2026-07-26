@@ -1,6 +1,6 @@
 /**
- * money therapy — design tokens (Tailwind v4 CSS-first config)
- * Minimal, monospace, black & white — grille éditoriale sobre.
+ * reda studio — design tokens (Tailwind v4 CSS-first config)
+ * Bold Arial/Helvetica, black & white — grille éditoriale sobre.
  */
 @import 'tailwindcss';
 
@@ -12,12 +12,8 @@
   --color-muted: #8a8a86;
   --color-sale: #b3261e;
 
-  --font-mono:
-    ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', Menlo, Consolas,
-    'Liberation Mono', monospace;
-  --font-sans:
-    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica,
-    Arial, sans-serif;
+  --font-mono: Arial, Helvetica, sans-serif;
+  --font-sans: Arial, Helvetica, sans-serif;
 
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }

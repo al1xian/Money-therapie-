@@ -16,8 +16,10 @@ import {AddToCartButton} from '~/components/AddToCartButton';
 import {BuyNowButton} from '~/components/BuyNowButton';
 import {Accordion} from '~/components/Accordion';
 import {ProductItem} from '~/components/ProductItem';
+import {ProductReviews} from '~/components/ProductReviews';
 import {useAside} from '~/components/Aside';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
+import {productFaq} from '~/data/faq';
 
 export const meta: Route.MetaFunction = ({data}) => {
   return [
@@ -155,50 +157,17 @@ export default function Product() {
         <div className="pdp__accordions">
           {descriptionHtml ? (
             <Accordion title="détails">
-              <div className="font-sans" dangerouslySetInnerHTML={{__html: descriptionHtml}} />
+              <div className="font-normal" dangerouslySetInnerHTML={{__html: descriptionHtml}} />
             </Accordion>
           ) : null}
-          <Accordion title="coupe & taille">
-            <p>
-              coupe et correspondance des tailles précisées dans la
-              description ci-dessus lorsqu&rsquo;elles sont disponibles. en
-              cas de doute entre deux tailles, contactez notre service
-              client avant l&rsquo;achat.
-            </p>
-          </Accordion>
-          <Accordion title="composition">
-            <p>
-              la composition exacte de la pièce (matières, pourcentages) est
-              indiquée sur l&rsquo;étiquette cousue à l&rsquo;intérieur du
-              vêtement.
-            </p>
-          </Accordion>
-          <Accordion title="fabrication">
-            <p>
-              chaque pièce est sélectionnée et contrôlée avant sa mise en
-              vente selon nos critères de qualité et de finition.
-            </p>
-          </Accordion>
-          <Accordion title="livraison">
-            <p>
-              livraison suivie, expédiée sous quelques jours ouvrés. détails
-              sur notre page <a href="/policies/shipping-policy">livraison</a>.
-            </p>
-          </Accordion>
-          <Accordion title="retours">
-            <p>
-              retours et échanges acceptés sous 30 jours. détails sur notre
-              page <a href="/policies/refund-policy">retours</a>.
-            </p>
-          </Accordion>
-          <Accordion title="entretien">
-            <p>
-              lavez de préférence à l&rsquo;envers, à basse température, et
-              suivez les instructions précises indiquées sur
-              l&rsquo;étiquette du produit.
-            </p>
-          </Accordion>
+          {productFaq.map((item) => (
+            <Accordion key={item.question} title={item.question}>
+              <p>{item.answer}</p>
+            </Accordion>
+          ))}
         </div>
+
+        <ProductReviews productId={product.id} productTitle={title} />
       </div>
 
       <Suspense fallback={null}>

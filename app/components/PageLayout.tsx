@@ -61,7 +61,7 @@ export function PageLayout({
           />
         )}
         <main className={isHome ? undefined : 'main--with-header-space'}>{children}</main>
-        <Footer header={header} />
+        <Footer header={header} navCollections={navCollections} />
         <NewsletterPopup />
       </HeaderToneProvider>
     </Aside.Provider>
