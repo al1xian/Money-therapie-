@@ -78,6 +78,31 @@ export function InstagramIcon({className}: IconProps) {
   );
 }
 
+export function StarIcon({className, fill = 1}: IconProps & {fill?: number}) {
+  const id = `star-clip-${Math.round(fill * 100)}`;
+  return (
+    <svg className={className} width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">
+      <defs>
+        <clipPath id={id}>
+          <rect x="0" y="0" width={16 * Math.max(0, Math.min(1, fill))} height="16" />
+        </clipPath>
+      </defs>
+      <path
+        d="M8 1.4l1.9 4.02 4.35.63-3.15 3.13.74 4.42L8 11.5l-3.84 2.1.74-4.42L1.75 6.05l4.35-.63L8 1.4z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8 1.4l1.9 4.02 4.35.63-3.15 3.13.74 4.42L8 11.5l-3.84 2.1.74-4.42L1.75 6.05l4.35-.63L8 1.4z"
+        fill="currentColor"
+        clipPath={`url(#${id})`}
+      />
+    </svg>
+  );
+}
+
 export function TiktokIcon({className}: IconProps) {
   return (
     <svg className={className} width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">

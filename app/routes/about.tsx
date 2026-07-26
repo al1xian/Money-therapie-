@@ -4,26 +4,27 @@ import {Reveal} from '~/components/Reveal';
 
 export const meta: Route.MetaFunction = () => {
   return [
-    {title: 'reda studio | à propos'},
+    {title: 'reda studio | notre histoire'},
     {
       name: 'description',
-      content: 'reda studio — un studio de vêtements minimalistes, pensés pour durer.',
+      content:
+        'reda studio — maison streetwear indépendante, premium et minimaliste, inspirée par l’ambition et la culture contemporaine.',
     },
   ];
 };
 
-const values = [
+const pillars = [
   {
-    title: 'simplicité',
-    body: 'des pièces essentielles, sans logo tape-à-l’œil ni surcharge — la coupe et la matière font le vêtement.',
+    title: 'ambition',
+    body: 'reda studio est né pour ceux qui avancent — des pièces pensées pour accompagner l’exigence, pas pour la commenter.',
   },
   {
-    title: 'durabilité',
-    body: 'des matières choisies pour tenir dans le temps, plutôt que suivre une tendance qui s’efface en une saison.',
+    title: 'élégance',
+    body: 'une base noir & blanc, des coupes nettes, aucune fioriture. le minimalisme comme forme de rigueur.',
   },
   {
-    title: 'attention au détail',
-    body: 'chaque référence est vérifiée avant sa mise en vente — finitions, tombé, confort.',
+    title: 'culture',
+    body: 'un vestiaire streetwear enraciné dans la ville, informé par l’art, la musique et l’époque dans laquelle il vit.',
   },
 ];
 
@@ -34,8 +35,9 @@ export default function About() {
         <p className="about__eyebrow">notre histoire</p>
         <h1 className="about__title">reda studio</h1>
         <p className="about__lead">
-          un studio de vêtements pensés pour durer : des pièces essentielles,
-          des matières choisies, une coupe nette.
+          une maison streetwear indépendante, née d’une conviction simple :
+          l’ambition mérite un vestiaire à sa mesure — premium, minimaliste,
+          sans compromis.
         </p>
       </Reveal>
 
@@ -49,25 +51,51 @@ export default function About() {
       </Reveal>
 
       <Reveal as="section" className="about__block">
-        <p className="about__eyebrow">notre approche</p>
-        <h2>penser le vêtement dans la durée</h2>
+        <p className="about__eyebrow">l’origine</p>
+        <h2>une maison indépendante</h2>
         <p>
-          reda studio conçoit des vêtements sobres, pensés pour être portés
-          longtemps plutôt que renouvelés à chaque saison. chaque pièce est
-          choisie pour sa coupe, sa matière et sa capacité à traverser le
-          temps sans se démoder.
+          reda studio est une maison indépendante. pas de gros logo, pas de
+          collections surdimensionnées — une ligne resserrée, pensée pièce par
+          pièce, pour celles et ceux qui construisent quelque chose.
         </p>
         <p>
-          nous préférons un vestiaire resserré et bien pensé à une collection
-          surchargée — moins de pièces, mieux choisies.
+          notre point de départ, c’est la rue et son exigence silencieuse :
+          des vêtements qui en disent long sans avoir besoin de crier.
+        </p>
+      </Reveal>
+
+      <Reveal as="section" className="about__manifesto">
+        <p>
+          « s&rsquo;habiller avec ambition, c&rsquo;est choisir la sobriété
+          plutôt que le bruit. »
+        </p>
+      </Reveal>
+
+      <Reveal as="section" className="about__block">
+        <p className="about__eyebrow">notre approche</p>
+        <h2>premium, minimaliste, intemporel</h2>
+        <p>
+          chaque pièce reda studio est conçue pour durer — dans sa matière
+          comme dans son style. nous préférons un vestiaire resserré et bien
+          pensé à une collection surchargée : moins de pièces, mieux choisies,
+          mieux faites.
+        </p>
+        <p>
+          l’élégance, chez nous, n’est pas un supplément : c’est le point de
+          départ de chaque coupe, de chaque tissu, de chaque détail.
         </p>
       </Reveal>
 
       <section className="about__values">
-        {values.map((value, index) => (
-          <Reveal key={value.title} as="div" className="about__value" style={{transitionDelay: `${index * 80}ms`}}>
-            <h3>{value.title}</h3>
-            <p>{value.body}</p>
+        {pillars.map((pillar, index) => (
+          <Reveal
+            key={pillar.title}
+            as="div"
+            className="about__value"
+            style={{transitionDelay: `${index * 80}ms`}}
+          >
+            <h3>{pillar.title}</h3>
+            <p>{pillar.body}</p>
           </Reveal>
         ))}
       </section>

@@ -7,22 +7,7 @@ import {CollectionsSlider} from '~/components/CollectionsSlider';
 import {AnimatedHero} from '~/components/AnimatedHero';
 import {Reveal} from '~/components/Reveal';
 import {Newsletter} from '~/components/Newsletter';
-import {Accordion} from '~/components/Accordion';
-
-const homeFaq = [
-  {
-    question: 'quels sont vos délais de livraison ?',
-    answer: 'nous livrons tous nos produits en 48h, avec une livraison rapide partout en france.',
-  },
-  {
-    question: 'vos produits sont-ils de qualité ?',
-    answer: 'oui, tous nos produits sont de qualité, sélectionnés avec soin avant leur mise en vente.',
-  },
-  {
-    question: 'puis-je être remboursé ?',
-    answer: 'le remboursement est autorisé uniquement après renvoi du produit.',
-  },
-];
+import {HomeReviews} from '~/components/HomeReviews';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -88,16 +73,7 @@ export default function Homepage() {
 
       <AllProducts products={data.allProducts} />
 
-      <Reveal as="section" className="home-faq">
-        <h2 className="section-title">questions fréquentes</h2>
-        <div className="pdp__accordions">
-          {homeFaq.map((item) => (
-            <Accordion key={item.question} title={item.question}>
-              <p>{item.answer}</p>
-            </Accordion>
-          ))}
-        </div>
-      </Reveal>
+      <HomeReviews />
 
       <Reveal as="section">
         <Newsletter />
