@@ -1817,32 +1817,15 @@
 }
 
 /*
-* Buy box
+* Right column: buy box + description, characteristics and FAQ.
 *
-* `position: sticky` + `align-self: start` on desktop only. `align-self` is
-* required: stretched to the full row height the element has no room to move.
-* Long content lives in .pdp__details, which keeps this panel short.
+* Deliberately NOT sticky. This column now carries the long-form content, so
+* it is taller than the gallery: sticky would have no room to travel, and a
+* max-height would trap that content behind an inner scrollbar. Normal flow
+* is both simpler and impossible to overlap.
 */
 .pdp__buy {
   min-width: 0;
-}
-
-@media (min-width: 64em) {
-  .pdp__buy {
-    position: sticky;
-    top: calc(var(--header-height) + 1.5rem);
-    align-self: start;
-    /* Safety net for short screens (a 1024x768 or 1280x800 laptop) and for
-       when the size guide is expanded: if the panel is ever taller than the
-       space under the header it scrolls within itself, instead of stranding
-       its lower half — the buy button included — permanently off-screen while
-       stuck. Overflow on the sticky element itself is safe; only overflow on
-       an ANCESTOR would break sticky. No scrollbar appears while it fits. */
-    max-height: calc(100vh - var(--header-height) - 3rem);
-    overflow-y: auto;
-    scrollbar-width: thin;
-    overscroll-behavior-y: contain;
-  }
 }
 
 .buybox {
@@ -2160,18 +2143,20 @@
 }
 
 /*
-* Long-form sections (full width, below the product section)
+* Description / characteristics / FAQ — inside the right column, under the
+* payment buttons.
 */
 .pdp__details {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.75rem;
+  margin-top: 2rem;
 }
 
 @media (min-width: 64em) {
   .pdp__details {
-    gap: 3rem;
-    max-width: 68ch;
+    gap: 2rem;
+    margin-top: 2.5rem;
   }
 }
 
@@ -2444,6 +2429,138 @@
 
 .pdp__related h2 {
   padding: 0;
+}
+
+/*
+* "La vision Reda Studio"
+*
+* Editorial statement blocks: five aligned columns on desktop, a horizontal
+* carousel on mobile. The brand speaking for itself — no third-party marks.
+*/
+.vision {
+  border-top: 1px solid var(--color-line);
+  padding-top: 2.5rem;
+}
+
+.vision__head {
+  max-width: 46rem;
+  margin: 0 auto 2.25rem;
+  text-align: center;
+}
+
+.vision__title {
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  line-height: 1.3;
+}
+
+.vision__intro {
+  margin-top: 1rem;
+  font-size: 0.82rem;
+  line-height: 1.75;
+  color: var(--color-muted);
+  font-weight: 400;
+}
+
+.vision__rail {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  /* Bleeds to the screen edges; the negative margin exactly cancels .pdp's
+     padding, so the page itself never scrolls sideways. */
+  margin-inline: -1rem;
+  padding-inline: 1rem;
+}
+
+.vision__rail::-webkit-scrollbar {
+  display: none;
+}
+
+.vision__card {
+  flex: 0 0 72%;
+  scroll-snap-align: center;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.9rem;
+  padding: 2rem 1.25rem;
+  border: 1px solid var(--color-line);
+  background: var(--color-paper);
+}
+
+.vision__mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  color: var(--color-ink);
+}
+
+.vision__mark svg {
+  width: 100%;
+  height: 100%;
+}
+
+.vision__card-title {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.vision__card-body {
+  font-size: 0.8rem;
+  line-height: 1.7;
+  font-weight: 400;
+  color: var(--color-muted);
+  overflow-wrap: break-word;
+}
+
+@media (min-width: 40em) {
+  .vision__card {
+    flex-basis: 44%;
+  }
+}
+
+@media (min-width: 64em) {
+  .vision {
+    padding-top: 3.5rem;
+  }
+
+  .vision__head {
+    margin-bottom: 3rem;
+  }
+
+  .vision__title {
+    font-size: 1.35rem;
+  }
+
+  .vision__intro {
+    font-size: 0.88rem;
+  }
+
+  /* Five aligned blocks, no carousel. */
+  .vision__rail {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 1.25rem;
+    overflow: visible;
+    scroll-snap-type: none;
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+
+  .vision__card {
+    flex: none;
+    padding: 2.25rem 1.25rem;
+  }
 }
 
 /* Cancels .pdp's padding so the scrolling review rows run edge to edge. */

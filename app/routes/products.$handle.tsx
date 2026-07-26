@@ -13,6 +13,7 @@ import {ProductGallery} from '~/components/ProductGallery';
 import {ProductPurchase} from '~/components/ProductPurchase';
 import {ProductSpecs, type SpecRow} from '~/components/ProductSpecs';
 import {ProductDescription} from '~/components/ProductDescription';
+import {VisionSection} from '~/components/VisionSection';
 import type {SizeEntry} from '~/components/ProductSizeGuide';
 import {Accordion} from '~/components/Accordion';
 import {ProductItem} from '~/components/ProductItem';
@@ -189,35 +190,36 @@ export default function Product() {
             shortDescription={shortenDescription(description ?? '')}
             variantId={selectedVariant?.id}
           />
-        </aside>
-      </div>
 
-      {/* Long-form content, full width, below the main product info. */}
-      <div className="pdp__details">
-        {descriptionHtml && (
-          <section className="pdp__section">
-            <ProductDescription
-              html={descriptionHtml}
-              intro={shortenDescription(description ?? '')}
-            />
-          </section>
-        )}
+          {/* Description, characteristics and FAQ sit in the right column,
+              directly under the payment buttons. */}
+          <div className="pdp__details">
+            {descriptionHtml && (
+              <section className="pdp__section">
+                <ProductDescription
+                  html={descriptionHtml}
+                  intro={shortenDescription(description ?? '')}
+                />
+              </section>
+            )}
 
-        <section className="pdp__section">
-          <h2 className="pdp__section-title">caractéristiques</h2>
-          <ProductSpecs rows={specRows} />
-        </section>
+            <section className="pdp__section">
+              <h2 className="pdp__section-title">caractéristiques</h2>
+              <ProductSpecs rows={specRows} />
+            </section>
 
-        <section className="pdp__section">
-          <h2 className="pdp__section-title">questions fréquentes</h2>
-          <div className="pdp__accordions">
-            {productFaq.map((item) => (
-              <Accordion key={item.question} title={item.question}>
-                <p>{item.answer}</p>
-              </Accordion>
-            ))}
+            <section className="pdp__section">
+              <h2 className="pdp__section-title">questions fréquentes</h2>
+              <div className="pdp__accordions">
+                {productFaq.map((item) => (
+                  <Accordion key={item.question} title={item.question}>
+                    <p>{item.answer}</p>
+                  </Accordion>
+                ))}
+              </div>
+            </section>
           </div>
-        </section>
+        </aside>
       </div>
 
       <Suspense fallback={null}>
@@ -242,6 +244,8 @@ export default function Product() {
           }
         </Await>
       </Suspense>
+
+      <VisionSection />
 
       <div className="pdp__reviews">
         <ProductReviews productId={product.id} productTitle={title} />
