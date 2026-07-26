@@ -112,59 +112,65 @@ export default function Product() {
 
   return (
     <div className="pdp">
-      <div className="pdp__gallery">
-        <ProductGallery images={galleryImages} />
-      </div>
-
-      <div className="pdp__info">
-        <h1 className="pdp__title">{title}</h1>
-        <div className="pdp__price">
-          <ProductPrice
-            price={selectedVariant?.price}
-            compareAtPrice={selectedVariant?.compareAtPrice}
-          />
-          {discountPct > 0 && <span className="pdp__discount">−{discountPct}%</span>}
-        </div>
-        <p className="pdp__tax-note">
-          taxes incluses · <a href="/policies/shipping-policy">frais de port</a> calculés au paiement.
-        </p>
-
-        <div className={`pdp__stock ${stock.className}`}>
-          <span className="pdp__stock-dot" />
-          {stock.label}
+      {/* Gallery + info live in their own container so the sticky info block's
+          containing block stops at the bottom of the gallery. Anything below
+          (recommendations, reviews) must stay OUTSIDE .pdp__main, otherwise
+          the sticky block can travel over it — see .pdp__info in app.css. */}
+      <div className="pdp__main">
+        <div className="pdp__gallery">
+          <ProductGallery images={galleryImages} />
         </div>
 
-        <ProductForm productOptions={productOptions} />
+        <div className="pdp__info">
+          <h1 className="pdp__title">{title}</h1>
+          <div className="pdp__price">
+            <ProductPrice
+              price={selectedVariant?.price}
+              compareAtPrice={selectedVariant?.compareAtPrice}
+            />
+            {discountPct > 0 && <span className="pdp__discount">−{discountPct}%</span>}
+          </div>
+          <p className="pdp__tax-note">
+            taxes incluses · <a href="/policies/shipping-policy">frais de port</a> calculés au paiement.
+          </p>
 
-        <div className="pdp__buttons">
-          <AddToCartButton
-            className="btn btn--full btn--outline"
-            disabled={!available}
-            onClick={() => openAside('cart')}
-            lines={addLines}
-          >
-            {available ? 'ajouter au panier' : 'épuisé'}
-          </AddToCartButton>
-          <BuyNowButton disabled={!available} lines={addLines}>
-            acheter maintenant
-          </BuyNowButton>
-        </div>
+          <div className={`pdp__stock ${stock.className}`}>
+            <span className="pdp__stock-dot" />
+            {stock.label}
+          </div>
 
-        <p className="pdp__reassurance">
-          échanges gratuits · retours 30 jours · paiement sécurisé
-        </p>
+          <ProductForm productOptions={productOptions} />
 
-        <div className="pdp__accordions">
-          {descriptionHtml ? (
-            <Accordion title="détails">
-              <div className="font-normal" dangerouslySetInnerHTML={{__html: descriptionHtml}} />
-            </Accordion>
-          ) : null}
-          {productFaq.map((item) => (
-            <Accordion key={item.question} title={item.question}>
-              <p>{item.answer}</p>
-            </Accordion>
-          ))}
+          <div className="pdp__buttons">
+            <AddToCartButton
+              className="btn btn--full btn--outline"
+              disabled={!available}
+              onClick={() => openAside('cart')}
+              lines={addLines}
+            >
+              {available ? 'ajouter au panier' : 'épuisé'}
+            </AddToCartButton>
+            <BuyNowButton disabled={!available} lines={addLines}>
+              acheter maintenant
+            </BuyNowButton>
+          </div>
+
+          <p className="pdp__reassurance">
+            échanges gratuits · retours 30 jours · paiement sécurisé
+          </p>
+
+          <div className="pdp__accordions">
+            {descriptionHtml ? (
+              <Accordion title="détails">
+                <div className="font-normal" dangerouslySetInnerHTML={{__html: descriptionHtml}} />
+              </Accordion>
+            ) : null}
+            {productFaq.map((item) => (
+              <Accordion key={item.question} title={item.question}>
+                <p>{item.answer}</p>
+              </Accordion>
+            ))}
+          </div>
         </div>
       </div>
 

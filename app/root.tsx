@@ -11,7 +11,6 @@ import {
   useRouteLoaderData,
 } from 'react-router';
 import type {Route} from './+types/root';
-import favicon from '~/assets/favicon.svg';
 import {FOOTER_QUERY, HEADER_QUERY, NAV_COLLECTIONS_QUERY} from '~/lib/fragments';
 import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
@@ -62,7 +61,13 @@ export function links() {
       rel: 'preconnect',
       href: 'https://shop.app',
     },
-    {rel: 'icon', type: 'image/svg+xml', href: favicon},
+    // Favicon served from /public so the logo can be swapped by replacing the
+    // files, with no rebuild of a bundled asset. SVG first for crisp scaling
+    // on desktop, a 32px PNG for browsers that ignore SVG icons, and an
+    // apple-touch-icon for iOS home-screen / mobile bookmarks.
+    {rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg'},
+    {rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32.png'},
+    {rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png'},
   ];
 }
 

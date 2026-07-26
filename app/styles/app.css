@@ -1581,9 +1581,25 @@
 
 @media (min-width: 64em) {
   .pdp {
+    padding: 1.5rem;
+  }
+}
+
+/* Two-column product section. This is deliberately its own container rather
+   than putting the columns on .pdp: a sticky element is clamped to its grid
+   CONTAINER's box, not to its own grid area, so while the recommendations and
+   reviews rows lived in the same grid as .pdp__info, the info block could keep
+   sticking all the way to the bottom of .pdp and slide over them. Keep those
+   sections outside .pdp__main. */
+.pdp__main {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 64em) {
+  .pdp__main {
     grid-template-columns: minmax(0, 58fr) minmax(0, 42fr);
     gap: 3rem;
-    padding: 1.5rem;
   }
 }
 
@@ -1680,6 +1696,12 @@
   flex-direction: column;
 }
 
+/* Desktop only: follows the scroll while the gallery is still beside it, then
+   stops flush with the bottom of the gallery. `align-self: start` is required —
+   without it the item stretches to the full row height and has no room to
+   travel. Do not add `height`, `overflow` or `transform` to .pdp__main or its
+   ancestors: any of those would break or extend the sticky behaviour.
+   On mobile the block stays in normal flow, under the images. */
 @media (min-width: 64em) {
   .pdp__info {
     position: sticky;
@@ -1890,7 +1912,6 @@
 }
 
 .pdp__related {
-  grid-column: 1 / -1;
   padding-top: 2rem;
 }
 
@@ -1899,7 +1920,6 @@
 }
 
 .pdp__reviews {
-  grid-column: 1 / -1;
   margin: 0 -1rem;
 }
 
