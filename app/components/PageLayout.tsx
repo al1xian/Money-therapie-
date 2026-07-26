@@ -8,7 +8,6 @@ import type {
 import {Aside} from '~/components/Aside';
 import {Footer} from '~/components/Footer';
 import {Header, HeaderMenu, type NavCollection} from '~/components/Header';
-import {Marquee} from '~/components/Marquee';
 import {CartMain} from '~/components/CartMain';
 import {NewsletterPopup} from '~/components/NewsletterPopup';
 import {SearchIcon} from '~/components/Icons';
@@ -50,7 +49,6 @@ export function PageLayout({
         <CartAside cart={cart} />
         <SearchAside />
         <MobileMenuAside collections={navCollections} />
-        <Marquee />
         {header && (
           <Header
             header={header}

@@ -134,20 +134,15 @@ function hashString(input: string): number {
  * Sélectionne un sous-ensemble stable d'avis à partir d'un identifiant
  * (ex : l'id du produit). Le résultat ne change pas entre deux rendus,
  * évitant les erreurs d'hydratation et les avis qui changent au refresh.
+ * Les avis sont pris de façon contiguë (avec retour au début) à partir d'un
+ * point de départ dérivé du hash, ce qui garantit `count` avis distincts.
  */
 export function getReviewsForSeed(seed: string, count = 6): Review[] {
   const start = hashString(seed) % REVIEW_POOL.length;
+  const n = Math.min(count, REVIEW_POOL.length);
   const picked: Review[] = [];
-  for (let i = 0; i < count; i++) {
-    const index = (start + i * 3) % REVIEW_POOL.length;
-    const review = REVIEW_POOL[index];
-    if (review && !picked.includes(review)) picked.push(review);
+  for (let i = 0; i < n; i++) {
+    picked.push(REVIEW_POOL[(start + i) % REVIEW_POOL.length]);
   }
   return picked;
-}
-
-export function getAverageRating(reviews: Review[]): number {
-  if (!reviews.length) return 0;
-  const sum = reviews.reduce((total, review) => total + review.rating, 0);
-  return Math.round((sum / reviews.length) * 10) / 10;
 }
