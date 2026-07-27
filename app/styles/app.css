@@ -553,6 +553,9 @@
 @media (min-width: 48em) {
   .popup__body {
     padding: 2.5rem;
+    /* Le visuel portrait dicte la hauteur : on centre le formulaire au lieu
+       de le laisser collé en haut d'une colonne beaucoup plus haute. */
+    justify-content: center;
   }
 }
 
