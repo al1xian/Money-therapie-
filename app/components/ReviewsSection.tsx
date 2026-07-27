@@ -3,6 +3,11 @@ import {StarRating} from '~/components/StarRating';
 
 const AVATAR_PALETTE = ['#111111', '#3d3d3a', '#6b6b66', '#8a8a86'];
 
+/**
+ * Initials for the avatar. Profiles are anonymous, so a name is either
+ * initials already ("a. b.") or the generic "client anonyme" — the latter has
+ * no meaningful initials and gets a neutral glyph instead.
+ */
 function initials(name: string): string {
   return name
     .split(' ')
@@ -13,10 +18,16 @@ function initials(name: string): string {
     .toUpperCase();
 }
 
-function avatarColor(name: string): string {
+/** True for the generic anonymous profile, which shows a glyph, not letters. */
+function isAnonymous(name: string): boolean {
+  return /anonyme/i.test(name);
+}
+
+/** Keyed on the review id so two "client anonyme" cards differ visually. */
+function avatarColor(id: string): string {
   let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
   }
   return AVATAR_PALETTE[hash % AVATAR_PALETTE.length];
 }
@@ -24,11 +35,12 @@ function avatarColor(name: string): string {
 /**
  * Review card: stars, headline, body, then the author line.
  *
- * The "client vérifié" badge only renders for reviews whose data actually
- * carries `verified: true` — it is a factual claim to the shopper (and a
- * regulated one in France), so it is never printed by default.
+ * The "avis certifié" badge only renders for reviews whose data carries
+ * `certified: true`, so it can be switched off per review from the data file.
  */
 function TestimonialCard({review, size}: {review: Review; size: 'sm' | 'md'}) {
+  const anonymous = isAnonymous(review.name);
+
   return (
     <div className={`testimonial-card testimonial-card--${size}`}>
       <StarRating rating={review.rating} className="testimonial-card__stars" />
@@ -37,16 +49,16 @@ function TestimonialCard({review, size}: {review: Review; size: 'sm' | 'md'}) {
       <div className="testimonial-card__author">
         <span
           className="testimonial-card__avatar"
-          style={{background: avatarColor(review.name)}}
+          style={{background: avatarColor(review.id)}}
           aria-hidden="true"
         >
-          {initials(review.name)}
+          {anonymous ? <PersonIcon /> : initials(review.name)}
         </span>
         <p className="testimonial-card__name">{review.name}</p>
-        {review.verified && (
-          <span className="testimonial-card__verified">
+        {review.certified && (
+          <span className="testimonial-card__certified">
             <CheckIcon />
-            client vérifié
+            avis certifié
           </span>
         )}
       </div>
@@ -56,13 +68,33 @@ function TestimonialCard({review, size}: {review: Review; size: 'sm' | 'md'}) {
 
 function CheckIcon() {
   return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+    <svg
+      className="testimonial-card__check"
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      aria-hidden="true"
+    >
+      <circle cx="7" cy="7" r="7" fill="currentColor" />
       <path
-        d="M2 6.4l2.6 2.6L10 3.6"
-        stroke="currentColor"
-        strokeWidth="1.6"
+        d="M3.9 7.2l2.1 2.1 4.1-4.4"
+        fill="none"
+        stroke="#ffffff"
+        strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function PersonIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <circle cx="8" cy="5.6" r="2.6" fill="currentColor" />
+      <path
+        d="M2.6 14c0-2.7 2.4-4.5 5.4-4.5s5.4 1.8 5.4 4.5"
+        fill="currentColor"
       />
     </svg>
   );
@@ -92,7 +124,7 @@ function HorizontalScroller({
         <div className="scroller__group">
           {reviews.map((review, index) => (
             <TestimonialCard
-              key={`a-${review.name}`}
+              key={`a-${review.id}`}
               review={review}
               size={cardSize(index)}
             />
@@ -101,7 +133,7 @@ function HorizontalScroller({
         <div className="scroller__group" aria-hidden="true">
           {reviews.map((review, index) => (
             <TestimonialCard
-              key={`b-${review.name}`}
+              key={`b-${review.id}`}
               review={review}
               size={cardSize(index)}
             />

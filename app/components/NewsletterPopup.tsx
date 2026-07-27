@@ -1,14 +1,17 @@
 import {useEffect, useState} from 'react';
 import {CloseIcon} from '~/components/Icons';
 
-const STORAGE_KEY = 'reda-studio-welcome-popup-seen';
 const PROMO_CODE = 'REDA10';
 const OPEN_DELAY_MS = 1200;
 
 /**
- * One-time welcome pop-up: shown once per browser (localStorage, so it
- * genuinely never comes back after being closed or dismissed, not just for
- * the current tab/session), offering -10% in exchange for an email address.
+ * Welcome pop-up offering -10% in exchange for an email address.
+ *
+ * Shown at every visit: no localStorage flag, so closing it only dismisses it
+ * for the current page load and it comes back on the next one. The component
+ * is mounted in the root layout, which does not remount on client-side
+ * navigation — browsing the store therefore doesn't re-trigger it.
+ *
  * Posts through the same real /newsletter endpoint as the footer sign-up
  * (Shopify's own customer form) — the promo code only appears once that
  * submission actually succeeds.
@@ -18,7 +21,6 @@ export function NewsletterPopup() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
 
   useEffect(() => {
-    if (window.localStorage.getItem(STORAGE_KEY)) return;
     const timer = setTimeout(() => setOpen(true), OPEN_DELAY_MS);
     return () => clearTimeout(timer);
   }, []);
@@ -36,7 +38,6 @@ export function NewsletterPopup() {
 
   function close() {
     setOpen(false);
-    window.localStorage.setItem(STORAGE_KEY, '1');
   }
 
   async function submit(form: HTMLFormElement) {
@@ -57,7 +58,6 @@ export function NewsletterPopup() {
         body: body.toString(),
       });
       setStatus(res.ok ? 'done' : 'error');
-      if (res.ok) window.localStorage.setItem(STORAGE_KEY, '1');
     } catch {
       setStatus('error');
     }
@@ -80,8 +80,10 @@ export function NewsletterPopup() {
 
         <div className="popup__media">
           <img
-            src="/images/P1973928-2.webp"
-            alt="Deux personnes en tenue reda studio, ambiance urbaine"
+            src="/images/lookbook-casquette.webp"
+            alt="Tenue reda studio : haut écru, jean flare délavé et casquette bleue"
+            width="788"
+            height="1200"
             loading="lazy"
             decoding="async"
           />

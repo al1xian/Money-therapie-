@@ -13,7 +13,7 @@ export function Reveal({
 }: {
   children: React.ReactNode;
   className?: string;
-  as?: 'div' | 'section' | 'li';
+  as?: 'div' | 'section' | 'li' | 'figure';
 } & React.HTMLAttributes<HTMLElement>) {
   const ref = useRef<HTMLElement | null>(null);
   const [visible, setVisible] = useState(false);

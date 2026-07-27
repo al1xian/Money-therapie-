@@ -1060,15 +1060,25 @@
   background: linear-gradient(150deg, var(--color-tile), var(--color-line));
 }
 
+/*
+* Nom de la collection : encre noire sur pastille claire. Le texte blanc
+* posé directement sur la photo devenait illisible dès que l'image était
+* claire — la pastille garantit le contraste quelle que soit l'image.
+*/
 .collections-slider__label {
   position: absolute;
   left: 0.9rem;
   bottom: 0.9rem;
-  color: var(--color-paper);
-  font-size: 0.85rem;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-size: 0.8rem;
   text-transform: lowercase;
   letter-spacing: 0.03em;
-  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.45);
+  padding: 0.45rem 0.85rem;
+  max-width: calc(100% - 1.8rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /*
@@ -1431,25 +1441,40 @@
   overflow-wrap: break-word;
 }
 
+/*
+* L'auteur peut passer à la ligne : sur les petites cartes, le badge
+* « avis certifié » descend sous le nom au lieu de le comprimer.
+*/
 .testimonial-card__author {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.7rem;
+  row-gap: 0.4rem;
   margin-top: auto;
   padding-top: 0.75rem;
   border-top: 1px solid var(--color-line);
   width: 100%;
 }
 
-.testimonial-card__verified {
+/* Badge « avis certifié » : coche verte pastillée, à droite de l'auteur. */
+.testimonial-card__certified {
   margin-left: auto;
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.3rem;
   font-size: 0.7rem;
   text-transform: lowercase;
-  color: var(--color-star);
+  color: var(--color-certified);
   white-space: nowrap;
+}
+
+.testimonial-card__check {
+  flex-shrink: 0;
+}
+
+.testimonial-card--sm .testimonial-card__certified {
+  font-size: 0.64rem;
 }
 
 .testimonial-card__avatar {
@@ -2877,17 +2902,21 @@
   background: linear-gradient(150deg, var(--color-tile), var(--color-line));
 }
 
+/* Nom de la collection en noir sur pastille blanche, lisible sur toute photo. */
 .showcase__label {
   position: absolute;
   left: 50%;
   bottom: 1.5rem;
   transform: translateX(-50%);
-  background: var(--color-ink);
-  color: var(--color-paper);
+  background: var(--color-paper);
+  color: var(--color-ink);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   padding: 0.75rem 1.5rem;
+  max-width: calc(100% - 2rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
   transition:
     background 200ms var(--ease-out-soft),
@@ -2895,7 +2924,7 @@
 }
 
 .showcase__tile:hover .showcase__label {
-  background: #2c2c2c;
+  background: var(--color-tile);
 }
 
 /* Press feedback before the route change. */
@@ -3223,18 +3252,81 @@
   line-height: 1.7;
 }
 
+/*
+* Les visuels de la page sont des portraits : on garde un cadre vertical
+* plutôt que de recadrer en 16/9, qui coupait les tenues.
+*/
 .about__figure {
-  margin: 3rem 0;
-  aspect-ratio: 16 / 9;
-  overflow: hidden;
-  border: 1px solid var(--color-line);
-  background: var(--color-paper);
+  margin: 3rem auto;
+  max-width: 34rem;
 }
 
-.about__figure img {
+.about__figure img,
+.about__duo img,
+.about__split-media img {
+  display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
+  aspect-ratio: 3 / 4;
   object-fit: cover;
+  border: 1px solid var(--color-line);
+  background: var(--color-tile);
+}
+
+.about__figure figcaption {
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  text-transform: lowercase;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+}
+
+/* Deux looks côte à côte à partir de la tablette, empilés sur mobile. */
+.about__duo {
+  margin: 3rem 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.about__duo figure {
+  margin: 0;
+}
+
+/* Image + texte : colonne unique sur mobile, deux colonnes au-delà. */
+.about__split {
+  margin: 3.5rem 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.about__split-media {
+  margin: 0;
+}
+
+.about__split-text h2 {
+  font-size: 1.1rem;
+  margin: 0.5rem 0 1rem;
+}
+
+.about__split-text p:not(.about__eyebrow) {
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  line-height: 1.75;
+}
+
+@media (min-width: 48em) {
+  .about__duo {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .about__split {
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+  }
 }
 
 .about__block {

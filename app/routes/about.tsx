@@ -41,13 +41,16 @@ export default function About() {
         </p>
       </Reveal>
 
-      <Reveal as="section" className="about__figure">
+      <Reveal as="figure" className="about__figure">
         <img
-          src="/images/P1973928-2.webp"
-          alt="Deux personnes en tenue reda studio, ambiance urbaine"
+          src="/images/lookbook-tshirt.webp"
+          alt="Tenue reda studio : t-shirt noir imprimé et short en jean clair"
+          width="675"
+          height="1200"
           loading="lazy"
           decoding="async"
         />
+        <figcaption>le vestiaire reda studio, porté au quotidien.</figcaption>
       </Reveal>
 
       <Reveal as="section" className="about__block">
@@ -62,6 +65,29 @@ export default function About() {
           notre point de départ, c’est la rue et son exigence silencieuse :
           des vêtements qui en disent long sans avoir besoin de crier.
         </p>
+      </Reveal>
+
+      <Reveal as="section" className="about__duo" aria-label="Looks reda studio">
+        <figure>
+          <img
+            src="/images/lookbook-henley.webp"
+            alt="Tenue reda studio : haut henley noir à boutons et short camouflage"
+            width="671"
+            height="1200"
+            loading="lazy"
+            decoding="async"
+          />
+        </figure>
+        <figure>
+          <img
+            src="/images/lookbook-casquette.webp"
+            alt="Tenue reda studio : haut écru, jean flare délavé et casquette bleue"
+            width="788"
+            height="1200"
+            loading="lazy"
+            decoding="async"
+          />
+        </figure>
       </Reveal>
 
       <Reveal as="section" className="about__manifesto">
@@ -84,6 +110,33 @@ export default function About() {
           l’élégance, chez nous, n’est pas un supplément : c’est le point de
           départ de chaque coupe, de chaque tissu, de chaque détail.
         </p>
+      </Reveal>
+
+      <Reveal as="section" className="about__split">
+        <figure className="about__split-media">
+          <img
+            src="/images/lookbook-denim.webp"
+            alt="Deux jeans flare reda studio posés à plat, un délavé bleu et un noir"
+            width="901"
+            height="1200"
+            loading="lazy"
+            decoding="async"
+          />
+        </figure>
+        <div className="about__split-text">
+          <p className="about__eyebrow">le détail</p>
+          <h2>la coupe avant tout</h2>
+          <p>
+            nos pièces sont fabriquées au portugal, puis contrôlées une à une
+            avant leur mise en vente. coutures, ourlets, tombé : rien ne part
+            si le détail n’y est pas.
+          </p>
+          <p>
+            c’est ce travail invisible qui fait la différence à l’usage — une
+            pièce qui garde sa forme, son délavé et son allure lavage après
+            lavage.
+          </p>
+        </div>
       </Reveal>
 
       <section className="about__values">

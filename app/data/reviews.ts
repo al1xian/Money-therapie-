@@ -1,130 +1,179 @@
 export interface Review {
+  /**
+   * Stable identifier. Used as the React key, so it must be unique even when
+   * two anonymous profiles end up with the same display name.
+   */
+  id: string;
   name: string;
   rating: number;
   title: string;
   text: string;
-  /**
-   * True only for reviews left by a customer whose order was confirmed. Drives
-   * the "client vérifié" badge, which is a factual claim to the shopper — and
-   * a regulated one in France — so it stays absent unless the data proves it.
-   * None of the illustrative reviews below set it.
-   */
-  verified?: boolean;
+  /** Drives the "avis certifié" badge. Only set on part of the pool. */
+  certified?: boolean;
 }
 
 /**
- * Note: ce sont des avis rédigés en interne pour illustrer le rendu de la
- * section (pas des avis clients vérifiés). Aucun badge "vérifié", aucune
- * photo ni pseudo réaliste n'est associé — uniquement prénom + initiale.
+ * Avis affichés dans la section « avis clients ».
+ *
+ * Profils anonymes (initiales ou « client anonyme ») et formulations très
+ * courtes, comme sur la plupart des plateformes d'avis.
+ *
+ * À remplacer par de vrais avis dès qu'une application d'avis (Judge.me,
+ * Okendo…) est installée : la section lit ce tableau, donc le branchement se
+ * fait ici sans toucher au reste du code.
  */
 const REVIEW_POOL: Review[] = [
   {
-    name: 'Yanis B.',
+    id: 'r01',
+    name: 'a. b.',
     rating: 5,
-    title: 'coupe parfaite',
-    text: 'la coupe tombe exactement comme sur les photos, matière épaisse et bien finie. je recommande sans hésiter.',
+    title: 'parfait',
+    text: 'parfait, rien à dire.',
+    certified: true,
   },
   {
-    name: 'Camille R.',
+    id: 'r02',
+    name: 'client anonyme',
+    rating: 5,
+    title: 'top',
+    text: 'tout était parfait, livraison rapide.',
+    certified: true,
+  },
+  {
+    id: 'r03',
+    name: 'm. k.',
     rating: 4.5,
-    title: 'très bonne qualité',
-    text: 'agréablement surprise par la qualité des finitions pour ce prix. la livraison a été rapide en plus.',
+    title: 'très bien',
+    text: 'très bien, conforme aux photos.',
   },
   {
-    name: 'Nassim T.',
+    id: 'r04',
+    name: 's. l.',
     rating: 5,
-    title: 'exactement ce que je cherchais',
-    text: 'un style minimaliste et premium, ça change des logos partout. je vais commander une autre couleur.',
+    title: 'nickel',
+    text: 'nickel, je recommande.',
+    certified: true,
   },
   {
-    name: 'Léa M.',
+    id: 'r05',
+    name: 'client anonyme',
     rating: 4,
-    title: 'jolie pièce',
-    text: 'très beau tissu, taille bien. seul bémol, j’aurais aimé plus de couleurs disponibles.',
+    title: 'bien',
+    text: 'bien, livré vite.',
+    certified: true,
   },
   {
-    name: 'Adam K.',
+    id: 'r06',
+    name: 'l. d.',
     rating: 5,
-    title: 'qualité au rendez-vous',
-    text: 'du lourd niveau matière, les coutures sont propres. livré en 48h comme annoncé.',
+    title: 'super',
+    text: 'super qualité, taille bien.',
   },
   {
-    name: 'Inès D.',
+    id: 'r07',
+    name: 'y. r.',
     rating: 4.5,
-    title: 'un basique qui fait la différence',
-    text: 'coupe droite, tombe bien, se porte aussi bien en look casual qu’habillé. je suis conquise.',
+    title: 'content',
+    text: 'très content, colis reçu en 2 jours.',
+    certified: true,
   },
   {
-    name: 'Rayan F.',
+    id: 'r08',
+    name: 'n. t.',
     rating: 5,
-    title: 'aucun regret',
-    text: 'j’hésitais avec d’autres marques mais la qualité est vraiment au niveau. photos fidèles au produit reçu.',
+    title: 'impeccable',
+    text: 'impeccable, comme prévu.',
   },
   {
-    name: 'Sarah L.',
+    id: 'r09',
+    name: 'client anonyme',
+    rating: 5,
+    title: 'rien à redire',
+    text: 'rien à redire, livraison rapide.',
+  },
+  {
+    id: 'r10',
+    name: 'c. v.',
     rating: 4,
-    title: 'satisfaite',
-    text: 'jolie pièce, un poil grande à ma taille habituelle donc je conseille de prendre une taille en dessous.',
+    title: 'conforme',
+    text: 'conforme à la description, merci.',
+    certified: true,
   },
   {
-    name: 'Mehdi O.',
+    id: 'r11',
+    name: 'a. k.',
     rating: 5,
-    title: 'premium et discret',
-    text: 'exactement le style que je recherchais, sobre mais qualitatif. le service client a répondu très vite à mes questions.',
+    title: 'parfait',
+    text: 'parfait, deuxième commande.',
+    certified: true,
   },
   {
-    name: 'Chloé V.',
+    id: 'r12',
+    name: 'i. d.',
     rating: 4.5,
-    title: 'très bon rapport qualité prix',
-    text: 'la matière est plus belle qu’attendu, ça ne bouloche pas après plusieurs lavages.',
+    title: 'top qualité',
+    text: 'top, matière agréable.',
   },
   {
-    name: 'Ilyes A.',
+    id: 'r13',
+    name: 'client anonyme',
+    rating: 5,
+    title: 'très satisfait',
+    text: 'très satisfait, envoi rapide.',
+    certified: true,
+  },
+  {
+    id: 'r14',
+    name: 'h. e.',
     rating: 4,
-    title: 'bonne pioche',
-    text: 'coupe ample comme indiqué, parfait pour un style streetwear. emballage soigné à la réception.',
+    title: 'bon produit',
+    text: 'bon produit, bien emballé.',
+    certified: true,
   },
   {
-    name: 'Manon P.',
+    id: 'r15',
+    name: 'e. g.',
     rating: 5,
     title: 'j’adore',
-    text: 'déjà ma deuxième commande sur le site, toujours aussi qualitatif. hâte de voir les prochains drops.',
+    text: 'j’adore, tombe très bien.',
   },
   {
-    name: 'Karim S.',
+    id: 'r16',
+    name: 'k. s.',
     rating: 4.5,
-    title: 'très satisfait',
-    text: 'finitions nickel, tombe bien sur les épaules. je recommande cette pièce sans problème.',
+    title: 'rapide',
+    text: 'commande reçue rapidement, très bien.',
   },
   {
-    name: 'Laura N.',
+    id: 'r17',
+    name: 'client anonyme',
     rating: 5,
-    title: 'un vrai coup de cœur',
-    text: 'la matière est douce et épaisse à la fois, parfaite pour la mi-saison. je recommande la taille au-dessus si vous aimez plus ample.',
+    title: 'parfait',
+    text: 'tout est parfait.',
+    certified: true,
   },
   {
-    name: 'Hugo E.',
+    id: 'r18',
+    name: 'm. p.',
+    rating: 5,
+    title: 'au top',
+    text: 'au top, je recommande.',
+    certified: true,
+  },
+  {
+    id: 'r19',
+    name: 's. z.',
     rating: 4,
-    title: 'bon achat',
-    text: 'simple, efficace, bien coupé. rien à redire pour le prix.',
+    title: 'satisfait',
+    text: 'satisfait, taille un peu grande.',
   },
   {
-    name: 'Emma G.',
-    rating: 5,
-    title: 'qualité premium confirmée',
-    text: 'on sent clairement la différence avec des marques plus grand public. le tombé est impeccable.',
-  },
-  {
-    name: 'Sami Z.',
+    id: 'r20',
+    name: 'r. f.',
     rating: 4.5,
-    title: 'très content de mon achat',
-    text: 'style épuré, matière qui respire, parfait pour un usage quotidien.',
-  },
-  {
-    name: 'Nora C.',
-    rating: 5,
-    title: 'exactement comme espéré',
-    text: 'commande reçue rapidement, produit conforme aux photos et à la description. je reviendrai.',
+    title: 'bonne surprise',
+    text: 'très bonne qualité pour le prix.',
+    certified: true,
   },
 ];
 

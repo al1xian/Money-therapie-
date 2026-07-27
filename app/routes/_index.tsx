@@ -8,6 +8,7 @@ import {AnimatedHero} from '~/components/AnimatedHero';
 import {Reveal} from '~/components/Reveal';
 import {Newsletter} from '~/components/Newsletter';
 import {HomeReviews} from '~/components/HomeReviews';
+import {withoutHomeHiddenCollections} from '~/lib/collections';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -48,9 +49,12 @@ async function loadCriticalData({context}: Route.LoaderArgs) {
   const [{collections}] = await Promise.all([
     context.storefront.query(HOME_COLLECTIONS_QUERY),
   ]);
+  // « summer drop » et « all in drop » restent visibles dans le header, sur
+  // /collections et dans la vitrine des pages produit, mais pas sur l'accueil.
+  const visible = withoutHomeHiddenCollections(collections.nodes);
   return {
-    collections: collections.nodes,
-    featuredCollection: collections.nodes[0] ?? null,
+    collections: visible,
+    featuredCollection: visible[0] ?? null,
   };
 }
 
