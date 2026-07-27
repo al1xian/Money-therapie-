@@ -28,9 +28,9 @@ function avatarColor(name: string): string {
  * carries `verified: true` — it is a factual claim to the shopper (and a
  * regulated one in France), so it is never printed by default.
  */
-function TestimonialCard({review}: {review: Review}) {
+function TestimonialCard({review, size}: {review: Review; size: 'sm' | 'md'}) {
   return (
-    <div className="testimonial-card">
+    <div className={`testimonial-card testimonial-card--${size}`}>
       <StarRating rating={review.rating} className="testimonial-card__stars" />
       <h4 className="testimonial-card__headline">{review.title}</h4>
       <p className="testimonial-card__quote">&laquo;&nbsp;{review.text}&nbsp;&raquo;</p>
@@ -90,18 +90,31 @@ function HorizontalScroller({
         style={{'--scroll-duration': speed} as React.CSSProperties}
       >
         <div className="scroller__group">
-          {reviews.map((review) => (
-            <TestimonialCard key={`a-${review.name}`} review={review} />
+          {reviews.map((review, index) => (
+            <TestimonialCard
+              key={`a-${review.name}`}
+              review={review}
+              size={cardSize(index)}
+            />
           ))}
         </div>
         <div className="scroller__group" aria-hidden="true">
-          {reviews.map((review) => (
-            <TestimonialCard key={`b-${review.name}`} review={review} />
+          {reviews.map((review, index) => (
+            <TestimonialCard
+              key={`b-${review.name}`}
+              review={review}
+              size={cardSize(index)}
+            />
           ))}
         </div>
       </div>
     </div>
   );
+}
+
+/** Alternates compact and regular cards so the rails don't read as a grid. */
+function cardSize(index: number): 'sm' | 'md' {
+  return index % 3 === 1 ? 'sm' : 'md';
 }
 
 const ROWS: Array<{speed: string; direction: 'left' | 'right'}> = [

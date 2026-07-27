@@ -153,3 +153,21 @@ export function getReviewsForSeed(seed: string, count = 6): Review[] {
   }
   return picked;
 }
+
+/**
+ * Average of a review set, rounded to one decimal — the honest summary of the
+ * reviews actually displayed, not a separate invented figure. Varies per
+ * product because the selection does.
+ */
+export function getRatingForSeed(
+  seed: string,
+  count = 12,
+): {value: number; count: number} | null {
+  const reviews = getReviewsForSeed(seed, count);
+  if (!reviews.length) return null;
+  const sum = reviews.reduce((total, review) => total + review.rating, 0);
+  return {
+    value: Math.round((sum / reviews.length) * 10) / 10,
+    count: reviews.length,
+  };
+}

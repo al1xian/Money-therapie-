@@ -11,7 +11,6 @@ import {
 } from '@shopify/hydrogen';
 import {ProductGallery} from '~/components/ProductGallery';
 import {ProductPurchase} from '~/components/ProductPurchase';
-import {ProductSpecs, type SpecRow} from '~/components/ProductSpecs';
 import {ProductDescription} from '~/components/ProductDescription';
 import {VisionSection} from '~/components/VisionSection';
 import {CollectionShowcase} from '~/components/CollectionShowcase';
@@ -21,8 +20,9 @@ import {Accordion} from '~/components/Accordion';
 import {ProductItem} from '~/components/ProductItem';
 import {ProductReviews} from '~/components/ProductReviews';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
-import {productFaq} from '~/data/faq';
+import {getProductFaq} from '~/data/faq';
 import {parseRating} from '~/lib/rating';
+import {getRatingForSeed} from '~/data/reviews';
 
 export const meta: Route.MetaFunction = ({data}) => {
   const product = data?.product;
@@ -180,7 +180,7 @@ export default function Product() {
     selectedOrFirstAvailableVariant: selectedVariant,
   });
 
-  const {title, description, descriptionHtml, vendor, productType} = product;
+  const {title, description, descriptionHtml, vendor} = product;
 
   const galleryImages = product.images.nodes.length
     ? product.images.nodes
@@ -199,18 +199,6 @@ export default function Product() {
     name: value.name,
     available: value.available,
   }));
-
-  // Characteristics, sourced only from Shopify fields. ProductSpecs drops any
-  // row whose value is missing, so this adapts to every product in the catalogue.
-  const specRows: SpecRow[] = [
-    {label: 'référence', value: selectedVariant?.sku},
-    {label: 'marque', value: vendor},
-    {label: 'catégorie', value: productType},
-    ...productOptions.map((option) => ({
-      label: option.name.toLowerCase(),
-      value: option.optionValues.map((value) => value.name).join(' · '),
-    })),
-  ];
 
   return (
     <div className="pdp">
@@ -234,7 +222,12 @@ export default function Product() {
             quantityAvailable={selectedVariant?.quantityAvailable ?? null}
             shortDescription={shortenDescription(description ?? '')}
             variantId={selectedVariant?.id}
-            rating={parseRating(product.rating, product.ratingCount)}
+            rating={
+              // A real review app's score always wins; otherwise we summarise
+              // the reviews actually displayed further down the page.
+              parseRating(product.rating, product.ratingCount) ??
+              getRatingForSeed(product.id)
+            }
           />
 
           {/* Limited offer: this product bundled with a gift item. */}
@@ -266,14 +259,9 @@ export default function Product() {
             )}
 
             <section className="pdp__section">
-              <h2 className="pdp__section-title">caractéristiques</h2>
-              <ProductSpecs rows={specRows} />
-            </section>
-
-            <section className="pdp__section">
               <h2 className="pdp__section-title">questions fréquentes</h2>
               <div className="pdp__accordions">
-                {productFaq.map((item) => (
+                {getProductFaq(description ?? '').map((item) => (
                   <Accordion key={item.question} title={item.question}>
                     <p>{item.answer}</p>
                   </Accordion>
@@ -387,7 +375,6 @@ const PRODUCT_FRAGMENT = `#graphql
     id
     title
     vendor
-    productType
     handle
     descriptionHtml
     description
