@@ -3,6 +3,13 @@ export interface Review {
   rating: number;
   title: string;
   text: string;
+  /**
+   * True only for reviews left by a customer whose order was confirmed. Drives
+   * the "client vérifié" badge, which is a factual claim to the shopper — and
+   * a regulated one in France — so it stays absent unless the data proves it.
+   * None of the illustrative reviews below set it.
+   */
+  verified?: boolean;
 }
 
 /**

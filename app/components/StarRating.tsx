@@ -1,6 +1,6 @@
 /**
- * Star rating, drawn inline so it inherits the brand's ink colour and needs
- * no image request. Supports halves via a clip on the filled layer.
+ * Star rating, drawn inline so it needs no image request and scales cleanly.
+ * Supports halves via a clip on the filled layer.
  *
  * Deliberately not Trustpilot's green star graphic: that mark signals a
  * Trustpilot-verified score, which this shop doesn't have.
@@ -9,31 +9,40 @@ export function StarRating({
   rating,
   count,
   size = 13,
+  showValue = false,
   className,
 }: {
   rating: number;
   count?: number | null;
   size?: number;
+  /** Prints the numeric score next to the stars. Off by default. */
+  showValue?: boolean;
   className?: string;
 }) {
   const clamped = Math.max(0, Math.min(5, rating));
+  const printed = clamped.toString().replace('.', ',');
   const label =
     typeof count === 'number'
-      ? `${clamped.toString().replace('.', ',')} sur 5 — ${count} avis`
-      : `${clamped.toString().replace('.', ',')} sur 5`;
+      ? `${printed} sur 5 — ${count} avis`
+      : `${printed} sur 5`;
 
   return (
     <span className={`stars ${className ?? ''}`}>
       <span className="stars__icons" role="img" aria-label={label}>
-        {[0, 1, 2, 3, 4].map((position) => {
-          const fill = Math.max(0, Math.min(1, clamped - position));
-          return <Star key={position} fill={fill} size={size} />;
-        })}
+        {[0, 1, 2, 3, 4].map((position) => (
+          <Star
+            key={position}
+            fill={Math.max(0, Math.min(1, clamped - position))}
+            size={size}
+          />
+        ))}
       </span>
-      <span className="stars__value" aria-hidden="true">
-        {clamped.toString().replace('.', ',')}
-      </span>
-      {typeof count === 'number' && (
+      {showValue && (
+        <span className="stars__value" aria-hidden="true">
+          {printed}
+        </span>
+      )}
+      {showValue && typeof count === 'number' && (
         <span className="stars__count" aria-hidden="true">
           ({count})
         </span>

@@ -15,12 +15,14 @@ import {ProductSpecs, type SpecRow} from '~/components/ProductSpecs';
 import {ProductDescription} from '~/components/ProductDescription';
 import {VisionSection} from '~/components/VisionSection';
 import {CollectionShowcase} from '~/components/CollectionShowcase';
+import {BundleOffer} from '~/components/BundleOffer';
 import type {SizeEntry} from '~/components/ProductSizeGuide';
 import {Accordion} from '~/components/Accordion';
 import {ProductItem} from '~/components/ProductItem';
 import {ProductReviews} from '~/components/ProductReviews';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {productFaq} from '~/data/faq';
+import {parseRating} from '~/lib/rating';
 
 export const meta: Route.MetaFunction = ({data}) => {
   const product = data?.product;
@@ -127,7 +129,30 @@ function loadDeferredData(
       return [];
     });
 
-  return {recommended, showcaseCollections};
+  // The bundle's gift item, looked up in the real catalogue. If the shop has no
+  // cap, the whole offer simply doesn't render.
+  const giftProduct = context.storefront
+    .query(GIFT_PRODUCT_QUERY, {variables: {query: GIFT_SEARCH_QUERY}})
+    .then((data) => {
+      const node = data?.products?.nodes?.[0];
+      if (!node) return null;
+      const variant = node.variants?.nodes?.[0];
+      if (!variant?.availableForSale) return null;
+      return {
+        id: node.id,
+        title: node.title,
+        handle: node.handle,
+        featuredImage: node.featuredImage,
+        variantId: variant.id,
+        price: variant.price,
+      };
+    })
+    .catch((error: Error) => {
+      console.error(error);
+      return null;
+    });
+
+  return {recommended, showcaseCollections, giftProduct};
 }
 
 /** First sentence of the product description, for the short blurb in the buy box. */
@@ -140,7 +165,8 @@ function shortenDescription(description: string): string {
 }
 
 export default function Product() {
-  const {product, recommended, showcaseCollections} = useLoaderData<typeof loader>();
+  const {product, recommended, showcaseCollections, giftProduct} =
+    useLoaderData<typeof loader>();
 
   const selectedVariant = useOptimisticVariant(
     product.selectedOrFirstAvailableVariant,
@@ -208,7 +234,24 @@ export default function Product() {
             quantityAvailable={selectedVariant?.quantityAvailable ?? null}
             shortDescription={shortenDescription(description ?? '')}
             variantId={selectedVariant?.id}
+            rating={parseRating(product.rating, product.ratingCount)}
           />
+
+          {/* Limited offer: this product bundled with a gift item. */}
+          <Suspense fallback={null}>
+            <Await resolve={giftProduct}>
+              {(gift) => (
+                <BundleOffer
+                  productTitle={title}
+                  productImage={product.images.nodes[0] ?? selectedVariant?.image}
+                  productPrice={selectedVariant?.price}
+                  productVariantId={selectedVariant?.id}
+                  gift={gift}
+                  available={available}
+                />
+              )}
+            </Await>
+          </Suspense>
 
           {/* Description, characteristics and FAQ sit in the right column,
               directly under the payment buttons. */}
@@ -348,6 +391,14 @@ const PRODUCT_FRAGMENT = `#graphql
     handle
     descriptionHtml
     description
+    # Standard Shopify review metafields, written by review apps. Absent when
+    # the shop has no review app — no rating is then shown at all.
+    rating: metafield(namespace: "reviews", key: "rating") {
+      value
+    }
+    ratingCount: metafield(namespace: "reviews", key: "rating_count") {
+      value
+    }
     encodedVariantExistence
     encodedVariantAvailability
     images(first: 12) {
@@ -484,6 +535,46 @@ const PRODUCT_RECOMMENDATIONS_QUERY = `#graphql
     }
   }
   ${RECO_PRODUCT_FRAGMENT}
+` as const;
+
+/**
+ * Which catalogue product plays the gift in the bundle offer. A Shopify search
+ * term, so renaming the cap in the admin doesn't break anything — and if no
+ * match exists the offer hides itself instead of inventing a product.
+ */
+const GIFT_SEARCH_QUERY = 'casquette';
+
+const GIFT_PRODUCT_QUERY = `#graphql
+  query PdpGiftProduct(
+    $query: String!
+    $country: CountryCode
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
+    products(first: 1, query: $query) {
+      nodes {
+        id
+        title
+        handle
+        featuredImage {
+          id
+          url
+          altText
+          width
+          height
+        }
+        variants(first: 1) {
+          nodes {
+            id
+            availableForSale
+            price {
+              amount
+              currencyCode
+            }
+          }
+        }
+      }
+    }
+  }
 ` as const;
 
 /** Collections for the showcase tiles that close the product page. */

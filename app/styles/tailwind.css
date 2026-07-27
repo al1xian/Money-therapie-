@@ -11,6 +11,8 @@
   --color-line: #e5e5e3;
   --color-muted: #8a8a86;
   --color-sale: #b3261e;
+  /* Rating stars — the one warm accent in an otherwise black & white palette. */
+  --color-star: #f5a623;
 
   --font-mono: Arial, Helvetica, sans-serif;
   --font-sans: Arial, Helvetica, sans-serif;

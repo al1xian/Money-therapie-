@@ -7,7 +7,9 @@ import {AddToCartButton} from '~/components/AddToCartButton';
 import {BuyNowButton} from '~/components/BuyNowButton';
 import {QuantitySelector} from '~/components/QuantitySelector';
 import {ProductSizeGuide, type SizeEntry} from '~/components/ProductSizeGuide';
+import {StarRating} from '~/components/StarRating';
 import {useAside} from '~/components/Aside';
+import type {ProductRating} from '~/lib/rating';
 
 /**
  * The buy box: everything the customer needs to pick a variant and add it to
@@ -29,6 +31,7 @@ export function ProductPurchase({
   quantityAvailable,
   shortDescription,
   variantId,
+  rating,
 }: {
   title: string;
   price?: MoneyV2;
@@ -39,6 +42,7 @@ export function ProductPurchase({
   quantityAvailable: number | null;
   shortDescription: string;
   variantId?: string;
+  rating?: ProductRating | null;
 }) {
   const {open: openAside} = useAside();
   const [quantity, setQuantity] = useState(1);
@@ -60,6 +64,22 @@ export function ProductPurchase({
 
   return (
     <div className="buybox">
+      {/* Rating line above the title — only when the shop publishes real
+          review metafields, never a placeholder score. */}
+      {rating && (
+        <div className="rating-summary">
+          <StarRating rating={rating.value} size={14} />
+          <span className="rating-summary__text">
+            évalué <strong>{rating.value.toString().replace('.', ',')}</strong> sur 5
+            {typeof rating.count === 'number' && (
+              <>
+                {' '}sur <strong>{rating.count}</strong> avis
+              </>
+            )}
+          </span>
+        </div>
+      )}
+
       <h1 className="buybox__title">{title}</h1>
 
       <div className="buybox__price">

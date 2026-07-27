@@ -22,18 +22,18 @@ function avatarColor(name: string): string {
 }
 
 /**
- * Review card: rating, headline, body, then the author.
+ * Review card: stars, headline, body, then the author line.
  *
- * Only fields that exist in the review data are rendered. There is no date or
- * city here because that information isn't in the data, and no "verified"
- * badge because nothing verifies these.
+ * The "client vérifié" badge only renders for reviews whose data actually
+ * carries `verified: true` — it is a factual claim to the shopper (and a
+ * regulated one in France), so it is never printed by default.
  */
 function TestimonialCard({review}: {review: Review}) {
   return (
     <div className="testimonial-card">
       <StarRating rating={review.rating} className="testimonial-card__stars" />
       <h4 className="testimonial-card__headline">{review.title}</h4>
-      <p className="testimonial-card__quote">&ldquo;{review.text}&rdquo;</p>
+      <p className="testimonial-card__quote">&laquo;&nbsp;{review.text}&nbsp;&raquo;</p>
       <div className="testimonial-card__author">
         <span
           className="testimonial-card__avatar"
@@ -42,12 +42,29 @@ function TestimonialCard({review}: {review: Review}) {
         >
           {initials(review.name)}
         </span>
-        <div>
-          <p className="testimonial-card__name">{review.name}</p>
-          <p className="testimonial-card__role">avis client</p>
-        </div>
+        <p className="testimonial-card__name">{review.name}</p>
+        {review.verified && (
+          <span className="testimonial-card__verified">
+            <CheckIcon />
+            client vérifié
+          </span>
+        )}
       </div>
     </div>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path
+        d="M2 6.4l2.6 2.6L10 3.6"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 

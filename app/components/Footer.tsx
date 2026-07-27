@@ -1,12 +1,10 @@
 import {NavLink, Link} from 'react-router';
 import type {HeaderQuery} from 'storefrontapi.generated';
-import type {NavCollection} from '~/components/Header';
 import {InstagramIcon, TiktokIcon} from '~/components/Icons';
 import {Newsletter} from '~/components/Newsletter';
 
 interface FooterProps {
   header: HeaderQuery;
-  navCollections: NavCollection[];
 }
 
 const INFO_LINKS = [
@@ -22,7 +20,7 @@ const POLICY_LINKS = [
   {title: 'confidentialité', to: '/policies/privacy-policy'},
 ];
 
-export function Footer({header, navCollections}: FooterProps) {
+export function Footer({header}: FooterProps) {
   const shopName = header?.shop?.name ?? 'reda studio';
   const year = new Date().getFullYear();
 
@@ -46,21 +44,6 @@ export function Footer({header, navCollections}: FooterProps) {
             </a>
           </div>
         </div>
-
-        {navCollections.length > 0 && (
-          <nav className="site-footer__col" aria-label="Collections">
-            <h3 className="site-footer__col-title">collections</h3>
-            <ul>
-              {navCollections.map((collection) => (
-                <li key={collection.id}>
-                  <NavLink to={`/collections/${collection.handle}`} prefetch="intent">
-                    {collection.title.toLowerCase()}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        )}
 
         <nav className="site-footer__col" aria-label="Informations">
           <h3 className="site-footer__col-title">informations</h3>
