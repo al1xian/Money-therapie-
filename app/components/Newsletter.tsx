@@ -18,7 +18,9 @@ export function Newsletter() {
         form_type: 'customer',
         utf8: '✓',
         'contact[email]': email,
-        'contact[tags]': 'newsletter',
+        // Tagged as coming from the footer so the two sign-up points can be
+        // told apart in the store's customer list.
+        source: 'footer',
       });
       const res = await fetch('/newsletter', {
         method: 'POST',

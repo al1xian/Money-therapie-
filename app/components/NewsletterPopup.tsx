@@ -1,26 +1,29 @@
 import {useEffect, useState} from 'react';
 import {CloseIcon} from '~/components/Icons';
 
+const STORAGE_KEY = 'reda-studio-newsletter-subscribed';
 const PROMO_CODE = 'REDA10';
 const OPEN_DELAY_MS = 1200;
 
 /**
  * Welcome pop-up offering -10% in exchange for an email address.
  *
- * Shown at every visit: no localStorage flag, so closing it only dismisses it
- * for the current page load and it comes back on the next one. The component
- * is mounted in the root layout, which does not remount on client-side
- * navigation — browsing the store therefore doesn't re-trigger it.
+ * Shown at every visit *until the visitor actually subscribes*. The
+ * localStorage flag is written only on a successful submission, never on a
+ * simple close — someone who dismisses it still sees the offer next time,
+ * while a subscriber is never asked again.
  *
  * Posts through the same real /newsletter endpoint as the footer sign-up
- * (Shopify's own customer form) — the promo code only appears once that
- * submission actually succeeds.
+ * (Shopify's own customer form), so every address lands in the store's
+ * customer list — see docs/emails-newsletter.md. The promo code only appears
+ * once that submission actually succeeds.
  */
 export function NewsletterPopup() {
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
 
   useEffect(() => {
+    if (window.localStorage.getItem(STORAGE_KEY)) return;
     const timer = setTimeout(() => setOpen(true), OPEN_DELAY_MS);
     return () => clearTimeout(timer);
   }, []);
@@ -50,7 +53,9 @@ export function NewsletterPopup() {
         form_type: 'customer',
         utf8: '✓',
         'contact[email]': email,
-        'contact[tags]': 'newsletter,popup',
+        // Tagged as coming from the pop-up so the two sign-up points can be
+        // told apart in the store's customer list.
+        source: 'popup',
       });
       const res = await fetch('/newsletter', {
         method: 'POST',
@@ -58,6 +63,8 @@ export function NewsletterPopup() {
         body: body.toString(),
       });
       setStatus(res.ok ? 'done' : 'error');
+      // Only a real subscription silences the pop-up for good.
+      if (res.ok) window.localStorage.setItem(STORAGE_KEY, '1');
     } catch {
       setStatus('error');
     }

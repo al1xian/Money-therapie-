@@ -1064,20 +1064,22 @@
 }
 
 /*
-* Nom de la collection : encre noire sur pastille claire. Le texte blanc
-* posé directement sur la photo devenait illisible dès que l'image était
-* claire — la pastille garantit le contraste quelle que soit l'image.
+* Nom de la collection : encre noire posée directement sur la photo, sans
+* pastille. Le halo clair est un text-shadow, pas un fond : il décolle les
+* lettres des zones sombres de l'image sans ajouter de bloc opaque.
 */
 .collections-slider__label {
   position: absolute;
   left: 0.9rem;
   bottom: 0.9rem;
-  background: var(--color-paper);
+  background: transparent;
   color: var(--color-ink);
   font-size: 0.8rem;
   text-transform: lowercase;
   letter-spacing: 0.03em;
-  padding: 0.45rem 0.85rem;
+  text-shadow:
+    0 0 6px rgba(255, 255, 255, 0.85),
+    0 0 2px rgba(255, 255, 255, 0.95);
   max-width: calc(100% - 1.8rem);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -3256,17 +3258,18 @@
 }
 
 /*
-* Les visuels de la page sont des portraits : on garde un cadre vertical
-* plutôt que de recadrer en 16/9, qui coupait les tenues.
+* Un visuel ferme chaque bloc de texte. Les photos sont des portraits : on
+* garde un cadre vertical plutôt qu'un recadrage paysage, qui coupait les
+* tenues. La largeur suit celle du bloc, donc l'image s'aligne sur le texte.
 */
-.about__figure {
-  margin: 3rem auto;
-  max-width: 34rem;
+.about__block-media {
+  margin: 2rem 0 0;
+  /* Plafond de largeur : quatre portraits pleine largeur transformeraient la
+     page en défilement d'images. */
+  max-width: 26rem;
 }
 
-.about__figure img,
-.about__duo img,
-.about__split-media img {
+.about__block-media img {
   display: block;
   width: 100%;
   height: auto;
@@ -3274,62 +3277,6 @@
   object-fit: cover;
   border: 1px solid var(--color-line);
   background: var(--color-tile);
-}
-
-.about__figure figcaption {
-  margin-top: 0.75rem;
-  font-size: 0.75rem;
-  text-transform: lowercase;
-  letter-spacing: 0.04em;
-  color: var(--color-muted);
-}
-
-/* Deux looks côte à côte à partir de la tablette, empilés sur mobile. */
-.about__duo {
-  margin: 3rem 0;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-}
-
-.about__duo figure {
-  margin: 0;
-}
-
-/* Image + texte : colonne unique sur mobile, deux colonnes au-delà. */
-.about__split {
-  margin: 3.5rem 0;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-  align-items: center;
-}
-
-.about__split-media {
-  margin: 0;
-}
-
-.about__split-text h2 {
-  font-size: 1.1rem;
-  margin: 0.5rem 0 1rem;
-}
-
-.about__split-text p:not(.about__eyebrow) {
-  margin-bottom: 1rem;
-  font-size: 0.85rem;
-  line-height: 1.75;
-}
-
-@media (min-width: 48em) {
-  .about__duo {
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-  }
-
-  .about__split {
-    grid-template-columns: 1fr 1fr;
-    gap: 2.5rem;
-  }
 }
 
 .about__block {
@@ -3342,7 +3289,8 @@
   margin-bottom: 1rem;
 }
 
-.about__block p {
+/* Le sur-titre garde sa propre taille : il n'est pas du corps de texte. */
+.about__block p:not(.about__eyebrow) {
   margin-bottom: 1rem;
   font-size: 0.85rem;
   line-height: 1.75;

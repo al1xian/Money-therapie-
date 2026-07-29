@@ -28,6 +28,35 @@ const pillars = [
   },
 ];
 
+/**
+ * Visual closing each text block. One image per block, always in the same
+ * place, so the page reads as an alternation texte → image du début à la fin.
+ */
+function BlockFigure({
+  src,
+  alt,
+  width,
+  height,
+}: {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+}) {
+  return (
+    <figure className="about__block-media">
+      <img
+        src={src}
+        alt={alt}
+        width={width}
+        height={height}
+        loading="lazy"
+        decoding="async"
+      />
+    </figure>
+  );
+}
+
 export default function About() {
   return (
     <div className="about">
@@ -39,18 +68,12 @@ export default function About() {
           l’ambition mérite un vestiaire à sa mesure — premium, minimaliste,
           sans compromis.
         </p>
-      </Reveal>
-
-      <Reveal as="figure" className="about__figure">
-        <img
-          src="/images/lookbook-tshirt.webp"
-          alt="Tenue reda studio : t-shirt noir imprimé et short en jean clair"
-          width="675"
-          height="1200"
-          loading="lazy"
-          decoding="async"
+        <BlockFigure
+          src="/images/histoire-piscine.webp"
+          alt="Tenue reda studio entièrement noire, au bord d’une piscine face à la mer au coucher du soleil"
+          width={675}
+          height={1200}
         />
-        <figcaption>le vestiaire reda studio, porté au quotidien.</figcaption>
       </Reveal>
 
       <Reveal as="section" className="about__block">
@@ -65,29 +88,12 @@ export default function About() {
           notre point de départ, c’est la rue et son exigence silencieuse :
           des vêtements qui en disent long sans avoir besoin de crier.
         </p>
-      </Reveal>
-
-      <Reveal as="section" className="about__duo" aria-label="Looks reda studio">
-        <figure>
-          <img
-            src="/images/lookbook-henley.webp"
-            alt="Tenue reda studio : haut henley noir à boutons et short camouflage"
-            width="671"
-            height="1200"
-            loading="lazy"
-            decoding="async"
-          />
-        </figure>
-        <figure>
-          <img
-            src="/images/lookbook-casquette.webp"
-            alt="Tenue reda studio : haut écru, jean flare délavé et casquette bleue"
-            width="788"
-            height="1200"
-            loading="lazy"
-            decoding="async"
-          />
-        </figure>
+        <BlockFigure
+          src="/images/histoire-cerisiers.webp"
+          alt="Tenue reda studio : t-shirt blanc oversize et jean délavé brodé, sous les cerisiers en fleurs"
+          width={675}
+          height={1200}
+        />
       </Reveal>
 
       <Reveal as="section" className="about__manifesto">
@@ -110,33 +116,33 @@ export default function About() {
           l’élégance, chez nous, n’est pas un supplément : c’est le point de
           départ de chaque coupe, de chaque tissu, de chaque détail.
         </p>
+        <BlockFigure
+          src="/images/histoire-chambre.webp"
+          alt="Jean reda studio à motif brodé, dans une chambre avec vue sur la ville de nuit"
+          width={675}
+          height={1200}
+        />
       </Reveal>
 
-      <Reveal as="section" className="about__split">
-        <figure className="about__split-media">
-          <img
-            src="/images/lookbook-denim.webp"
-            alt="Deux jeans flare reda studio posés à plat, un délavé bleu et un noir"
-            width="901"
-            height="1200"
-            loading="lazy"
-            decoding="async"
-          />
-        </figure>
-        <div className="about__split-text">
-          <p className="about__eyebrow">le détail</p>
-          <h2>la coupe avant tout</h2>
-          <p>
-            nos pièces sont fabriquées au portugal, puis contrôlées une à une
-            avant leur mise en vente. coutures, ourlets, tombé : rien ne part
-            si le détail n’y est pas.
-          </p>
-          <p>
-            c’est ce travail invisible qui fait la différence à l’usage — une
-            pièce qui garde sa forme, son délavé et son allure lavage après
-            lavage.
-          </p>
-        </div>
+      <Reveal as="section" className="about__block">
+        <p className="about__eyebrow">le détail</p>
+        <h2>la coupe avant tout</h2>
+        <p>
+          nos pièces sont fabriquées au portugal, puis contrôlées une à une
+          avant leur mise en vente. coutures, ourlets, tombé : rien ne part si
+          le détail n’y est pas.
+        </p>
+        <p>
+          c’est ce travail invisible qui fait la différence à l’usage — une
+          pièce qui garde sa forme, son délavé et son allure lavage après
+          lavage.
+        </p>
+        <BlockFigure
+          src="/images/lookbook-denim.webp"
+          alt="Deux jeans flare reda studio posés à plat, un délavé bleu et un noir"
+          width={901}
+          height={1200}
+        />
       </Reveal>
 
       <section className="about__values">
