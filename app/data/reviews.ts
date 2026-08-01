@@ -1,22 +1,23 @@
 export interface Review {
-  /**
-   * Stable identifier. Used as the React key, so it must be unique even when
-   * two anonymous profiles end up with the same display name.
-   */
+  /** Stable identifier, utilisé comme clé React. */
   id: string;
+  /** Prénom et nom, affichés tels quels sous l'avis. */
   name: string;
   rating: number;
-  title: string;
+  /**
+   * Texte intégral de l'avis. C'est le seul contenu rédactionnel de la
+   * carte : ni titre ni accroche séparée, pour qu'aucun résumé ne vienne
+   * doubler l'avis lui-même.
+   */
   text: string;
   /** Drives the "avis certifié" badge. Only set on part of the pool. */
   certified?: boolean;
 }
 
 /**
- * Avis affichés dans la section « avis clients ».
- *
- * Profils anonymes (initiales ou « client anonyme ») et formulations très
- * courtes, comme sur la plupart des plateformes d'avis.
+ * Avis affichés dans la section « avis clients ». Formulations courtes, comme
+ * sur la plupart des plateformes d'avis, et affichées en entier — chaque avis
+ * n'apparaît qu'une seule fois par section.
  *
  * À remplacer par de vrais avis dès qu'une application d'avis (Judge.me,
  * Okendo…) est installée : la section lit ce tableau, donc le branchement se
@@ -25,153 +26,133 @@ export interface Review {
 const REVIEW_POOL: Review[] = [
   {
     id: 'r01',
-    name: 'a. b.',
+    name: 'Amine Belkacem',
     rating: 5,
-    title: 'parfait',
     text: 'parfait, rien à dire.',
     certified: true,
   },
   {
     id: 'r02',
-    name: 'client anonyme',
+    name: 'Camille Rousseau',
     rating: 5,
-    title: 'top',
     text: 'tout était parfait, livraison rapide.',
     certified: true,
   },
   {
     id: 'r03',
-    name: 'm. k.',
+    name: 'Mehdi Kaddouri',
     rating: 4.5,
-    title: 'très bien',
     text: 'très bien, conforme aux photos.',
   },
   {
     id: 'r04',
-    name: 's. l.',
+    name: 'Sarah Lemoine',
     rating: 5,
-    title: 'nickel',
     text: 'nickel, je recommande.',
     certified: true,
   },
   {
     id: 'r05',
-    name: 'client anonyme',
+    name: 'Clara Fontaine',
     rating: 4,
-    title: 'bien',
     text: 'bien, livré vite.',
     certified: true,
   },
   {
     id: 'r06',
-    name: 'l. d.',
+    name: 'Lucas Dubois',
     rating: 5,
-    title: 'super',
     text: 'super qualité, taille bien.',
   },
   {
     id: 'r07',
-    name: 'y. r.',
+    name: 'Yanis Rahmani',
     rating: 4.5,
-    title: 'content',
     text: 'très content, colis reçu en 2 jours.',
     certified: true,
   },
   {
     id: 'r08',
-    name: 'n. t.',
+    name: 'Nadia Toumi',
     rating: 5,
-    title: 'impeccable',
     text: 'impeccable, comme prévu.',
   },
   {
     id: 'r09',
-    name: 'client anonyme',
+    name: 'Chloé Marchand',
     rating: 5,
-    title: 'rien à redire',
     text: 'rien à redire, livraison rapide.',
   },
   {
     id: 'r10',
-    name: 'c. v.',
+    name: 'Céline Vasseur',
     rating: 4,
-    title: 'conforme',
     text: 'conforme à la description, merci.',
     certified: true,
   },
   {
     id: 'r11',
-    name: 'a. k.',
+    name: 'Adam Khelifi',
     rating: 5,
-    title: 'parfait',
     text: 'parfait, deuxième commande.',
     certified: true,
   },
   {
     id: 'r12',
-    name: 'i. d.',
+    name: 'Inès Daoudi',
     rating: 4.5,
-    title: 'top qualité',
     text: 'top, matière agréable.',
   },
   {
     id: 'r13',
-    name: 'client anonyme',
+    name: 'Thomas Berger',
     rating: 5,
-    title: 'très satisfait',
     text: 'très satisfait, envoi rapide.',
     certified: true,
   },
   {
     id: 'r14',
-    name: 'h. e.',
+    name: 'Hugo Renaud',
     rating: 4,
-    title: 'bon produit',
     text: 'bon produit, bien emballé.',
     certified: true,
   },
   {
     id: 'r15',
-    name: 'e. g.',
+    name: 'Emma Girard',
     rating: 5,
-    title: 'j’adore',
     text: 'j’adore, tombe très bien.',
   },
   {
     id: 'r16',
-    name: 'k. s.',
+    name: 'Karim Saidi',
     rating: 4.5,
-    title: 'rapide',
     text: 'commande reçue rapidement, très bien.',
   },
   {
     id: 'r17',
-    name: 'client anonyme',
+    name: 'Léa Moreau',
     rating: 5,
-    title: 'parfait',
     text: 'tout est parfait.',
     certified: true,
   },
   {
     id: 'r18',
-    name: 'm. p.',
+    name: 'Maxime Petit',
     rating: 5,
-    title: 'au top',
     text: 'au top, je recommande.',
     certified: true,
   },
   {
     id: 'r19',
-    name: 's. z.',
+    name: 'Sofia Zeroual',
     rating: 4,
-    title: 'satisfait',
     text: 'satisfait, taille un peu grande.',
   },
   {
     id: 'r20',
-    name: 'r. f.',
+    name: 'Rayan Fournier',
     rating: 4.5,
-    title: 'bonne surprise',
     text: 'très bonne qualité pour le prix.',
     certified: true,
   },

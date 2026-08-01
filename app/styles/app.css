@@ -1268,304 +1268,363 @@
 
 /*
 * --------------------------------------------------
-* Avis clients (PDP + accueil) — rangées défilantes
+* Avis clients (PDP + accueil) — grille
 * --------------------------------------------------
 */
-.testimonials {
-  position: relative;
-  overflow: hidden;
-  padding: 3rem 0;
+.reviews {
+  padding: 3rem 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2.5rem;
+  gap: 2rem;
 }
 
-/* Halo décoratif en bas de section (équivalent neutre du dégradé radial du
-   design de référence, adapté à la palette noir & blanc de la marque). */
-.testimonials__glow {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background: radial-gradient(
-    ellipse 85% 67% at 50% 100%,
-    rgba(17, 17, 17, 0.07) 0%,
-    transparent 60%
-  );
-}
-
-.testimonials__head {
-  position: relative;
-  z-index: 1;
-  max-width: 40rem;
+.reviews__head {
   text-align: center;
-  padding: 0 1.25rem;
-  display: flex;
-  flex-direction: column;
+  max-width: 46rem;
+}
+
+.reviews__title {
+  font-size: 1.75rem;
+  line-height: 1.15;
+  text-transform: lowercase;
+}
+
+.reviews__subtitle {
+  margin-top: 0.75rem;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--color-muted);
+}
+
+/*
+* Une carte par avis, chaque avis rendu une seule fois. La structure de la
+* carte est identique sur mobile et sur desktop : seul le nombre de colonnes
+* change.
+*/
+.reviews__grid {
+  width: 100%;
+  max-width: 78rem;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 1rem;
 }
 
-.testimonials__title {
-  font-size: 1.6rem;
-  line-height: 1.15;
-  text-transform: lowercase;
-  opacity: 0;
-  animation: fade-in-up 0.7s var(--ease-out-soft) 0.2s forwards;
-}
-
-.testimonials__subtitle {
-  font-size: 0.85rem;
-  line-height: 1.65;
-  color: var(--color-muted);
-  opacity: 0;
-  animation: fade-in-up 0.7s var(--ease-out-soft) 0.4s forwards;
-}
-
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.testimonials__rows {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-/*
-* Défilement horizontal
-*/
-.scroller {
-  width: 100%;
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-}
-
-.scroller__track {
-  display: flex;
-  width: max-content;
-}
-
-.scroller__track--left {
-  animation: scroll-horizontal var(--scroll-duration, 50s) linear infinite;
-}
-
-.scroller__track--right {
-  animation: scroll-horizontal-reverse var(--scroll-duration, 50s) linear infinite;
-}
-
-.scroller:hover .scroller__track {
-  animation-play-state: paused;
-}
-
-.scroller__group {
-  display: flex;
-  align-items: stretch;
-  gap: 2rem;
-  padding: 0 1rem;
-  flex-shrink: 0;
-}
-
-@keyframes scroll-horizontal {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-@keyframes scroll-horizontal-reverse {
-  from {
-    transform: translateX(-50%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
-/*
-* Carte d'avis
-*/
-.testimonial-card {
-  flex-shrink: 0;
-  width: 20rem;
+.review-card {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 1rem;
+  gap: 0.9rem;
   padding: 1.5rem;
   background: var(--color-paper);
   border: 1px solid var(--color-line);
   border-radius: 0.5rem;
-  box-shadow: 0 10px 15px -3px rgba(17, 17, 17, 0.07), 0 4px 6px -4px rgba(17, 17, 17, 0.06);
+  box-shadow:
+    0 10px 15px -3px rgba(17, 17, 17, 0.06),
+    0 4px 6px -4px rgba(17, 17, 17, 0.05);
+  transition: box-shadow 250ms var(--ease-out-soft);
 }
 
-/* Two card sizes so the rails read as an editorial wall rather than a grid. */
-.testimonial-card--sm {
-  width: 15rem;
-  padding: 1.1rem;
-  gap: 0.6rem;
+.review-card:hover {
+  box-shadow:
+    0 16px 24px -6px rgba(17, 17, 17, 0.1),
+    0 6px 10px -6px rgba(17, 17, 17, 0.07);
 }
 
-.testimonial-card--sm .testimonial-card__quote {
-  font-size: 0.78rem;
+.review-card__stars {
+  margin-bottom: -0.15rem;
 }
 
-.testimonial-card--sm .testimonial-card__avatar {
-  width: 2.25rem;
-  height: 2.25rem;
-  font-size: 0.62rem;
-}
-
-.testimonial-card__stars {
-  margin-bottom: -0.25rem;
-}
-
-.testimonial-card__headline {
-  font-size: 0.85rem;
-  text-transform: lowercase;
+/* L'avis occupe toute la hauteur disponible : l'auteur reste aligné en bas
+   d'une carte à l'autre, quelle que soit la longueur du texte. */
+.review-card__text {
+  flex: 1;
   margin: 0;
-}
-
-.testimonial-card__quote {
-  font-size: 0.85rem;
-  line-height: 1.6;
+  font-size: 0.9rem;
+  line-height: 1.65;
   color: var(--color-ink);
   overflow-wrap: break-word;
 }
 
 /*
-* L'auteur peut passer à la ligne : sur les petites cartes, le badge
-* « avis certifié » descend sous le nom au lieu de le comprimer.
+* Auteur aligné en haut : le nom tombe donc à la même hauteur d'une carte à
+* l'autre, que l'avis porte ou non le badge « avis certifié ».
 */
-.testimonial-card__author {
+.review-card__author {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.7rem;
-  row-gap: 0.4rem;
-  margin-top: auto;
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--color-line);
+  align-items: flex-start;
+  gap: 0.75rem;
   width: 100%;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--color-line);
 }
 
-/* Badge « avis certifié » : coche verte pastillée, à droite de l'auteur. */
-.testimonial-card__certified {
-  margin-left: auto;
+.review-card__avatar {
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  color: var(--color-paper);
+}
+
+.review-card__identity {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  /* Recentre le nom face à l'avatar sans casser l'alignement entre cartes. */
+  padding-top: 0.45rem;
+  /* Hauteur d'un bloc nom + badge : réservée même sans badge, pour que les
+     noms tombent exactement à la même hauteur sur toute une rangée. */
+  min-height: 3.15rem;
+}
+
+.review-card__name {
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  overflow-wrap: break-word;
+}
+
+/* Badge « avis certifié » : coche verte pastillée, sous le nom. */
+.review-card__certified {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
   font-size: 0.7rem;
   text-transform: lowercase;
   color: var(--color-certified);
-  white-space: nowrap;
 }
 
-.testimonial-card__check {
+.review-card__check {
   flex-shrink: 0;
-}
-
-.testimonial-card--sm .testimonial-card__certified {
-  font-size: 0.64rem;
-}
-
-.testimonial-card__avatar {
-  flex-shrink: 0;
-  width: 3rem;
-  height: 3rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  color: var(--color-paper);
-}
-
-.testimonial-card__name {
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin: 0;
-}
-
-@media (max-width: 40em) {
-  .testimonials {
-    padding: 2.25rem 0;
-    gap: 1.75rem;
-  }
-
-  .testimonials__rows {
-    gap: 0.9rem;
-  }
-
-  .testimonial-card {
-    width: 16.5rem;
-    padding: 1.15rem;
-    gap: 0.75rem;
-  }
-
-  .testimonial-card--sm {
-    width: 13rem;
-    padding: 0.9rem;
-    gap: 0.55rem;
-  }
-
-  .testimonial-card__quote {
-    font-size: 0.82rem;
-    line-height: 1.55;
-  }
-
-  .testimonial-card__avatar {
-    width: 2.5rem;
-    height: 2.5rem;
-    font-size: 0.68rem;
-  }
-
-  .scroller__group {
-    gap: 1rem;
-    padding: 0 0.5rem;
-  }
 }
 
 @media (min-width: 48em) {
-  .testimonials__title {
+  .reviews {
+    padding: 3.5rem 1.5rem;
+  }
+
+  .reviews__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
+
+  .reviews__title {
     font-size: 2.25rem;
   }
 
-  .testimonials__subtitle {
+  .reviews__subtitle {
     font-size: 0.95rem;
   }
 }
 
 @media (min-width: 64em) {
-  .testimonials {
-    padding: 4rem 0;
-    gap: 3rem;
+  .reviews {
+    padding: 4.5rem 1.5rem;
+    gap: 2.75rem;
   }
 
-  .testimonials__title {
+  .reviews__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+
+  .reviews__title {
+    font-size: 2.75rem;
+  }
+}
+
+/*
+* --------------------------------------------------
+* Nos produits portés — rail vidéo horizontal
+* --------------------------------------------------
+*/
+.worn {
+  padding: 3rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.75rem;
+}
+
+.worn__title {
+  font-size: 1.75rem;
+  line-height: 1.15;
+  text-transform: lowercase;
+  text-align: center;
+  padding: 0 1rem;
+}
+
+.worn__viewport {
+  position: relative;
+  width: 100%;
+}
+
+/* Défilement natif + scroll-snap : la transition reste fluide au doigt comme
+   à la souris, et `scroll-behavior` adoucit les sauts des flèches. */
+.worn__rail {
+  display: flex;
+  gap: 1rem;
+  padding: 0 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.worn__rail::-webkit-scrollbar {
+  display: none;
+}
+
+.worn__slide {
+  position: relative;
+  flex: 0 0 auto;
+  width: 68vw;
+  max-width: 20rem;
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  background: var(--color-tile);
+  scroll-snap-align: center;
+  transition: transform 400ms var(--ease-out-soft);
+}
+
+.worn__slide:hover {
+  transform: translateY(-4px);
+}
+
+.worn__video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Pastille de renvoi produit, reprise du repère visuel du site : encre noire
+   sur fond clair, coins arrondis. */
+.worn__pill {
+  position: absolute;
+  left: 50%;
+  bottom: 1rem;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: calc(100% - 1.5rem);
+  padding: 0.55rem 0.9rem;
+  border-radius: 0.4rem;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-size: 0.75rem;
+  text-transform: lowercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: transform 250ms var(--ease-out-soft);
+}
+
+.worn__slide:hover .worn__pill {
+  transform: translateX(-50%) translateY(-2px);
+}
+
+.worn__arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  transform: translateY(-50%);
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--color-line);
+  border-radius: 50%;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(17, 17, 17, 0.12);
+  transition:
+    opacity 200ms var(--ease-out-soft),
+    background 200ms var(--ease-out-soft);
+}
+
+.worn__arrow:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.worn__arrow:not(:disabled):hover {
+  background: var(--color-tile);
+}
+
+.worn__arrow--prev {
+  left: 0.75rem;
+}
+
+.worn__arrow--next {
+  right: 0.75rem;
+}
+
+/* Les flèches n'apparaissent qu'au pointeur : au doigt, le rail se fait
+   glisser directement. */
+@media (hover: hover) and (pointer: fine) {
+  .worn__arrow {
+    display: flex;
+  }
+}
+
+@media (min-width: 48em) {
+  .worn {
+    padding: 3.5rem 0;
+  }
+
+  .worn__title {
+    font-size: 2.25rem;
+  }
+
+  .worn__rail {
+    gap: 1.25rem;
+    padding: 0 3.5rem;
+  }
+
+  .worn__slide {
+    width: 17rem;
+  }
+}
+
+@media (min-width: 64em) {
+  .worn {
+    padding: 4.5rem 0;
+    gap: 2.25rem;
+  }
+
+  .worn__title {
     font-size: 2.75rem;
   }
 
-  .testimonial-card {
-    width: 24rem;
+  .worn__rail {
+    gap: 1.5rem;
+    padding: 0 4.5rem;
   }
 
-  .testimonial-card--sm {
-    width: 17.5rem;
+  .worn__slide {
+    width: 19rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .worn__rail {
+    scroll-behavior: auto;
+  }
+
+  .worn__slide,
+  .worn__pill {
+    transition: none;
   }
 }
 
@@ -2798,6 +2857,19 @@
   overflow-wrap: break-word;
 }
 
+/*
+* Mobile : aucune apparition en glissé vertical dans cette section. Le contenu
+* est posé d'emblée, sans opacité ni translation à rattraper. Le comportement
+* desktop reste inchangé.
+*/
+@media (max-width: 47.99em) {
+  .vision .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 @media (min-width: 40em) {
   .vision__card {
     flex-basis: 44%;
@@ -3359,6 +3431,99 @@
   margin-bottom: 1.5rem;
   font-size: 0.82rem;
   color: var(--color-muted);
+}
+
+/*
+* Version desktop de « notre histoire ». Tout est confiné à cette
+* media-query : la mise en page mobile et tablette n'est pas touchée.
+*
+* La page était calée sur une colonne étroite héritée du mobile, ce qui
+* laissait une large bande vide à droite et des visuels sous-dimensionnés.
+* On élargit le cadre, on agrandit les images et le corps de texte, et on
+* respire davantage entre les blocs.
+*/
+@media (min-width: 64em) {
+  .about {
+    max-width: 880px;
+    padding: 5rem 2.5rem 7rem;
+  }
+
+  .about__eyebrow {
+    font-size: 0.78rem;
+  }
+
+  .about__title {
+    margin-top: 0.75rem;
+    font-size: 2.6rem;
+  }
+
+  .about__lead {
+    margin-top: 1.5rem;
+    max-width: 46ch;
+    font-size: 1.1rem;
+    line-height: 1.75;
+  }
+
+  /* Colonne centrée : texte et visuel partagent exactement la même largeur,
+     au lieu d'une colonne étroite plaquée à gauche d'un cadre plus large. */
+  .about__intro,
+  .about__block {
+    max-width: 62ch;
+    margin-inline: auto;
+  }
+
+  .about__block {
+    margin-block: 5rem;
+  }
+
+  .about__block h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .about__block p:not(.about__eyebrow) {
+    margin-bottom: 1.25rem;
+    font-size: 0.98rem;
+    line-height: 1.85;
+  }
+
+  .about__block-media {
+    margin-top: 2.75rem;
+    max-width: none;
+  }
+
+  /* Cadre un peu moins haut que le 3/4 mobile : quatre portraits pleine
+     colonne resteraient sinon interminables au scroll. */
+  .about__block-media img {
+    aspect-ratio: 4 / 5;
+  }
+
+  .about__manifesto {
+    margin: 5rem 0;
+    padding: 3rem 0;
+  }
+
+  .about__values {
+    margin-top: 5rem;
+    gap: 2.5rem;
+  }
+
+  .about__value h3 {
+    font-size: 1.05rem;
+  }
+
+  .about__value p {
+    font-size: 0.88rem;
+  }
+
+  .about__cta {
+    margin-top: 5rem;
+    padding: 3.5rem 2rem;
+  }
+
+  .about__cta p {
+    font-size: 0.9rem;
+  }
 }
 
 .lookbook-grid {

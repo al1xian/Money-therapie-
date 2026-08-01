@@ -8,6 +8,7 @@ import {AnimatedHero} from '~/components/AnimatedHero';
 import {Reveal} from '~/components/Reveal';
 import {Newsletter} from '~/components/Newsletter';
 import {HomeReviews} from '~/components/HomeReviews';
+import {WornProducts} from '~/components/WornProducts';
 import {withoutHomeHiddenCollections} from '~/lib/collections';
 
 export const meta: Route.MetaFunction = () => {
@@ -94,12 +95,36 @@ export default function Homepage() {
 
       <AllProducts products={data.allProducts} />
 
+      <WornProductsSection products={data.allProducts} />
+
       <HomeReviews />
 
       <Reveal as="section">
         <Newsletter />
       </Reveal>
     </div>
+  );
+}
+
+/**
+ * « Nos produits portés » : le rail vidéo réutilise le catalogue déjà chargé
+ * pour la grille, donc aucune requête supplémentaire. Les produits sans vidéo
+ * Shopify sont filtrés par le composant, et la section entière disparaît s'il
+ * n'y en a aucune.
+ */
+function WornProductsSection({
+  products,
+}: {
+  products: Promise<AllProductsQuery | null>;
+}) {
+  return (
+    <Suspense fallback={null}>
+      <Await resolve={products}>
+        {(response) =>
+          response ? <WornProducts products={response.products.nodes} /> : null
+        }
+      </Await>
+    </Suspense>
   );
 }
 
