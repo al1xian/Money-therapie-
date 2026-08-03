@@ -23,8 +23,8 @@ export function StarRating({
   const printed = clamped.toString().replace('.', ',');
   const label =
     typeof count === 'number'
-      ? `${printed} sur 5 — ${count} avis`
-      : `${printed} sur 5`;
+      ? `${printed} out of 5 — ${count} reviews`
+      : `${printed} out of 5`;
 
   return (
     <span className={`stars ${className ?? ''}`}>

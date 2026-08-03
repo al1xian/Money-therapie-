@@ -12,23 +12,23 @@ import {Reveal} from '~/components/Reveal';
 const PILLARS: Array<{title: string; body: string}> = [
   {
     title: 'ambition',
-    body: 'Une nouvelle génération guidée par l’ambition et la volonté de construire son propre avenir.',
+    body: 'A new generation driven by ambition and the will to build a future of its own.',
   },
   {
-    title: 'identité',
-    body: 'Des pièces distinctives pensées pour celles et ceux qui refusent de passer inaperçus.',
+    title: 'identity',
+    body: 'Distinctive pieces made for the people who refuse to go unnoticed.',
   },
   {
-    title: 'minimalisme',
-    body: 'Une esthétique épurée où chaque coupe, matière et détail possède une véritable fonction.',
+    title: 'minimalism',
+    body: 'A stripped-back aesthetic where every cut, fabric and detail serves a real purpose.',
   },
   {
     title: 'streetwear',
-    body: 'Une vision contemporaine du streetwear, entre élégance, caractère et culture urbaine.',
+    body: 'A contemporary take on streetwear, between elegance, character and city culture.',
   },
   {
     title: 'vision',
-    body: 'Reda Studio ne suit pas simplement les tendances : la marque développe son propre univers.',
+    body: 'Reda Studio does not simply follow trends — the house builds a world of its own.',
   },
 ];
 
@@ -37,14 +37,13 @@ export function VisionSection() {
     <section className="vision" aria-labelledby="vision-heading">
       <Reveal className="vision__head">
         <h2 className="vision__title" id="vision-heading">
-          la vision reda studio
+          the reda studio vision
         </h2>
         <p className="vision__intro">
-          Reda Studio développe une vision premium et minimaliste du
-          streetwear. Nos pièces sont confectionnées pour les entrepreneurs,
-          les créateurs et celles et ceux qui construisent quelque chose :
-          chaque création est pensée autour de l’ambition, de l’identité et du
-          souci du détail.
+          Reda Studio builds a premium, minimalist vision of streetwear. Our
+          pieces are made for founders, creators and anyone building something
+          of their own: every design is shaped around ambition, identity and a
+          refusal to overlook the detail.
         </p>
       </Reveal>
 
@@ -68,7 +67,7 @@ export function VisionSection() {
 
       <Reveal className="vision__cta">
         <Link to="/about" prefetch="intent" className="btn">
-          découvrir l’histoire de la marque
+          discover the story behind the brand
         </Link>
       </Reveal>
     </section>

@@ -259,7 +259,7 @@ export default function Product() {
             )}
 
             <section className="pdp__section">
-              <h2 className="pdp__section-title">questions fréquentes</h2>
+              <h2 className="pdp__section-title">frequently asked questions</h2>
               <div className="pdp__accordions">
                 {getProductFaq(description ?? '').map((item) => (
                   <Accordion key={item.question} title={item.question}>
@@ -278,7 +278,7 @@ export default function Product() {
             items.length ? (
               <section className="pdp__related" aria-labelledby="related-heading">
                 <h2 className="pdp__section-title" id="related-heading">
-                  vous aimerez aussi
+                  you may also like
                 </h2>
                 {/* Grid on desktop, touch slider on mobile — same markup, CSS
                     switches between them (see .related-rail). */}
@@ -307,7 +307,7 @@ export default function Product() {
           {(collections) => (
             <CollectionShowcase
               collections={collections}
-              heading="rejoignez la communauté"
+              heading="join the community"
             />
           )}
         </Await>

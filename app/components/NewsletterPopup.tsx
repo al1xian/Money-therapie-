@@ -78,17 +78,17 @@ export function NewsletterPopup() {
   if (!open) return null;
 
   return (
-    <div className="popup-overlay" role="dialog" aria-modal aria-label="Offre de bienvenue">
-      <button className="popup-overlay__close-outside" onClick={close} aria-label="Fermer" />
+    <div className="popup-overlay" role="dialog" aria-modal aria-label="Welcome offer">
+      <button className="popup-overlay__close-outside" onClick={close} aria-label="Close" />
       <div className="popup">
-        <button type="button" className="popup__close" onClick={close} aria-label="Fermer">
+        <button type="button" className="popup__close" onClick={close} aria-label="Close">
           <CloseIcon />
         </button>
 
         <div className="popup__media">
           <img
             src="/images/lookbook-casquette.webp"
-            alt="Tenue reda studio : haut écru, jean flare délavé et casquette bleue"
+            alt="reda studio outfit: ecru top, washed flare jeans and blue cap"
             width="788"
             height="1200"
             loading="lazy"
@@ -97,38 +97,38 @@ export function NewsletterPopup() {
         </div>
 
         <div className="popup__body">
-          <h2>-10% sur ta 1ère commande</h2>
+          <h2>-10% off your first order</h2>
 
           {status === 'done' ? (
             <div className="popup__code">
-              <p className="popup__code-label">ton code promo</p>
+              <p className="popup__code-label">your promo code</p>
               <p className="popup__code-value">{PROMO_CODE}</p>
-              <p className="popup__code-hint">valable sur ta prochaine commande.</p>
+              <p className="popup__code-hint">valid on your next order.</p>
             </div>
           ) : (
             <>
               <p className="popup__text">
-                laisse ton e-mail, ton code promo s&rsquo;affiche juste après. simple, rapide et sans spam.
+                leave your email and your promo code appears right after. quick, simple, no spam.
               </p>
               <form className="popup__form" onSubmit={onSubmit}>
                 <input
                   type="email"
                   name="email"
-                  placeholder="adresse e-mail"
-                  aria-label="adresse e-mail"
+                  placeholder="email address"
+                  aria-label="email address"
                   autoComplete="email"
                   required
                 />
                 <button type="submit" className="btn btn--full" disabled={status === 'loading'}>
-                  {status === 'loading' ? '…' : 'obtenir mes -10% maintenant'}
+                  {status === 'loading' ? '…' : 'get my -10% now'}
                 </button>
                 {status === 'error' && (
                   <p className="form-error" role="alert">
-                    une erreur est survenue, réessayez.
+                    something went wrong, please try again.
                   </p>
                 )}
               </form>
-              <p className="popup__fineprint">pas de spam. offres exclusives et ventes privées seulement.</p>
+              <p className="popup__fineprint">no spam. exclusive offers and private sales only.</p>
             </>
           )}
         </div>

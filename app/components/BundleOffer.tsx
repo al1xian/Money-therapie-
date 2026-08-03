@@ -68,18 +68,18 @@ export function BundleOffer({
   return (
     <section className="bundle" aria-labelledby="bundle-heading">
       <h2 className="bundle__heading" id="bundle-heading">
-        offre limitée
+        limited offer
       </h2>
 
       <div className="bundle__box">
         {FREE_GIFT_ENABLED && (
-          <span className="bundle__ribbon">{gift.title} offerte</span>
+          <span className="bundle__ribbon">{gift.title} free</span>
         )}
 
         <div className="bundle__top">
           <div>
-            <p className="bundle__set-title">le set complet</p>
-            <p className="bundle__set-sub">même esthétique, mêmes détails</p>
+            <p className="bundle__set-title">the complete set</p>
+            <p className="bundle__set-sub">same aesthetic, same details</p>
           </div>
           <div className="bundle__totals">
             <span className="bundle__total">
@@ -141,7 +141,7 @@ export function BundleOffer({
           onClick={() => openAside('cart')}
           lines={lines}
         >
-          {available ? 'ajouter le set au panier' : 'épuisé'}
+          {available ? 'add set to cart' : 'sold out'}
         </AddToCartButton>
       </div>
     </section>

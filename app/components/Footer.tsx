@@ -9,15 +9,15 @@ interface FooterProps {
 
 const INFO_LINKS = [
   {title: 'faq', to: '/faq'},
-  {title: 'notre histoire', to: '/about'},
+  {title: 'our story', to: '/about'},
   {title: 'contact', to: '/contact'},
 ];
 
 const POLICY_LINKS = [
-  {title: 'livraison', to: '/policies/shipping-policy'},
-  {title: 'retours', to: '/policies/refund-policy'},
-  {title: 'cgv & mentions légales', to: '/policies/terms-of-service'},
-  {title: 'confidentialité', to: '/policies/privacy-policy'},
+  {title: 'shipping', to: '/policies/shipping-policy'},
+  {title: 'returns', to: '/policies/refund-policy'},
+  {title: 'terms & legal', to: '/policies/terms-of-service'},
+  {title: 'privacy', to: '/policies/privacy-policy'},
 ];
 
 export function Footer({header}: FooterProps) {
@@ -32,8 +32,8 @@ export function Footer({header}: FooterProps) {
             {shopName.toLowerCase()}
           </Link>
           <p className="site-footer__blurb">
-            maison streetwear indépendante — pièces premium, minimalistes,
-            pensées pour durer. livraison rapide partout en france.
+            an independent streetwear house &mdash; premium, minimalist
+            pieces made to last. fast delivery across france.
           </p>
           <div className="site-footer__social">
             <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
@@ -58,8 +58,8 @@ export function Footer({header}: FooterProps) {
           </ul>
         </nav>
 
-        <nav className="site-footer__col" aria-label="Livraison et politiques">
-          <h3 className="site-footer__col-title">livraison &amp; politiques</h3>
+        <nav className="site-footer__col" aria-label="Shipping and policies">
+          <h3 className="site-footer__col-title">shipping &amp; policies</h3>
           <ul>
             {POLICY_LINKS.map((link) => (
               <li key={link.to}>

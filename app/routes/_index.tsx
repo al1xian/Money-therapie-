@@ -15,7 +15,7 @@ import {withoutHomeHiddenCollections} from '~/lib/collections';
 export const meta: Route.MetaFunction = () => {
   return [
     {title: 'reda studio'},
-    {name: 'description', content: 'reda studio — vêtements minimalistes.'},
+    {name: 'description', content: 'reda studio — minimalist essentials.'},
   ];
 };
 
@@ -81,15 +81,15 @@ export default function Homepage() {
       <AnimatedHero
         imageMobileSrc="/images/hero-mobile.webp"
         imageDesktopSrc="/images/P1973928-2.webp"
-        imageAlt="Deux personnes en tenue reda studio, ambiance urbaine"
-        eyebrow="nouvelle collection"
+        imageAlt="Two people wearing reda studio, urban setting"
+        eyebrow="new collection"
         title="reda studio"
-        description="designer pour des personnes avec de l'ambition."
+        description="designed for people with ambition."
         ctaButton={{
-          text: 'découvrir',
+          text: 'shop now',
           href: featured ? `/collections/${featured.handle}` : '/collections/all',
         }}
-        secondaryCta={{text: 'notre histoire', href: '/about'}}
+        secondaryCta={{text: 'our story', href: '/about'}}
       />
 
       <CollectionsSlider collections={data.collections} />
@@ -98,9 +98,9 @@ export default function Homepage() {
 
       <HomeReviews />
 
-      <WornVideos />
-
       <HelpFaq />
+
+      <WornVideos />
 
       <Reveal as="section">
         <Newsletter />
@@ -118,7 +118,7 @@ function AllProducts({
     <section aria-labelledby="catalogue-heading">
       <Reveal as="section">
         <h2 id="catalogue-heading" className="section-title">
-          tous nos produits
+          all products
         </h2>
       </Reveal>
       <Suspense fallback={<div className="product-grid" aria-hidden="true" />}>
@@ -139,7 +139,7 @@ function AllProducts({
         </Await>
       </Suspense>
       <div className="view-all">
-        <Link to="/collections/all">voir tout</Link>
+        <Link to="/collections/all">view all</Link>
       </div>
     </section>
   );

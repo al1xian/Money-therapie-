@@ -42,16 +42,16 @@ export function ProductSizeGuide({sizes}: {sizes: SizeEntry[]}) {
                     size.available ? 'size-guide__stock--in' : 'size-guide__stock--out'
                   }`}
                 >
-                  {size.available ? 'disponible' : 'épuisé'}
+                  {size.available ? 'available' : 'sold out'}
                 </span>
               </li>
             ))}
           </ul>
           <p className="size-guide__note">
-            nos pièces taillent normalement. en cas d&rsquo;hésitation entre
-            deux tailles, prenez la taille au-dessus pour un porté plus ample.
-            un doute&nbsp;? <a href="/contact">écrivez-nous</a> avant de
-            commander, on vous répond sous 24&nbsp;h.
+            our pieces fit true to size. if you fall between two sizes, take
+            the larger one for a looser wear. not sure?{' '}
+            <a href="/contact">write to us</a> before ordering &mdash; we reply
+            within 24&nbsp;hours.
           </p>
         </div>
       )}

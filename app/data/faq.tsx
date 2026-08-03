@@ -5,32 +5,32 @@ export interface FaqItem {
   answer: ReactNode;
 }
 
-/** Questions générales — livraison, qualité, remboursement. */
+/** General questions — shipping, quality, refunds. */
 export const generalFaq: FaqItem[] = [
   {
-    question: 'quels sont vos délais de livraison ?',
+    question: 'how long does shipping take?',
     answer:
-      'nous expédions depuis notre local à paris et livrons en 48h partout en france.',
+      'we ship from our studio in paris and deliver within 48 hours anywhere in france.',
   },
   {
-    question: 'où sont fabriqués vos produits ?',
-    answer: 'toutes nos pièces sont fabriquées au portugal.',
+    question: 'where are your pieces made?',
+    answer: 'every piece is manufactured in portugal.',
   },
   {
-    question: 'vos produits sont-ils de qualité ?',
+    question: 'how is quality controlled?',
     answer:
-      'oui, tous nos produits sont de qualité, sélectionnés avec soin avant leur mise en vente.',
+      'each piece is checked one by one against our quality and finishing standards before it goes on sale.',
   },
   {
-    question: 'puis-je être remboursé ?',
-    answer: 'le remboursement est autorisé uniquement après renvoi du produit.',
+    question: 'can i get a refund?',
+    answer: 'refunds are issued once the returned item reaches us.',
   },
 ];
 
 /**
  * Pulls the composition out of a product description.
  *
- * Shops write it in prose ("Composition : 100% coton"), so we look for an
+ * Shops write it in prose ("Composition: 100% cotton"), so we look for an
  * explicit "composition" sentence first, then for any sentence carrying a
  * material percentage. Returns null when the description says nothing about
  * it — the FAQ then points to the garment's own label rather than inventing a
@@ -52,7 +52,7 @@ export function extractComposition(description: string): string | null {
   }
 
   // No explicit label: pick the clauses that actually carry a material
-  // percentage, e.g. "80 % coton, 20 % polyester" out of a longer sentence.
+  // percentage, e.g. "80% cotton, 20% polyester" out of a longer sentence.
   const withPercent = sentences.find((sentence) =>
     /\d+\s*%\s*\p{L}/u.test(sentence),
   );
@@ -77,12 +77,12 @@ export function getProductFaq(description = ''): FaqItem[] {
 
   return [
     {
-      question: 'coupe & taille',
+      question: 'fit & sizing',
       answer: (
         <>
-          coupe et correspondance des tailles précisées dans la description du
-          produit lorsqu&rsquo;elles sont disponibles. en cas de doute entre
-          deux tailles, contactez notre service client avant l&rsquo;achat.
+          the cut and size guidance are given in the product description
+          wherever they are available. if you fall between two sizes, reach out
+          to us before ordering and we will advise.
         </>
       ),
     },
@@ -92,47 +92,45 @@ export function getProductFaq(description = ''): FaqItem[] {
         <>{composition}.</>
       ) : (
         <>
-          la composition exacte de la pièce (matières, pourcentages) est
-          indiquée sur l&rsquo;étiquette cousue à l&rsquo;intérieur du
-          vêtement.
+          the exact composition of this piece — materials and percentages — is
+          printed on the label sewn inside the garment.
         </>
       ),
     },
     {
-      question: 'fabrication',
+      question: 'manufacturing',
       answer: (
         <>
-          nos pièces sont fabriquées au portugal, puis contrôlées une à une
-          avant leur mise en vente selon nos critères de qualité et de
-          finition.
+          our pieces are made in portugal, then checked one by one against our
+          quality and finishing standards before going on sale.
         </>
       ),
     },
     {
-      question: 'livraison',
+      question: 'shipping',
       answer: (
         <>
-          expédition depuis notre local à paris et livraison en 48h partout en
-          france, avec suivi. détails sur notre page{' '}
-          <a href="/policies/shipping-policy">livraison</a>.
+          shipped from our studio in paris and delivered within 48 hours
+          anywhere in france, with tracking. full details on our{' '}
+          <a href="/policies/shipping-policy">shipping page</a>.
         </>
       ),
     },
     {
-      question: 'retours',
+      question: 'returns',
       answer: (
         <>
-          retours et échanges acceptés sous 30 jours. détails sur notre page{' '}
-          <a href="/policies/refund-policy">retours</a>.
+          returns and exchanges accepted within 30 days. full details on our{' '}
+          <a href="/policies/refund-policy">returns page</a>.
         </>
       ),
     },
     {
-      question: 'entretien',
+      question: 'care',
       answer: (
         <>
-          lavez de préférence à l&rsquo;envers, à basse température, et suivez
-          les instructions précises indiquées sur l&rsquo;étiquette du produit.
+          wash inside out at a low temperature, and follow the specific
+          instructions printed on the garment&rsquo;s label.
         </>
       ),
     },

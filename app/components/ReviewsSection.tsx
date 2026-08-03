@@ -3,7 +3,7 @@ import {StarRating} from '~/components/StarRating';
 
 const AVATAR_PALETTE = ['#111111', '#3d3d3a', '#6b6b66', '#8a8a86'];
 
-/** Initiales du prénom et du nom, pour la pastille d'avatar. */
+/** Initials of the first and last name, for the avatar disc. */
 function initials(name: string): string {
   return name
     .split(' ')
@@ -14,7 +14,7 @@ function initials(name: string): string {
     .toUpperCase();
 }
 
-/** Couleur dérivée de l'identifiant, stable d'un rendu à l'autre. */
+/** Colour derived from the id, stable from one render to the next. */
 function avatarColor(id: string): string {
   let hash = 0;
   for (let i = 0; i < id.length; i++) {
@@ -24,22 +24,18 @@ function avatarColor(id: string): string {
 }
 
 /**
- * Carte d'avis : note, avis complet, puis l'auteur.
+ * Review card: rating, the review in full, then the author.
  *
- * Un seul bloc de texte, affiché en entier — pas de titre d'accroche qui
- * ferait doublon avec l'avis, pas de troncature.
- *
- * Le badge « avis certifié » ne s'affiche que si la donnée porte
- * `certified: true`, il peut donc être coupé avis par avis.
+ * One block of copy, printed whole — no headline that would double as a
+ * summary, no truncation. The "verified review" badge only shows when the data
+ * carries `certified: true`.
  */
 function ReviewCard({review}: {review: Review}) {
   return (
     <article className="review-card">
       <StarRating rating={review.rating} className="review-card__stars" />
 
-      <p className="review-card__text">
-        &laquo;&nbsp;{review.text}&nbsp;&raquo;
-      </p>
+      <p className="review-card__text">&ldquo;{review.text}&rdquo;</p>
 
       <footer className="review-card__author">
         <span
@@ -54,7 +50,7 @@ function ReviewCard({review}: {review: Review}) {
           {review.certified && (
             <span className="review-card__certified">
               <CheckIcon />
-              avis certifié
+              verified review
             </span>
           )}
         </span>
@@ -86,10 +82,59 @@ function CheckIcon() {
 }
 
 /**
- * Bloc « avis clients », partagé par la page d'accueil et les pages produit.
+ * One continuously scrolling row.
  *
- * Grille simple : une carte par avis, chaque avis rendu une seule fois. Même
- * structure sur mobile et sur desktop, seul le nombre de colonnes change.
+ * The row's reviews are rendered twice, back to back, and the track is
+ * translated by exactly -50%. At the end of the cycle the second copy sits
+ * precisely where the first began, so the loop restarts with nothing to see —
+ * no jump, no visible start or end. Each card still carries a single review;
+ * only the track is duplicated, and the duplicate is hidden from screen
+ * readers so reviews are never announced twice.
+ */
+function ScrollingRow({
+  reviews,
+  direction,
+  duration,
+}: {
+  reviews: Review[];
+  direction: 'left' | 'right';
+  duration: string;
+}) {
+  if (!reviews.length) return null;
+
+  return (
+    <div className="reviews-row">
+      <div
+        className={`reviews-row__track reviews-row__track--${direction}`}
+        style={{'--marquee-duration': duration} as React.CSSProperties}
+      >
+        <div className="reviews-row__group">
+          {reviews.map((review) => (
+            <ReviewCard key={review.id} review={review} />
+          ))}
+        </div>
+        <div className="reviews-row__group" aria-hidden="true">
+          {reviews.map((review) => (
+            <ReviewCard key={`clone-${review.id}`} review={review} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Row settings: right, then left, then right. */
+const ROWS: Array<{direction: 'left' | 'right'; duration: string}> = [
+  {direction: 'right', duration: '58s'},
+  {direction: 'left', duration: '46s'},
+  {direction: 'right', duration: '64s'},
+];
+
+/**
+ * Customer reviews, shared by the homepage and every product page.
+ *
+ * Three rows scrolling continuously in alternating directions. Reviews are
+ * dealt across the rows, so no review shows up in more than one of them.
  */
 export function ReviewsSection({
   heading,
@@ -102,6 +147,9 @@ export function ReviewsSection({
 }) {
   if (!reviews.length) return null;
 
+  const rows: Review[][] = [[], [], []];
+  reviews.forEach((review, index) => rows[index % rows.length].push(review));
+
   return (
     <section className="reviews">
       <div className="reviews__head">
@@ -109,9 +157,15 @@ export function ReviewsSection({
         {subheading ? <p className="reviews__subtitle">{subheading}</p> : null}
       </div>
 
-      <div className="reviews__grid">
-        {reviews.map((review) => (
-          <ReviewCard key={review.id} review={review} />
+      <div className="reviews__rows">
+        {rows.map((row, index) => (
+          <ScrollingRow
+            // eslint-disable-next-line react/no-array-index-key -- fixed-length static array, never reordered
+            key={index}
+            reviews={row}
+            direction={ROWS[index].direction}
+            duration={ROWS[index].duration}
+          />
         ))}
       </div>
     </section>

@@ -5,7 +5,7 @@ import {CartForm} from '@shopify/hydrogen';
 import {CartMain} from '~/components/CartMain';
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: `reda studio | panier`}];
+  return [{title: `reda studio | cart`}];
 };
 
 export const headers: HeadersFunction = ({actionHeaders}) => actionHeaders;
@@ -106,7 +106,7 @@ export default function Cart() {
 
   return (
     <div className="page page--wide">
-      <h1>panier</h1>
+      <h1>cart</h1>
       <CartMain layout="page" cart={cart} />
     </div>
   );

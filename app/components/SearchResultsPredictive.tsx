@@ -204,7 +204,7 @@ function SearchResultsPredictiveProducts({
 
   return (
     <div className="search-group" key="products">
-      <h5>produits</h5>
+      <h5>products</h5>
       <ul>
         {products.map((product) => {
           const productUrl = urlWithTrackingParams({

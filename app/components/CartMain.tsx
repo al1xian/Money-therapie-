@@ -44,7 +44,7 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
 
   return (
     <>
-      <ul className="cart-lines" aria-label="Articles du panier">
+      <ul className="cart-lines" aria-label="Cart items">
         {(cart?.lines?.nodes ?? []).map((line) => {
           if ('parentRelationship' in line && line.parentRelationship?.parent) {
             return null;
@@ -68,7 +68,7 @@ function CartEmpty() {
   const {close} = useAside();
   return (
     <div className="cart-empty">
-      <p>votre panier est vide.</p>
+      <p>your cart is empty.</p>
       <br />
       <Link to="/collections/all" onClick={close} prefetch="viewport" className="btn--ghost">
         continuer mes achats

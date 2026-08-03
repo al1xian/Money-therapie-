@@ -966,19 +966,46 @@
 
 /*
 * --------------------------------------------------
-* Titre de section
+* Section headings
 * --------------------------------------------------
+*
+* One scale for every section title on the site — homepage, product page,
+* collection showcase. They used to run from 0.85rem to 2.75rem depending on
+* the component, which flattened the page's hierarchy; a single token keeps
+* them in step.
 */
-.section-title {
-  font-size: 0.85rem;
+.section-title,
+.pdp__section-title,
+.showcase__heading {
+  font-size: var(--section-title-size);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
   text-transform: lowercase;
-  letter-spacing: 0.04em;
-  padding: 2rem 1rem 0;
 }
 
+.section-title {
+  padding: 3rem 1rem 0.5rem;
+}
+
+/* Breakpoint steps for the shared heading size. */
 @media (min-width: 48em) {
+  :root {
+    --section-title-size: 2.25rem;
+  }
+
   .section-title {
-    padding: 2.5rem 1.5rem 0;
+    padding: 3.5rem 1.5rem 0.75rem;
+  }
+}
+
+@media (min-width: 64em) {
+  :root {
+    --section-title-size: 2.75rem;
+  }
+
+  .section-title {
+    padding: 4.5rem 1.5rem 1rem;
   }
 }
 
@@ -1268,94 +1295,158 @@
 
 /*
 * --------------------------------------------------
-* Avis clients (PDP + accueil) — grille
+* Customer reviews — three continuously scrolling rows
 * --------------------------------------------------
 */
 .reviews {
-  padding: 3rem 1rem;
+  padding: 3.5rem 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
+  gap: 2.25rem;
 }
 
 .reviews__head {
   text-align: center;
   max-width: 46rem;
+  padding: 0 1rem;
 }
 
 .reviews__title {
-  font-size: 1.75rem;
-  line-height: 1.15;
+  font-size: var(--section-title-size);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
   text-transform: lowercase;
 }
 
 .reviews__subtitle {
-  margin-top: 0.75rem;
+  margin-top: 0.9rem;
   font-size: 0.88rem;
-  line-height: 1.6;
+  line-height: 1.65;
   color: var(--color-muted);
 }
 
-/*
-* Une carte par avis, chaque avis rendu une seule fois. La structure de la
-* carte est identique sur mobile et sur desktop : seul le nombre de colonnes
-* change.
-*/
-.reviews__grid {
+.reviews__rows {
   width: 100%;
-  max-width: 78rem;
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
+  /* Both ends dissolve instead of being cut, so the loop has no visible edge. */
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 6%,
+    #000 94%,
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 6%,
+    #000 94%,
+    transparent
+  );
+}
+
+.reviews-row {
+  overflow: hidden;
+}
+
+/*
+* The row's cards are rendered twice, side by side, and the track slides by
+* exactly -50%. The trailing gap lives inside each group (padding-right), so
+* the two groups are the same width and 50% lands on a pixel-identical frame:
+* the loop restarts with nothing to see.
+*/
+.reviews-row__track {
+  display: flex;
+  width: max-content;
+  animation: reviews-marquee var(--marquee-duration, 50s) linear infinite;
+}
+
+.reviews-row__track--right {
+  animation-name: reviews-marquee-reverse;
+}
+
+.reviews-row__group {
+  display: flex;
+  gap: 1rem;
+  padding-right: 1rem;
+}
+
+@keyframes reviews-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes reviews-marquee-reverse {
+  from {
+    transform: translate3d(-50%, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Pausing on hover lets a card actually be read. */
+.reviews-row:hover .reviews-row__track,
+.reviews-row:focus-within .reviews-row__track {
+  animation-play-state: paused;
 }
 
 .review-card {
+  flex: 0 0 auto;
+  width: 20rem;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 0.9rem;
-  padding: 1.5rem;
+  padding: 1.6rem;
   background: var(--color-paper);
   border: 1px solid var(--color-line);
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   box-shadow:
-    0 10px 15px -3px rgba(17, 17, 17, 0.06),
-    0 4px 6px -4px rgba(17, 17, 17, 0.05);
-  transition: box-shadow 250ms var(--ease-out-soft);
+    0 1px 2px rgba(17, 17, 17, 0.04),
+    0 12px 24px -16px rgba(17, 17, 17, 0.18);
+  transition:
+    transform 450ms var(--ease-out-soft),
+    box-shadow 450ms var(--ease-out-soft),
+    border-color 450ms var(--ease-out-soft);
 }
 
 .review-card:hover {
+  transform: translateY(-6px);
+  border-color: #d8d8d4;
   box-shadow:
-    0 16px 24px -6px rgba(17, 17, 17, 0.1),
-    0 6px 10px -6px rgba(17, 17, 17, 0.07);
+    0 1px 2px rgba(17, 17, 17, 0.05),
+    0 26px 44px -22px rgba(17, 17, 17, 0.28);
 }
 
 .review-card__stars {
   margin-bottom: -0.15rem;
 }
 
-/* L'avis occupe toute la hauteur disponible : l'auteur reste aligné en bas
-   d'une carte à l'autre, quelle que soit la longueur du texte. */
+/* The review fills the available height, so authors line up across a row. */
 .review-card__text {
   flex: 1;
   margin: 0;
   font-size: 0.9rem;
-  line-height: 1.65;
+  line-height: 1.7;
   color: var(--color-ink);
   overflow-wrap: break-word;
 }
 
-/*
-* Auteur aligné en haut : le nom tombe donc à la même hauteur d'une carte à
-* l'autre, que l'avis porte ou non le badge « avis certifié ».
-*/
 .review-card__author {
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
   width: 100%;
-  padding-top: 0.9rem;
+  padding-top: 1rem;
   border-top: 1px solid var(--color-line);
 }
 
@@ -1376,20 +1467,17 @@
   flex-direction: column;
   gap: 0.25rem;
   min-width: 0;
-  /* Recentre le nom face à l'avatar sans casser l'alignement entre cartes. */
   padding-top: 0.45rem;
-  /* Hauteur d'un bloc nom + badge : réservée même sans badge, pour que les
-     noms tombent exactement à la même hauteur sur toute une rangée. */
+  /* Name + badge height, reserved even without a badge so names sit level. */
   min-height: 3.15rem;
 }
 
 .review-card__name {
   font-size: 0.82rem;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   overflow-wrap: break-word;
 }
 
-/* Badge « avis certifié » : coche verte pastillée, sous le nom. */
 .review-card__certified {
   display: inline-flex;
   align-items: center;
@@ -1403,57 +1491,79 @@
   flex-shrink: 0;
 }
 
-@media (min-width: 48em) {
+@media (max-width: 40em) {
   .reviews {
-    padding: 3.5rem 1.5rem;
+    padding: 2.5rem 0;
+    gap: 1.75rem;
   }
 
-  .reviews__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.25rem;
+  .review-card {
+    width: 17rem;
+    padding: 1.25rem;
   }
 
-  .reviews__title {
-    font-size: 2.25rem;
-  }
-
-  .reviews__subtitle {
-    font-size: 0.95rem;
+  .reviews-row__group {
+    gap: 0.85rem;
+    padding-right: 0.85rem;
   }
 }
 
 @media (min-width: 64em) {
   .reviews {
-    padding: 4.5rem 1.5rem;
-    gap: 2.75rem;
+    padding: 5rem 0;
+    gap: 3rem;
   }
 
-  .reviews__grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1.5rem;
+  .reviews__rows {
+    gap: 1.25rem;
   }
 
-  .reviews__title {
-    font-size: 2.75rem;
+  .reviews__subtitle {
+    font-size: 0.95rem;
+  }
+
+  .review-card {
+    width: 23rem;
+  }
+
+  .reviews-row__group {
+    gap: 1.25rem;
+    padding-right: 1.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reviews-row__track {
+    animation: none;
+  }
+
+  .reviews-row {
+    overflow-x: auto;
+  }
+
+  .review-card {
+    transition: none;
   }
 }
 
 /*
 * --------------------------------------------------
-* Nos produits portés — rail vidéo horizontal
+* Our products worn — endless video carousel
 * --------------------------------------------------
 */
 .worn {
-  padding: 3rem 0;
+  padding: 3.5rem 0 4rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.75rem;
+  gap: 2rem;
 }
 
 .worn__title {
-  font-size: 1.75rem;
-  line-height: 1.15;
+  font-size: var(--section-title-size);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
   text-transform: lowercase;
   text-align: center;
   padding: 0 1rem;
@@ -1464,38 +1574,61 @@
   width: 100%;
 }
 
-/* Défilement natif + scroll-snap : la transition reste fluide au doigt comme
-   à la souris, et `scroll-behavior` adoucit les sauts des flèches. */
+/*
+* Native scrolling + snap: the motion stays fluid under a finger and under a
+* pointer, and the component keeps the viewer inside the middle copy of the
+* list so the rail never reaches an end.
+*/
 .worn__rail {
   display: flex;
-  gap: 1rem;
-  padding: 0 1rem;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem 1rem;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+  cursor: grab;
+  user-select: none;
 }
 
 .worn__rail::-webkit-scrollbar {
   display: none;
 }
 
+/* Snap is suspended while dragging so the rail follows the pointer exactly. */
+.worn__rail--dragging {
+  cursor: grabbing;
+  scroll-snap-type: none;
+  scroll-behavior: auto;
+}
+
+/*
+* Off-focus tiles sit back: slightly smaller, slightly faded. The centre tile
+* returns to full size and full opacity, which is what carries the eye.
+*/
 .worn__slide {
   position: relative;
   flex: 0 0 auto;
-  width: 68vw;
-  max-width: 20rem;
+  width: 62vw;
+  max-width: 19rem;
   aspect-ratio: 9 / 16;
   overflow: hidden;
-  border-radius: 0.75rem;
+  border-radius: 1rem;
   background: var(--color-tile);
   scroll-snap-align: center;
-  transition: transform 400ms var(--ease-out-soft);
+  transform: scale(0.86);
+  opacity: 0.45;
+  transition:
+    transform 650ms var(--ease-out-soft),
+    opacity 650ms var(--ease-out-soft),
+    box-shadow 650ms var(--ease-out-soft);
 }
 
-.worn__slide:hover {
-  transform: translateY(-4px);
+.worn__slide--active {
+  transform: scale(1);
+  opacity: 1;
+  box-shadow: 0 30px 60px -30px rgba(17, 17, 17, 0.45);
 }
 
 .worn__video {
@@ -1503,33 +1636,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
-}
-
-/* Pastille de renvoi produit, reprise du repère visuel du site : encre noire
-   sur fond clair, coins arrondis. */
-.worn__pill {
-  position: absolute;
-  left: 50%;
-  bottom: 1rem;
-  transform: translateX(-50%);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  max-width: calc(100% - 1.5rem);
-  padding: 0.55rem 0.9rem;
-  border-radius: 0.4rem;
-  background: var(--color-paper);
-  color: var(--color-ink);
-  font-size: 0.75rem;
-  text-transform: lowercase;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  transition: transform 250ms var(--ease-out-soft);
-}
-
-.worn__slide:hover .worn__pill {
-  transform: translateX(-50%) translateY(-2px);
+  pointer-events: none;
 }
 
 .worn__arrow {
@@ -1547,31 +1654,27 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(17, 17, 17, 0.12);
+  box-shadow: 0 6px 18px rgba(17, 17, 17, 0.14);
   transition:
-    opacity 200ms var(--ease-out-soft),
-    background 200ms var(--ease-out-soft);
+    background 250ms var(--ease-out-soft),
+    transform 250ms var(--ease-out-soft);
 }
 
-.worn__arrow:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
-
-.worn__arrow:not(:disabled):hover {
-  background: var(--color-tile);
+.worn__arrow:hover {
+  background: var(--color-ink);
+  color: var(--color-paper);
+  transform: translateY(-50%) scale(1.06);
 }
 
 .worn__arrow--prev {
-  left: 0.75rem;
+  left: 1rem;
 }
 
 .worn__arrow--next {
-  right: 0.75rem;
+  right: 1rem;
 }
 
-/* Les flèches n'apparaissent qu'au pointeur : au doigt, le rail se fait
-   glisser directement. */
+/* Arrows are for pointers only; on touch the rail is dragged directly. */
 @media (hover: hover) and (pointer: fine) {
   .worn__arrow {
     display: flex;
@@ -1579,72 +1682,73 @@
 }
 
 @media (min-width: 48em) {
-  .worn {
-    padding: 3.5rem 0;
-  }
-
-  .worn__title {
-    font-size: 2.25rem;
-  }
-
-  .worn__rail {
-    gap: 1.25rem;
-    padding: 0 3.5rem;
-  }
-
   .worn__slide {
     width: 17rem;
+  }
+
+  .worn__arrow--prev {
+    left: 2rem;
+  }
+
+  .worn__arrow--next {
+    right: 2rem;
   }
 }
 
 @media (min-width: 64em) {
   .worn {
-    padding: 4.5rem 0;
-    gap: 2.25rem;
-  }
-
-  .worn__title {
-    font-size: 2.75rem;
+    padding: 5rem 0 5.5rem;
+    gap: 2.5rem;
   }
 
   .worn__rail {
-    gap: 1.5rem;
-    padding: 0 4.5rem;
+    gap: 2rem;
+    padding: 2rem 1.5rem;
   }
 
   .worn__slide {
-    width: 19rem;
+    width: 20rem;
+    max-width: none;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .worn__rail {
-    scroll-behavior: auto;
-  }
-
-  .worn__slide,
-  .worn__pill {
+  .worn__slide {
     transition: none;
+    transform: none;
+    opacity: 1;
   }
 }
 
 /*
 * --------------------------------------------------
-* Besoin d'aide ? — accordéon léger de fin de page
+* Need some help? — closing accordion
 * --------------------------------------------------
 */
 .help-faq {
-  padding: 3.5rem 1rem 4rem;
-  max-width: 46rem;
+  padding: 4rem 1rem 4.5rem;
+  max-width: 52rem;
   margin: 0 auto;
 }
 
+.help-faq__eyebrow {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--color-muted);
+  text-align: center;
+}
+
 .help-faq__title {
-  font-size: 1.85rem;
-  line-height: 1.15;
+  margin-top: 0.85rem;
+  margin-bottom: 2.75rem;
+  font-size: var(--section-title-size);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
   text-align: center;
   text-transform: lowercase;
-  margin-bottom: 2.25rem;
 }
 
 .help-faq__list {
@@ -1653,60 +1757,107 @@
 
 .help-faq__item {
   border-bottom: 1px solid var(--color-line);
+  transition: border-color 300ms var(--ease-out-soft);
+}
+
+.help-faq__item--open {
+  border-bottom-color: var(--color-ink);
 }
 
 .help-faq__trigger {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 0.85rem;
-  padding: 1.15rem 0.25rem;
+  gap: 1rem;
+  padding: 1.4rem 0.25rem;
   background: none;
   border: none;
   cursor: pointer;
   text-align: left;
   color: var(--color-ink);
   font: inherit;
-  transition: opacity 200ms var(--ease-out-soft);
 }
 
-.help-faq__trigger:hover {
-  opacity: 0.6;
+.help-faq__index {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--color-muted);
+  transition: color 300ms var(--ease-out-soft);
+}
+
+.help-faq__item--open .help-faq__index,
+.help-faq__trigger:hover .help-faq__index {
+  color: var(--color-ink);
 }
 
 .help-faq__icon {
   flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 1px solid var(--color-line);
+  border-radius: 0.6rem;
   color: var(--color-ink);
+  transition:
+    background 300ms var(--ease-out-soft),
+    border-color 300ms var(--ease-out-soft),
+    color 300ms var(--ease-out-soft);
+}
+
+.help-faq__item--open .help-faq__icon {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-paper);
 }
 
 .help-faq__question {
   flex: 1;
-  font-size: 0.9rem;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   text-transform: lowercase;
-  letter-spacing: 0.01em;
+  transition: transform 400ms var(--ease-out-soft);
 }
 
-.help-faq__chevron {
+.help-faq__trigger:hover .help-faq__question {
+  transform: translateX(4px);
+}
+
+/* The plus loses its vertical bar as the row opens, becoming a minus. */
+.help-faq__toggle {
   flex-shrink: 0;
   color: var(--color-muted);
-  transition: transform 300ms var(--ease-out-soft);
+  transition:
+    transform 400ms var(--ease-out-soft),
+    color 300ms var(--ease-out-soft);
 }
 
-.help-faq__item--open .help-faq__chevron {
-  transform: rotate(180deg);
+.help-faq__item--open .help-faq__toggle {
+  transform: rotate(90deg);
+  color: var(--color-ink);
+}
+
+.help-faq__toggle-bar {
+  transform-origin: 50% 50%;
+  transition: opacity 300ms var(--ease-out-soft);
+}
+
+.help-faq__item--open .help-faq__toggle-bar {
+  opacity: 0;
 }
 
 /*
-* Ouverture sans hauteur devinée : la ligne de grille passe de 0fr à 1fr, ce
-* qui anime la hauteur réelle du contenu quel qu'il soit.
+* Opening without a guessed height: the grid row goes from 0fr to 1fr, which
+* animates the content's real height whatever it is.
 */
 .help-faq__panel {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 320ms var(--ease-out-soft);
+  transition: grid-template-rows 450ms var(--ease-out-soft);
 }
 
 .help-faq__item--open .help-faq__panel {
@@ -1715,53 +1866,66 @@
 
 .help-faq__panel-inner {
   overflow: hidden;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition:
+    opacity 350ms var(--ease-out-soft),
+    transform 450ms var(--ease-out-soft);
 }
 
 .help-faq__item--open .help-faq__panel-inner {
-  /* La marge ne s'applique qu'une fois ouvert, sinon elle occuperait de la
-     place alors que la ligne est à 0fr. */
-  padding-bottom: 1.25rem;
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .help-faq__panel-inner p {
-  font-size: 0.82rem;
-  line-height: 1.75;
+  font-size: 0.86rem;
+  line-height: 1.8;
   color: var(--color-muted);
-  padding-left: calc(18px + 0.85rem);
+  padding-left: calc(2.5rem + 1rem + 2.6rem);
+  padding-bottom: 1.4rem;
 }
 
 .help-faq__panel-inner p + p {
-  margin-top: 0.75rem;
+  margin-top: -0.5rem;
 }
 
 .help-faq__panel-inner a {
   color: var(--color-ink);
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-underline-offset: 3px;
+  transition: opacity 200ms var(--ease-out-soft);
+}
+
+.help-faq__panel-inner a:hover {
+  opacity: 0.55;
+}
+
+@media (max-width: 40em) {
+  .help-faq__panel-inner p {
+    padding-left: 0.25rem;
+  }
 }
 
 @media (min-width: 48em) {
   .help-faq {
-    padding: 4.5rem 1.5rem 5rem;
-  }
-
-  .help-faq__title {
-    font-size: 2.4rem;
-    margin-bottom: 2.75rem;
-  }
-
-  .help-faq__question {
-    font-size: 0.95rem;
+    padding: 5rem 1.5rem 5.5rem;
   }
 
   .help-faq__trigger {
-    padding: 1.35rem 0.25rem;
+    padding: 1.7rem 0.25rem;
+  }
+
+  .help-faq__question {
+    font-size: 1.15rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .help-faq__panel,
-  .help-faq__chevron {
+  .help-faq__panel-inner,
+  .help-faq__toggle,
+  .help-faq__question {
     transition: none;
   }
 }
@@ -2642,11 +2806,9 @@
   }
 }
 
+/* Typography comes from the shared section-heading rule above. */
 .pdp__section-title {
-  font-size: 0.85rem;
-  text-transform: lowercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .pdp__prose {
@@ -3060,11 +3222,9 @@
   margin-inline: -1rem;
 }
 
+/* Typography comes from the shared section-heading rule above. */
 .showcase__heading {
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  padding: 0 1rem 1rem;
+  padding: 0 1rem 1.25rem;
 }
 
 .showcase__rail {

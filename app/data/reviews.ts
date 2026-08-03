@@ -1,164 +1,162 @@
 export interface Review {
-  /** Stable identifier, utilisé comme clé React. */
+  /** Stable identifier, used as the React key. */
   id: string;
-  /** Prénom et nom, affichés tels quels sous l'avis. */
+  /** First and last name, printed as-is under the review. */
   name: string;
   rating: number;
   /**
-   * Texte intégral de l'avis. C'est le seul contenu rédactionnel de la
-   * carte : ni titre ni accroche séparée, pour qu'aucun résumé ne vienne
-   * doubler l'avis lui-même.
+   * The review in full. It is the card's only piece of copy — no headline,
+   * no pull quote — so nothing ever reads as a summary of the review.
    */
   text: string;
-  /** Drives the "avis certifié" badge. Only set on part of the pool. */
+  /** Drives the "verified review" badge. Only set on part of the pool. */
   certified?: boolean;
 }
 
 /**
- * Avis affichés dans la section « avis clients ». Formulations courtes, comme
- * sur la plupart des plateformes d'avis, et affichées en entier — chaque avis
- * n'apparaît qu'une seule fois par section.
+ * Reviews rendered in the customer reviews section. Short, the way most review
+ * platforms read, and always shown in full — one review per card.
  *
- * À remplacer par de vrais avis dès qu'une application d'avis (Judge.me,
- * Okendo…) est installée : la section lit ce tableau, donc le branchement se
- * fait ici sans toucher au reste du code.
+ * Swap these for real reviews as soon as a review app (Judge.me, Okendo…) is
+ * installed: the section reads this array, so the wiring happens here without
+ * touching anything else.
  */
 const REVIEW_POOL: Review[] = [
   {
     id: 'r01',
     name: 'Amine Belkacem',
     rating: 5,
-    text: 'parfait, rien à dire.',
+    text: 'perfect, nothing to fault.',
     certified: true,
   },
   {
     id: 'r02',
     name: 'Camille Rousseau',
     rating: 5,
-    text: 'tout était parfait, livraison rapide.',
+    text: 'everything was perfect, fast delivery.',
     certified: true,
   },
   {
     id: 'r03',
     name: 'Mehdi Kaddouri',
     rating: 4.5,
-    text: 'très bien, conforme aux photos.',
+    text: 'very good, exactly like the photos.',
   },
   {
     id: 'r04',
     name: 'Sarah Lemoine',
     rating: 5,
-    text: 'nickel, je recommande.',
+    text: 'flawless, i recommend it.',
     certified: true,
   },
   {
     id: 'r05',
     name: 'Clara Fontaine',
     rating: 4,
-    text: 'bien, livré vite.',
+    text: 'good piece, arrived quickly.',
     certified: true,
   },
   {
     id: 'r06',
     name: 'Lucas Dubois',
     rating: 5,
-    text: 'super qualité, taille bien.',
+    text: 'great quality, fits true to size.',
   },
   {
     id: 'r07',
     name: 'Yanis Rahmani',
     rating: 4.5,
-    text: 'très content, colis reçu en 2 jours.',
+    text: 'really happy, parcel arrived in 2 days.',
     certified: true,
   },
   {
     id: 'r08',
     name: 'Nadia Toumi',
     rating: 5,
-    text: 'impeccable, comme prévu.',
+    text: 'impeccable, just as expected.',
   },
   {
     id: 'r09',
     name: 'Chloé Marchand',
     rating: 5,
-    text: 'rien à redire, livraison rapide.',
+    text: 'nothing to complain about, fast shipping.',
   },
   {
     id: 'r10',
     name: 'Céline Vasseur',
     rating: 4,
-    text: 'conforme à la description, merci.',
+    text: 'matches the description, thank you.',
     certified: true,
   },
   {
     id: 'r11',
     name: 'Adam Khelifi',
     rating: 5,
-    text: 'parfait, deuxième commande.',
+    text: 'perfect, my second order.',
     certified: true,
   },
   {
     id: 'r12',
     name: 'Inès Daoudi',
     rating: 4.5,
-    text: 'top, matière agréable.',
+    text: 'top quality, lovely fabric.',
   },
   {
     id: 'r13',
     name: 'Thomas Berger',
     rating: 5,
-    text: 'très satisfait, envoi rapide.',
+    text: 'very satisfied, shipped fast.',
     certified: true,
   },
   {
     id: 'r14',
     name: 'Hugo Renaud',
     rating: 4,
-    text: 'bon produit, bien emballé.',
+    text: 'good product, nicely packaged.',
     certified: true,
   },
   {
     id: 'r15',
     name: 'Emma Girard',
     rating: 5,
-    text: 'j’adore, tombe très bien.',
+    text: 'i love it, hangs beautifully.',
   },
   {
     id: 'r16',
     name: 'Karim Saidi',
     rating: 4.5,
-    text: 'commande reçue rapidement, très bien.',
+    text: 'order arrived quickly, very good.',
   },
   {
     id: 'r17',
     name: 'Léa Moreau',
     rating: 5,
-    text: 'tout est parfait.',
+    text: 'everything is perfect.',
     certified: true,
   },
   {
     id: 'r18',
     name: 'Maxime Petit',
     rating: 5,
-    text: 'au top, je recommande.',
+    text: 'first class, i recommend.',
     certified: true,
   },
   {
     id: 'r19',
     name: 'Sofia Zeroual',
     rating: 4,
-    text: 'satisfait, taille un peu grande.',
+    text: 'happy with it, runs slightly large.',
   },
   {
     id: 'r20',
     name: 'Rayan Fournier',
     rating: 4.5,
-    text: 'très bonne qualité pour le prix.',
+    text: 'excellent quality for the price.',
     certified: true,
   },
 ];
 
-/** Petit hash déterministe (djb2) pour une sélection stable par identifiant. */
+/** Small deterministic hash (djb2) for a stable per-id selection. */
 function hashString(input: string): number {
   let hash = 5381;
   for (let i = 0; i < input.length; i++) {
@@ -168,11 +166,11 @@ function hashString(input: string): number {
 }
 
 /**
- * Sélectionne un sous-ensemble stable d'avis à partir d'un identifiant
- * (ex : l'id du produit). Le résultat ne change pas entre deux rendus,
- * évitant les erreurs d'hydratation et les avis qui changent au refresh.
- * Les avis sont pris de façon contiguë (avec retour au début) à partir d'un
- * point de départ dérivé du hash, ce qui garantit `count` avis distincts.
+ * Picks a stable subset of reviews from an identifier (a product id, say).
+ * The result is identical across renders, which avoids hydration mismatches
+ * and reviews that shuffle on refresh. Reviews are taken contiguously (wrapping
+ * around) from a hash-derived starting point, guaranteeing `count` distinct
+ * reviews.
  */
 export function getReviewsForSeed(seed: string, count = 6): Review[] {
   const start = hashString(seed) % REVIEW_POOL.length;

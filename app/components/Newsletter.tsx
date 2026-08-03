@@ -41,34 +41,34 @@ export function Newsletter() {
 
   return (
     <div className="newsletter">
-      <p>inscrivez-vous pour un accès exclusif aux nouveautés.</p>
-      <p>−10 % sur votre première commande.</p>
+      <p>sign up for early access to new drops.</p>
+      <p>−10% off your first order.</p>
 
       {status === 'done' ? (
-        <p className="newsletter__success">merci, c&rsquo;est noté.</p>
+        <p className="newsletter__success">thank you &mdash; you&rsquo;re in.</p>
       ) : (
         <form className="newsletter__form" onSubmit={onSubmit}>
           <input
             type="text"
             name="firstName"
-            placeholder="prénom (optionnel)"
+            placeholder="first name (optional)"
             autoComplete="given-name"
-            aria-label="prénom"
+            aria-label="first name"
           />
           <input
             type="email"
             name="email"
-            placeholder="e-mail"
+            placeholder="email"
             required
             autoComplete="email"
-            aria-label="e-mail"
+            aria-label="email"
           />
           <button type="submit" className="btn" disabled={status === 'loading'}>
-            {status === 'loading' ? '…' : "s'inscrire"}
+            {status === 'loading' ? '…' : 'sign up'}
           </button>
           {status === 'error' && (
             <p className="form-error" role="alert" style={{width: '100%'}}>
-              une erreur est survenue, réessayez.
+              something went wrong, please try again.
             </p>
           )}
         </form>

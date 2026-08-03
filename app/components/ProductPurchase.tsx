@@ -55,10 +55,10 @@ export function ProductPurchase({
       : 0;
 
   const stock = !available
-    ? {className: 'buybox__stock--out', label: 'épuisé'}
+    ? {className: 'buybox__stock--out', label: 'sold out'}
     : quantityAvailable !== null && quantityAvailable > 0 && quantityAvailable <= 5
-      ? {className: 'buybox__stock--low', label: `stock limité — ${quantityAvailable} restants`}
-      : {className: 'buybox__stock--in', label: 'en stock'};
+      ? {className: 'buybox__stock--low', label: `low stock — ${quantityAvailable} left`}
+      : {className: 'buybox__stock--in', label: 'in stock'};
 
   const lines = variantId ? [{merchandiseId: variantId, quantity}] : [];
 
@@ -70,10 +70,10 @@ export function ProductPurchase({
         <div className="rating-summary">
           <StarRating rating={rating.value} size={14} />
           <span className="rating-summary__text">
-            évalué <strong>{rating.value.toString().replace('.', ',')}</strong> sur 5
+            rated <strong>{rating.value.toString()}</strong> out of 5
             {typeof rating.count === 'number' && (
               <>
-                {' '}sur <strong>{rating.count}</strong> avis
+                {' '}from <strong>{rating.count}</strong> reviews
               </>
             )}
           </span>
@@ -88,8 +88,8 @@ export function ProductPurchase({
       </div>
 
       <p className="buybox__tax">
-        taxes incluses · <a href="/policies/shipping-policy">frais de port</a>{' '}
-        calculés au paiement.
+        taxes included · <a href="/policies/shipping-policy">shipping</a>{' '}
+        calculated at checkout.
       </p>
 
       {shortDescription && <p className="buybox__blurb">{shortDescription}</p>}
@@ -117,7 +117,7 @@ export function ProductPurchase({
           onClick={() => openAside('cart')}
           lines={lines}
         >
-          {available ? 'ajouter au panier' : 'épuisé'}
+          {available ? 'add to cart' : 'sold out'}
         </AddToCartButton>
         <BuyNowButton disabled={!available} lines={lines}>
           acheter maintenant
@@ -125,9 +125,9 @@ export function ProductPurchase({
       </div>
 
       <ul className="buybox__perks">
-        <li>livraison en 48 h partout en france</li>
-        <li>retours et échanges sous 30 jours</li>
-        <li>paiement sécurisé</li>
+        <li>48-hour delivery across france</li>
+        <li>30-day returns &amp; exchanges</li>
+        <li>secure payment</li>
       </ul>
     </div>
   );

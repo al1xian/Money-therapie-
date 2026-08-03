@@ -68,8 +68,8 @@ export function PageLayout({
 
 function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
   return (
-    <Aside type="cart" heading="panier">
-      <Suspense fallback={<p>chargement…</p>}>
+    <Aside type="cart" heading="cart">
+      <Suspense fallback={<p>loading…</p>}>
         <Await resolve={cart}>
           {(resolved) => <CartMain cart={resolved} layout="aside" />}
         </Await>
@@ -81,7 +81,7 @@ function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
 function SearchAside() {
   const queriesDatalistId = useId();
   return (
-    <Aside type="search" heading="recherche">
+    <Aside type="search" heading="search">
       <div className="predictive-search">
         <SearchFormPredictive>
           {({fetchResults, goToSearch, inputRef}) => (
@@ -91,7 +91,7 @@ function SearchAside() {
                 name="q"
                 onChange={fetchResults}
                 onFocus={fetchResults}
-                placeholder="rechercher un produit"
+                placeholder="search for a product"
                 ref={inputRef}
                 type="search"
                 list={queriesDatalistId}
@@ -108,7 +108,7 @@ function SearchAside() {
             const {articles, collections, pages, products, queries} = items;
 
             if (state === 'loading' && term.current) {
-              return <p className="search-group">recherche…</p>;
+              return <p className="search-group">searching…</p>;
             }
 
             if (!total) {

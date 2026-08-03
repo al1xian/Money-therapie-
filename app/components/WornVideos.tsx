@@ -1,33 +1,56 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 
 /**
- * Vidéos du dossier `public/videos`. Pour en ajouter ou en retirer une, il
- * suffit de modifier ce tableau — le composant ne dépend de rien d'autre.
+ * Videos served from `public/videos`. Add or remove one by editing this array
+ * — the component depends on nothing else.
  */
 const VIDEOS: Array<{src: string; poster: string; label: string}> = [
-  {src: '/videos/porte-01.mp4', poster: '/videos/porte-01.webp', label: 'Look reda studio en extérieur'},
-  {src: '/videos/porte-02.mp4', poster: '/videos/porte-02.webp', label: 'Look reda studio en intérieur'},
-  {src: '/videos/porte-03.mp4', poster: '/videos/porte-03.webp', label: 'Détail d’une pièce reda studio'},
-  {src: '/videos/porte-04.mp4', poster: '/videos/porte-04.webp', label: 'Tenue reda studio portée'},
-  {src: '/videos/porte-05.mp4', poster: '/videos/porte-05.webp', label: 'Pièce reda studio en mouvement'},
+  {src: '/videos/porte-01.mp4', poster: '/videos/porte-01.webp', label: 'reda studio look, outdoors'},
+  {src: '/videos/porte-02.mp4', poster: '/videos/porte-02.webp', label: 'reda studio look, indoors'},
+  {src: '/videos/porte-03.mp4', poster: '/videos/porte-03.webp', label: 'close-up on a reda studio piece'},
+  {src: '/videos/porte-04.mp4', poster: '/videos/porte-04.webp', label: 'reda studio outfit worn'},
+  {src: '/videos/porte-05.mp4', poster: '/videos/porte-05.webp', label: 'reda studio piece in motion'},
 ];
 
 /**
- * Une vignette vidéo.
- *
- * La source n'est posée sur l'élément qu'une fois la carte proche de l'écran :
- * sans cela, la page d'accueil téléchargerait plusieurs mégaoctets de vidéo
- * dès son ouverture. La lecture démarre à l'entrée dans le champ et se met en
- * pause à la sortie, pour ne jamais faire tourner cinq décodeurs à la fois.
+ * The rail renders the list three times over. Scroll position is kept inside
+ * the middle copy: whenever the viewer drifts into the first or last copy, we
+ * jump by exactly one copy's width. That jump lands on a pixel-identical
+ * frame, so the carousel has no start and no end — it can be dragged
+ * indefinitely in either direction.
  */
-function VideoSlide({
-  src,
-  poster,
-  label,
-}: {
+const COPIES = 3;
+
+type Slide = {
+  key: string;
+  index: number;
   src: string;
   poster: string;
   label: string;
+};
+
+const SLIDES: Slide[] = Array.from({length: COPIES}).flatMap((_, copy) =>
+  VIDEOS.map((video, index) => ({
+    key: `${copy}-${video.src}`,
+    index: copy * VIDEOS.length + index,
+    ...video,
+  })),
+);
+
+/**
+ * A single video tile.
+ *
+ * The source is only attached once the tile is near the viewport — otherwise
+ * the homepage would pull several megabytes of video the moment it opens.
+ * Playback starts when the tile enters view and pauses when it leaves, so a
+ * handful of decoders never run at once.
+ */
+function VideoSlide({
+  slide,
+  active,
+}: {
+  slide: Slide;
+  active: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -36,7 +59,7 @@ function VideoSlide({
     const node = videoRef.current;
     if (!node) return;
 
-    // Marge large : la vidéo est prête avant d'être réellement visible.
+    // Generous margin: the file is ready before the tile is actually seen.
     const preloader = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -51,14 +74,14 @@ function VideoSlide({
     const player = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          // play() rejette si le navigateur refuse la lecture automatique ;
-          // la vidéo reste alors sur sa première image, ce qui est voulu.
+          // play() rejects when the browser refuses autoplay; the tile then
+          // stays on its poster, which is the intended fallback.
           void node.play().catch(() => {});
         } else {
           node.pause();
         }
       },
-      {threshold: 0.35},
+      {threshold: 0.3},
     );
     player.observe(node);
 
@@ -69,23 +92,26 @@ function VideoSlide({
   }, []);
 
   return (
-    <div className="worn__slide">
+    <div
+      className={`worn__slide ${active ? 'worn__slide--active' : ''}`}
+      data-index={slide.index}
+    >
       {/*
-        Le poster est la première image de la vidéo : la vignette est déjà
-        visible avant que le fichier ne soit chargé, et le rail ne se remplit
-        pas de rectangles vides au premier affichage.
+        The poster is the video's own first frame, so the tile is already
+        legible before the file loads and the rail never shows empty boxes.
       */}
       <video
         ref={videoRef}
         className="worn__video"
-        src={loaded ? src : undefined}
-        poster={poster}
-        aria-label={label}
+        src={loaded ? slide.src : undefined}
+        poster={slide.poster}
+        aria-label={slide.label}
         muted
         loop
         playsInline
         autoPlay
         preload="none"
+        draggable={false}
       />
     </div>
   );
@@ -106,37 +132,112 @@ function Arrow({direction}: {direction: 'left' | 'right'}) {
 }
 
 /**
- * « Nos produits portés » — carrousel horizontal de vidéos.
+ * "Our products worn" — an endless horizontal video carousel.
  *
- * Composant autonome : il lit les fichiers du dossier `public/videos` et ne
- * dépend ni du catalogue Shopify ni d'aucun autre composant du site.
+ * Self-contained: it reads the files in `public/videos` and depends on
+ * neither the Shopify catalogue nor any other component.
  */
 export function WornVideos() {
   const railRef = useRef<HTMLDivElement | null>(null);
-  const [atStart, setAtStart] = useState(true);
-  const [atEnd, setAtEnd] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  /** Set while we reposition the rail, so the correction isn't treated as a scroll. */
+  const correcting = useRef(false);
 
-  /** Désactive la flèche correspondante quand le rail bute d'un côté. */
-  const syncEdges = useCallback(() => {
+  /**
+   * Keeps the viewer inside the middle copy and marks the centre tile.
+   * Both jobs read the same measurements, so they share one pass.
+   */
+  const onScroll = useCallback(() => {
     const rail = railRef.current;
-    if (!rail) return;
-    const max = rail.scrollWidth - rail.clientWidth;
-    setAtStart(rail.scrollLeft <= 1);
-    setAtEnd(rail.scrollLeft >= max - 1);
+    if (!rail || correcting.current) return;
+
+    const copyWidth = rail.scrollWidth / COPIES;
+
+    // Wrap around before either edge is reached, on a whole copy width: the
+    // pixels under the viewport are identical, so nothing is visible.
+    if (rail.scrollLeft < copyWidth * 0.5) {
+      correcting.current = true;
+      rail.scrollLeft += copyWidth;
+      requestAnimationFrame(() => (correcting.current = false));
+    } else if (rail.scrollLeft > copyWidth * 1.5) {
+      correcting.current = true;
+      rail.scrollLeft -= copyWidth;
+      requestAnimationFrame(() => (correcting.current = false));
+    }
+
+    // The tile whose centre is closest to the rail's centre takes focus.
+    const middle = rail.scrollLeft + rail.clientWidth / 2;
+    let best = -1;
+    let bestGap = Infinity;
+    for (const child of Array.from(rail.children) as HTMLElement[]) {
+      const gap = Math.abs(child.offsetLeft + child.offsetWidth / 2 - middle);
+      if (gap < bestGap) {
+        bestGap = gap;
+        best = Number(child.dataset.index);
+      }
+    }
+    setActiveIndex(best);
   }, []);
 
+  // Start in the middle copy so there is room to drag either way immediately.
   useEffect(() => {
-    syncEdges();
-    window.addEventListener('resize', syncEdges);
-    return () => window.removeEventListener('resize', syncEdges);
-  }, [syncEdges]);
-
-  function scrollByPage(direction: 1 | -1) {
     const rail = railRef.current;
     if (!rail) return;
-    // Une carte + son écart : le rail avance d'un cran net, jamais à moitié.
-    const step = rail.firstElementChild?.clientWidth ?? rail.clientWidth;
-    rail.scrollBy({left: direction * (step + 16), behavior: 'smooth'});
+    rail.scrollLeft = rail.scrollWidth / COPIES;
+    onScroll();
+
+    window.addEventListener('resize', onScroll);
+    return () => window.removeEventListener('resize', onScroll);
+  }, [onScroll]);
+
+  // Pointer drag on desktop. Touch is left to the browser's native scrolling,
+  // which already handles momentum better than any JS equivalent.
+  useEffect(() => {
+    const rail = railRef.current;
+    if (!rail) return;
+
+    let dragging = false;
+    let startX = 0;
+    let startScroll = 0;
+
+    function down(event: PointerEvent) {
+      if (event.pointerType === 'touch') return;
+      dragging = true;
+      startX = event.clientX;
+      startScroll = rail!.scrollLeft;
+      rail!.classList.add('worn__rail--dragging');
+    }
+
+    function move(event: PointerEvent) {
+      if (!dragging) return;
+      event.preventDefault();
+      rail!.scrollLeft = startScroll - (event.clientX - startX);
+    }
+
+    function up() {
+      if (!dragging) return;
+      dragging = false;
+      rail!.classList.remove('worn__rail--dragging');
+    }
+
+    rail.addEventListener('pointerdown', down);
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
+    return () => {
+      rail.removeEventListener('pointerdown', down);
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
+    };
+  }, []);
+
+  function step(direction: 1 | -1) {
+    const rail = railRef.current;
+    if (!rail) return;
+    const slide = rail.firstElementChild as HTMLElement | null;
+    const width = slide ? slide.offsetWidth + 24 : rail.clientWidth;
+    rail.scrollBy({left: direction * width, behavior: 'smooth'});
   }
 
   if (!VIDEOS.length) return null;
@@ -144,27 +245,25 @@ export function WornVideos() {
   return (
     <section className="worn" aria-labelledby="worn-heading">
       <h2 className="worn__title" id="worn-heading">
-        nos produits portés
+        our products worn
       </h2>
 
       <div className="worn__viewport">
         <button
           type="button"
           className="worn__arrow worn__arrow--prev"
-          onClick={() => scrollByPage(-1)}
-          disabled={atStart}
-          aria-label="Vidéos précédentes"
+          onClick={() => step(-1)}
+          aria-label="Previous videos"
         >
           <Arrow direction="left" />
         </button>
 
-        <div className="worn__rail" ref={railRef} onScroll={syncEdges}>
-          {VIDEOS.map((video) => (
+        <div className="worn__rail" ref={railRef} onScroll={onScroll}>
+          {SLIDES.map((slide) => (
             <VideoSlide
-              key={video.src}
-              src={video.src}
-              poster={video.poster}
-              label={video.label}
+              key={slide.key}
+              slide={slide}
+              active={slide.index === activeIndex}
             />
           ))}
         </div>
@@ -172,9 +271,8 @@ export function WornVideos() {
         <button
           type="button"
           className="worn__arrow worn__arrow--next"
-          onClick={() => scrollByPage(1)}
-          disabled={atEnd}
-          aria-label="Vidéos suivantes"
+          onClick={() => step(1)}
+          aria-label="Next videos"
         >
           <Arrow direction="right" />
         </button>

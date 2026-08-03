@@ -45,7 +45,7 @@ export function Header({header, cart, navCollections}: HeaderProps) {
         <button
           className="site-header__icon-btn site-header__burger"
           onClick={() => open('mobile')}
-          aria-label="Ouvrir le menu"
+          aria-label="Open menu"
         >
           <BurgerIcon />
         </button>
@@ -73,7 +73,7 @@ export function Header({header, cart, navCollections}: HeaderProps) {
         <button
           className="site-header__icon-btn"
           onClick={() => open('search')}
-          aria-label="Rechercher"
+          aria-label="Search"
         >
           <SearchIcon />
         </button>
@@ -137,7 +137,7 @@ function CartButton({count}: {count: number}) {
   return (
     <button
       className="site-header__icon-btn"
-      aria-label={`Panier, ${count} article${count > 1 ? 's' : ''}`}
+      aria-label={`Cart, ${count} item${count > 1 ? 's' : ''}`}
       onClick={() => {
         open('cart');
         publish('cart_viewed', {

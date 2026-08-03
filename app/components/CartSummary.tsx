@@ -25,15 +25,15 @@ export function CartSummary({cart}: CartSummaryProps) {
         </div>
         <span className="shipping-progress__label">
           {remaining > 0
-            ? `plus que ${formatMoney(remaining, currency)} pour la livraison offerte`
-            : 'livraison offerte débloquée ✓'}
+            ? `${formatMoney(remaining, currency)} away from free shipping`
+            : 'free shipping unlocked ✓'}
         </span>
       </div>
 
       <CartDiscounts discountCodes={cart?.discountCodes} />
 
       <div className="cart-summary__row">
-        <span>sous-total</span>
+        <span>subtotal</span>
         <span>
           {cart?.cost?.subtotalAmount?.amount ? (
             <Money data={cart.cost.subtotalAmount} />
@@ -42,7 +42,7 @@ export function CartSummary({cart}: CartSummaryProps) {
           )}
         </span>
       </div>
-      <p className="cart-summary__note">taxes incluses · livraison calculée au paiement</p>
+      <p className="cart-summary__note">taxes included · shipping calculated at checkout</p>
 
       <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} />
     </div>
@@ -51,7 +51,7 @@ export function CartSummary({cart}: CartSummaryProps) {
 
 function formatMoney(amount: number, currency: string) {
   try {
-    return new Intl.NumberFormat('fr-FR', {style: 'currency', currency}).format(amount);
+    return new Intl.NumberFormat('en-US', {style: 'currency', currency}).format(amount);
   } catch {
     return `${amount.toFixed(2)} ${currency}`;
   }
@@ -61,7 +61,7 @@ function CartCheckoutActions({checkoutUrl}: {checkoutUrl?: string}) {
   if (!checkoutUrl) return null;
   return (
     <a href={checkoutUrl} target="_self" className="btn btn--full">
-      passer au paiement
+      proceed to checkout
     </a>
   );
 }
@@ -90,7 +90,7 @@ function CartDiscounts({
 
       <UpdateDiscountForm discountCodes={codes}>
         <div className="cart-discount-form">
-          <input ref={inputRef} type="text" name="discountCode" placeholder="code promo" aria-label="code promo" />
+          <input ref={inputRef} type="text" name="discountCode" placeholder="promo code" aria-label="promo code" />
           <button type="submit">ok</button>
         </div>
       </UpdateDiscountForm>

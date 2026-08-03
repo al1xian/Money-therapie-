@@ -20,14 +20,14 @@ export function QuantitySelector({
 
   return (
     <div className="quantity">
-      <span className="quantity__label">quantité</span>
+      <span className="quantity__label">quantity</span>
       <div className="quantity__control">
         <button
           type="button"
           className="quantity__btn"
           onClick={() => onChange(Math.max(1, value - 1))}
           disabled={!canDecrease}
-          aria-label="Diminuer la quantité"
+          aria-label="Decrease quantity"
         >
           −
         </button>
@@ -39,7 +39,7 @@ export function QuantitySelector({
           className="quantity__btn"
           onClick={() => onChange(Math.min(ceiling, value + 1))}
           disabled={!canIncrease}
-          aria-label="Augmenter la quantité"
+          aria-label="Increase quantity"
         >
           +
         </button>

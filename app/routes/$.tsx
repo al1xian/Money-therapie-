@@ -15,7 +15,7 @@ export function ErrorBoundary() {
   return (
     <div className="not-found">
       <h1>404</h1>
-      <p>cette page n&rsquo;existe pas ou plus.</p>
+      <p>this page doesn&rsquo;t exist.</p>
       <Link to="/" className="btn--ghost">
         retour à l&rsquo;accueil
       </Link>

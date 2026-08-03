@@ -14,7 +14,7 @@ export async function action({request, context}: Route.ActionArgs): Promise<Acti
   const message = String(formData.get('message') || '').trim();
 
   if (!name || !email || !message) {
-    return {ok: false, error: 'merci de compléter tous les champs.'};
+    return {ok: false, error: 'please fill in every field.'};
   }
 
   const shopDomain = context.env.PUBLIC_STORE_DOMAIN;
@@ -35,7 +35,7 @@ export async function action({request, context}: Route.ActionArgs): Promise<Acti
     return {ok: true};
   } catch (error) {
     console.error('Contact form failed', error);
-    return {ok: false, error: "l'envoi a échoué, réessayez plus tard."};
+    return {ok: false, error: 'sending failed, please try again later.'};
   }
 }
 
@@ -47,18 +47,18 @@ export default function Contact() {
   return (
     <div className="page">
       <h1>contact</h1>
-      <p>une question sur une commande, un produit ou une collaboration ? écrivez-nous.</p>
+      <p>a question about an order, a piece or a collaboration? write to us.</p>
 
       {actionData?.ok ? (
         <p className="form-success" role="status">
-          merci, votre message a bien été envoyé.
+          thank you — your message has been sent.
         </p>
       ) : (
         <Form method="post" className="contact-form" replace>
-          <label htmlFor="name">nom</label>
+          <label htmlFor="name">name</label>
           <input id="name" name="name" type="text" required autoComplete="name" />
 
-          <label htmlFor="email">e-mail</label>
+          <label htmlFor="email">email</label>
           <input id="email" name="email" type="email" required autoComplete="email" />
 
           <label htmlFor="message">message</label>
@@ -72,7 +72,7 @@ export default function Contact() {
 
           <br />
           <button type="submit" className="btn" disabled={submitting}>
-            {submitting ? 'envoi…' : 'envoyer'}
+            {submitting ? 'sending…' : 'send'}
           </button>
         </Form>
       )}
