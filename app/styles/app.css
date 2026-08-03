@@ -1015,7 +1015,12 @@
 * --------------------------------------------------
 */
 .collections-slider {
-  padding: 1.5rem 0 0.5rem;
+  padding: 0 0 0.5rem;
+}
+
+/* The heading brings its own top padding via .section-title. */
+.collections-slider .section-title {
+  padding-bottom: 1.25rem;
 }
 
 .collections-slider__track {
@@ -2786,6 +2791,14 @@
 
 .bundle__cta {
   margin-top: 0.35rem;
+}
+
+.bundle__note {
+  margin-top: 0.65rem;
+  font-size: 0.7rem;
+  line-height: 1.6;
+  text-align: center;
+  color: var(--color-muted);
 }
 
 /*

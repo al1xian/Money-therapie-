@@ -1,5 +1,6 @@
 import {type FetcherWithComponents} from 'react-router';
 import {CartForm, type OptimisticCartLineInput} from '@shopify/hydrogen';
+import {BUNDLE_ADD_ACTION} from '~/lib/offers';
 
 export function AddToCartButton({
   analytics,
@@ -8,6 +9,7 @@ export function AddToCartButton({
   lines,
   onClick,
   className = 'btn btn--full',
+  bundle = false,
 }: {
   analytics?: unknown;
   children: React.ReactNode;
@@ -15,9 +17,16 @@ export function AddToCartButton({
   lines: Array<OptimisticCartLineInput>;
   onClick?: () => void;
   className?: string;
+  /**
+   * Routes the submit through the cart's bundle action, which adds the lines
+   * and applies the offer's discount code in the same request.
+   */
+  bundle?: boolean;
 }) {
+  const action = bundle ? BUNDLE_ADD_ACTION : CartForm.ACTIONS.LinesAdd;
+
   return (
-    <CartForm route="/cart" inputs={{lines}} action={CartForm.ACTIONS.LinesAdd}>
+    <CartForm route="/cart" inputs={{lines}} action={action}>
       {(fetcher: FetcherWithComponents<any>) => (
         <>
           <input
@@ -31,7 +40,7 @@ export function AddToCartButton({
             onClick={onClick}
             disabled={disabled ?? fetcher.state !== 'idle'}
           >
-            {fetcher.state !== 'idle' ? 'ajout…' : children}
+            {fetcher.state !== 'idle' ? 'adding…' : children}
           </button>
         </>
       )}

@@ -3,6 +3,7 @@ import type {Route} from './+types/cart';
 import type {CartQueryDataReturn} from '@shopify/hydrogen';
 import {CartForm} from '@shopify/hydrogen';
 import {CartMain} from '~/components/CartMain';
+import {BUNDLE_ADD_ACTION, FREE_CAP_DISCOUNT_CODE} from '~/lib/offers';
 
 export const meta: Route.MetaFunction = () => {
   return [{title: `reda studio | cart`}];
@@ -28,6 +29,31 @@ export async function action({request, context}: Route.ActionArgs) {
     case CartForm.ACTIONS.LinesAdd:
       result = await cart.addLines(inputs.lines);
       break;
+    /*
+     * Bundle add: the set's lines plus the offer's discount code, in a single
+     * request. Doing it in one round trip keeps the two cart mutations
+     * sequential — two concurrent writes to the same cart can conflict — and
+     * guarantees the checkout sees the discount the product page promised.
+     */
+    case BUNDLE_ADD_ACTION: {
+      // A custom action's inputs are untyped, so the lines are narrowed here.
+      const bundleLines = inputs.lines as Parameters<typeof cart.addLines>[0];
+      result = await cart.addLines(bundleLines);
+
+      if (FREE_CAP_DISCOUNT_CODE) {
+        const applied = (result?.cart?.discountCodes ?? [])
+          .filter((discount) => discount.applicable)
+          .map((discount) => discount.code);
+
+        if (!applied.includes(FREE_CAP_DISCOUNT_CODE)) {
+          result = await cart.updateDiscountCodes([
+            ...applied,
+            FREE_CAP_DISCOUNT_CODE,
+          ]);
+        }
+      }
+      break;
+    }
     case CartForm.ACTIONS.LinesUpdate:
       result = await cart.updateLines(inputs.lines);
       break;

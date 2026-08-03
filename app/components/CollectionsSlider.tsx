@@ -24,7 +24,11 @@ export function CollectionsSlider({collections}: {collections: SliderCollection[
   if (!collections.length) return null;
 
   return (
-    <Reveal as="section" className="collections-slider" aria-label="Collections">
+    <Reveal as="section" className="collections-slider" aria-labelledby="basics-heading">
+      <h2 className="section-title" id="basics-heading">
+        our basics
+      </h2>
+
       <div className="collections-slider__track">
         {collections.map((collection) => (
           <Link
