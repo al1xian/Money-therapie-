@@ -30,10 +30,18 @@ export async function action({request, context}: Route.ActionArgs) {
       result = await cart.addLines(inputs.lines);
       break;
     /*
-     * Bundle add: the set's lines plus the offer's discount code, in a single
-     * request. Doing it in one round trip keeps the two cart mutations
-     * sequential — two concurrent writes to the same cart can conflict — and
-     * guarantees the checkout sees the discount the product page promised.
+     * Bundle add: the set's lines, plus the offer's discount code when the
+     * offer is running. One round trip keeps the two cart mutations sequential
+     * — two concurrent writes to the same cart can conflict.
+     *
+     * Adding the lines is the part that must not fail: it is the sale. The
+     * discount is applied inside a try/catch so that a missing, expired or
+     * rejected code can never take the cart mutation down with it. The
+     * customer ends up with the items either way, and can always check out.
+     *
+     * The case stays registered even when the offer is off, so a browser
+     * holding a cached page from when it was on still adds to cart instead of
+     * hitting the "not defined" throw below.
      */
     case BUNDLE_ADD_ACTION: {
       // A custom action's inputs are untyped, so the lines are narrowed here.
@@ -41,15 +49,21 @@ export async function action({request, context}: Route.ActionArgs) {
       result = await cart.addLines(bundleLines);
 
       if (FREE_CAP_DISCOUNT_CODE) {
-        const applied = (result?.cart?.discountCodes ?? [])
-          .filter((discount) => discount.applicable)
-          .map((discount) => discount.code);
+        try {
+          const applied = (result?.cart?.discountCodes ?? [])
+            .filter((discount) => discount.applicable)
+            .map((discount) => discount.code);
 
-        if (!applied.includes(FREE_CAP_DISCOUNT_CODE)) {
-          result = await cart.updateDiscountCodes([
-            ...applied,
-            FREE_CAP_DISCOUNT_CODE,
-          ]);
+          if (!applied.includes(FREE_CAP_DISCOUNT_CODE)) {
+            const discounted = await cart.updateDiscountCodes([
+              ...applied,
+              FREE_CAP_DISCOUNT_CODE,
+            ]);
+            // Only adopt the discounted cart if it really came back.
+            if (discounted?.cart) result = discounted;
+          }
+        } catch (error) {
+          console.error('Free-cap discount could not be applied', error);
         }
       }
       break;
