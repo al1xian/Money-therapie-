@@ -1,28 +1,26 @@
 /**
- * Discount code backing the "buy the piece, get the cap free" offer.
+ * Cap offer — €10 off the cap when the customer buys any other product.
  *
  * A storefront cannot change a price: what the customer pays is decided by
  * Shopify at cart and checkout. So the offer is driven by a real Shopify
  * discount, and the storefront's job is to apply it to the cart automatically
- * whenever the set is added — see the `CustomBundleAdd` case in
- * app/routes/cart.tsx.
+ * when the set is added — see the `CustomBundleAdd` case in app/routes/cart.tsx.
  *
- * IT IS OFF BY DEFAULT, ON PURPOSE. Turning it on before the matching discount
- * exists in Shopify has two costs: the page promises a free cap the cart will
- * charge for, and every "add set to cart" fires a second cart mutation that can
- * only fail — on the one path where a failure costs a sale.
+ * The matching discount must exist in Shopify Admin → Discounts, as a
+ * "Buy X get Y" code discount using exactly this code, granting €10 off the
+ * cap. Until it does, the page announces a reduction the cart will not apply.
+ * The procedure is in docs/cap-offer.md.
  *
- * To switch it on, once and only once the discount is live in Shopify Admin →
- * Discounts as a "Buy X get Y" code discount using exactly this code:
- *
- *     export const FREE_CAP_DISCOUNT_CODE = 'FREECAP';
- *
- * The full procedure is in docs/free-cap-offer.md.
+ * Set the code to an empty string to switch the offer off: the cap then shows
+ * at its real price everywhere and no code is applied.
  */
-export const FREE_CAP_DISCOUNT_CODE: string = '';
+export const CAP_DISCOUNT_CODE: string = 'CAP10';
 
-/** True while the free-cap offer is active. */
-export const FREE_CAP_ENABLED: boolean = FREE_CAP_DISCOUNT_CODE.length > 0;
+/** Amount taken off the cap, in the store's currency. */
+export const CAP_DISCOUNT_AMOUNT = 10;
+
+/** True while the cap offer is active. */
+export const CAP_OFFER_ENABLED: boolean = CAP_DISCOUNT_CODE.length > 0;
 
 /**
  * Custom cart action: add the set's lines, then apply the offer's code.

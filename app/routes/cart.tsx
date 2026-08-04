@@ -3,7 +3,7 @@ import type {Route} from './+types/cart';
 import type {CartQueryDataReturn} from '@shopify/hydrogen';
 import {CartForm} from '@shopify/hydrogen';
 import {CartMain} from '~/components/CartMain';
-import {BUNDLE_ADD_ACTION, FREE_CAP_DISCOUNT_CODE} from '~/lib/offers';
+import {BUNDLE_ADD_ACTION, CAP_DISCOUNT_CODE} from '~/lib/offers';
 
 export const meta: Route.MetaFunction = () => {
   return [{title: `reda studio | cart`}];
@@ -48,22 +48,22 @@ export async function action({request, context}: Route.ActionArgs) {
       const bundleLines = inputs.lines as Parameters<typeof cart.addLines>[0];
       result = await cart.addLines(bundleLines);
 
-      if (FREE_CAP_DISCOUNT_CODE) {
+      if (CAP_DISCOUNT_CODE) {
         try {
           const applied = (result?.cart?.discountCodes ?? [])
             .filter((discount) => discount.applicable)
             .map((discount) => discount.code);
 
-          if (!applied.includes(FREE_CAP_DISCOUNT_CODE)) {
+          if (!applied.includes(CAP_DISCOUNT_CODE)) {
             const discounted = await cart.updateDiscountCodes([
               ...applied,
-              FREE_CAP_DISCOUNT_CODE,
+              CAP_DISCOUNT_CODE,
             ]);
             // Only adopt the discounted cart if it really came back.
             if (discounted?.cart) result = discounted;
           }
         } catch (error) {
-          console.error('Free-cap discount could not be applied', error);
+          console.error('Cap discount could not be applied', error);
         }
       }
       break;
@@ -121,6 +121,20 @@ export async function action({request, context}: Route.ActionArgs) {
   if (typeof redirectTo === 'string') {
     status = 303;
     headers.set('Location', redirectTo);
+  }
+
+  /*
+   * "Buy now" posts this flag and expects the server to send the customer
+   * straight to checkout. Redirecting here rather than from the browser keeps
+   * the whole thing one navigation: nothing is fetched client-side, so nothing
+   * can be aborted mid-flight and surface as an error.
+   *
+   * If the cart came back without a checkout URL we simply fall through to the
+   * cart page — a missing URL must not cost the customer their basket.
+   */
+  if (formData.get('checkoutAfterAdd') === 'true') {
+    status = 303;
+    headers.set('Location', cartResult?.checkoutUrl ?? '/cart');
   }
 
   return data(

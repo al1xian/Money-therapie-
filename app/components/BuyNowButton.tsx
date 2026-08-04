@@ -1,11 +1,20 @@
-import {useEffect} from 'react';
-import {useFetcher} from 'react-router';
+import {Form} from 'react-router';
 import {CartForm, type OptimisticCartLineInput} from '@shopify/hydrogen';
 
 /**
- * "Buy now": adds the line to the cart, then redirects straight to the
- * Shopify checkout using the checkoutUrl returned by the cart action. Falls
- * back gracefully (does nothing beyond the add) if no URL comes back.
+ * "Buy now": adds the line to the cart, then goes straight to the Shopify
+ * checkout.
+ *
+ * The redirect is done by the server, not the browser. An earlier version
+ * submitted through a fetcher and then set `window.location.href` once the
+ * checkout URL came back — but navigating away mid-flight aborts React
+ * Router's follow-up revalidation request, and Safari surfaces that abort as
+ * `TypeError: Load failed`, which lands in the root error boundary. The
+ * customer saw a 500 flash on the way to payment.
+ *
+ * `reloadDocument` makes this a plain browser form POST: no client-side fetch
+ * to abort, and the action answers with a 303 to the checkout URL, which the
+ * browser simply follows.
  */
 export function BuyNowButton({
   disabled,
@@ -16,26 +25,21 @@ export function BuyNowButton({
   lines: Array<OptimisticCartLineInput>;
   children: React.ReactNode;
 }) {
-  const fetcher = useFetcher<{cart?: {checkoutUrl?: string}}>();
-
-  useEffect(() => {
-    const url = fetcher.data?.cart?.checkoutUrl;
-    if (url) {
-      window.location.href = url;
-    }
-  }, [fetcher.data]);
-
-  const busy = fetcher.state !== 'idle';
-
   return (
-    <fetcher.Form method="post" action="/cart">
-      <input type="hidden" name="cartFormInput" value={JSON.stringify({
-        action: CartForm.ACTIONS.LinesAdd,
-        inputs: {lines},
-      })} />
-      <button type="submit" className="btn btn--full" disabled={disabled || busy}>
-        {busy ? 'redirection…' : children}
+    <Form method="post" action="/cart" reloadDocument>
+      <input
+        type="hidden"
+        name="cartFormInput"
+        value={JSON.stringify({
+          action: CartForm.ACTIONS.LinesAdd,
+          inputs: {lines},
+        })}
+      />
+      {/* Tells the cart action to answer with a redirect to checkout. */}
+      <input type="hidden" name="checkoutAfterAdd" value="true" />
+      <button type="submit" className="btn btn--full" disabled={disabled}>
+        {children}
       </button>
-    </fetcher.Form>
+    </Form>
   );
 }

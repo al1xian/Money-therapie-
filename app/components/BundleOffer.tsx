@@ -2,7 +2,7 @@ import {Image, Money} from '@shopify/hydrogen';
 import type {MoneyV2} from '@shopify/hydrogen/storefront-api-types';
 import {AddToCartButton} from '~/components/AddToCartButton';
 import {useAside} from '~/components/Aside';
-import {FREE_CAP_ENABLED} from '~/lib/offers';
+import {CAP_DISCOUNT_AMOUNT, CAP_OFFER_ENABLED} from '~/lib/offers';
 
 export type GiftProduct = {
   id: string;
@@ -44,10 +44,18 @@ export function BundleOffer({
   const giftAmount = Number(gift.price.amount);
   const currency = productPrice.currencyCode;
 
-  // With the cap free the set costs the piece alone; otherwise it is the
-  // honest sum of both items.
-  const bundleTotal = FREE_CAP_ENABLED ? mainAmount : mainAmount + giftAmount;
+  /*
+   * The offer takes a fixed amount off the cap, never below zero — a cap
+   * cheaper than the discount would otherwise show a negative price.
+   */
+  const capDiscount = CAP_OFFER_ENABLED
+    ? Math.min(CAP_DISCOUNT_AMOUNT, giftAmount)
+    : 0;
+  const discountedGift = giftAmount - capDiscount;
+
+  const bundleTotal = mainAmount + discountedGift;
   const strikeTotal = mainAmount + giftAmount;
+  const showsDiscount = capDiscount > 0;
 
   const lines = [
     {merchandiseId: productVariantId, quantity: 1},
@@ -61,16 +69,21 @@ export function BundleOffer({
       </h2>
 
       <div className="bundle__box">
-        {FREE_CAP_ENABLED && (
-          <span className="bundle__ribbon">{gift.title} free</span>
+        {showsDiscount && (
+          <span className="bundle__ribbon">
+            <Money
+              data={{amount: capDiscount.toFixed(2), currencyCode: currency}}
+            />
+            &nbsp;off the {gift.title.toLowerCase()}
+          </span>
         )}
 
         <div className="bundle__top">
           <div>
             <p className="bundle__set-title">the complete set</p>
             <p className="bundle__set-sub">
-              {FREE_CAP_ENABLED
-                ? 'buy the piece, the cap is on us'
+              {showsDiscount
+                ? 'add any piece and the cap drops in price'
                 : 'same aesthetic, same details'}
             </p>
           </div>
@@ -78,7 +91,7 @@ export function BundleOffer({
             <span className="bundle__total">
               <Money data={{amount: bundleTotal.toFixed(2), currencyCode: currency}} />
             </span>
-            {FREE_CAP_ENABLED && strikeTotal > bundleTotal && (
+            {showsDiscount && strikeTotal > bundleTotal && (
               <s className="bundle__strike">
                 <Money data={{amount: strikeTotal.toFixed(2), currencyCode: currency}} />
               </s>
@@ -115,9 +128,16 @@ export function BundleOffer({
           </span>
           <span className="bundle__item-name">{gift.title}</span>
           <span className="bundle__item-price">
-            {FREE_CAP_ENABLED ? (
+            {showsDiscount ? (
               <>
-                <span className="bundle__gift-badge">free</span>
+                <span className="bundle__gift-badge">
+                  <Money
+                    data={{
+                      amount: discountedGift.toFixed(2),
+                      currencyCode: currency,
+                    }}
+                  />
+                </span>
                 <s className="bundle__strike">
                   <Money data={gift.price} />
                 </s>
@@ -133,12 +153,12 @@ export function BundleOffer({
           disabled={!available}
           onClick={() => openAside('cart')}
           lines={lines}
-          bundle={FREE_CAP_ENABLED}
+          bundle={CAP_OFFER_ENABLED}
         >
           {available ? 'add set to cart' : 'sold out'}
         </AddToCartButton>
 
-        {FREE_CAP_ENABLED && (
+        {showsDiscount && (
           <p className="bundle__note">
             the discount is applied to your cart automatically and carried
             through to checkout.
