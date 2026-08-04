@@ -22,6 +22,7 @@ import {ProductReviews} from '~/components/ProductReviews';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {getProductFaq} from '~/data/faq';
 import {parseRating} from '~/lib/rating';
+import {onlyShowcaseCollections} from '~/lib/collections';
 import {getRatingForSeed} from '~/data/reviews';
 
 export const meta: Route.MetaFunction = ({data}) => {
@@ -110,20 +111,15 @@ function loadDeferredData(
     return merged;
   });
 
-  // Real collections for the showcase closing the page, so every tile links
-  // somewhere that exists. The two handles Shopify creates by default carry no
-  // editorial meaning, so they're filtered out — same rule as the header nav.
+  /*
+   * The "join the community" showcase closing the page. It is deliberately
+   * restricted to the drops named in ~/lib/collections — an allowlist, so a
+   * new collection created in Shopify does not silently appear here. Every
+   * tile still comes from a real Shopify collection, so none of them 404.
+   */
   const showcaseCollections = context.storefront
-    .query(SHOWCASE_COLLECTIONS_QUERY, {variables: {first: 10}})
-    .then((data) =>
-      (data?.collections?.nodes ?? [])
-        .filter(
-          (collection) =>
-            collection.handle !== 'frontpage' &&
-            collection.title.toLowerCase() !== 'home page',
-        )
-        .slice(0, 4),
-    )
+    .query(SHOWCASE_COLLECTIONS_QUERY, {variables: {first: 50}})
+    .then((data) => onlyShowcaseCollections(data?.collections?.nodes ?? []))
     .catch((error: Error) => {
       console.error(error);
       return [];

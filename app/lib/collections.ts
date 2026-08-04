@@ -1,15 +1,22 @@
 /**
- * Collections volontairement absentes de la page d'accueil : elles restent
- * accessibles (header, page /collections, vitrine des pages produit), mais
- * ne s'affichent pas dans le carrousel de l'accueil.
+ * Collections deliberately kept off the homepage carousel. They stay reachable
+ * everywhere else — header, /collections, the product page showcase — they
+ * just don't sit among the "our basics" tiles.
  *
- * Le filtre porte sur le handle ET sur le titre normalisé, pour rester
- * efficace même si le handle Shopify diffère (« summer-drop », « summerdrop »,
- * un titre renommé, etc.).
+ * Matching is done on the handle AND on the normalised title, so it keeps
+ * working whatever Shopify's handle looks like ("summer-drop", "summerdrop",
+ * a renamed title, and so on).
  */
-const HIDDEN_FROM_HOME = ['summer drop', 'all in drop'];
+const HIDDEN_FROM_HOME = ['summer drop', 'all in drop', 'win drop'];
 
-/** « SUMMER DROP » / « summer-drop » → « summer drop ». */
+/**
+ * The only collections shown in the "join the community" showcase closing each
+ * product page. An allowlist rather than an exclusion list: new collections
+ * created in Shopify stay out of it until they are named here on purpose.
+ */
+const SHOWCASE_ONLY = ['win drop', 'all in drop'];
+
+/** "SUMMER DROP" / "summer-drop" → "summer drop". */
 function normalize(value: string): string {
   return value
     .toLowerCase()
@@ -19,19 +26,40 @@ function normalize(value: string): string {
     .trim();
 }
 
-/** True quand la collection ne doit pas apparaître sur la page d'accueil. */
+/** True when either the handle or the title matches one of `names`. */
+function matches(
+  collection: {handle: string; title: string},
+  names: string[],
+): boolean {
+  const handle = normalize(collection.handle);
+  const title = normalize(collection.title);
+  return names.some((name) => name === handle || name === title);
+}
+
+/** True when the collection must not appear on the homepage. */
 export function isHiddenFromHome(collection: {
   handle: string;
   title: string;
 }): boolean {
-  const handle = normalize(collection.handle);
-  const title = normalize(collection.title);
-  return HIDDEN_FROM_HOME.some((name) => name === handle || name === title);
+  return matches(collection, HIDDEN_FROM_HOME);
 }
 
-/** Retire de la liste les collections masquées sur la page d'accueil. */
+/** Drops the collections hidden from the homepage. */
 export function withoutHomeHiddenCollections<
   T extends {handle: string; title: string},
 >(collections: T[]): T[] {
   return collections.filter((collection) => !isHiddenFromHome(collection));
+}
+
+/**
+ * Keeps only the showcase collections, in the order given by SHOWCASE_ONLY
+ * rather than the order Shopify happens to return — so the row reads the same
+ * every time.
+ */
+export function onlyShowcaseCollections<
+  T extends {handle: string; title: string},
+>(collections: T[]): T[] {
+  return SHOWCASE_ONLY.flatMap(
+    (name) => collections.filter((collection) => matches(collection, [name])),
+  );
 }
