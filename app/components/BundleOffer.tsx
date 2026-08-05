@@ -160,8 +160,8 @@ export function BundleOffer({
 
         {showsDiscount && (
           <p className="bundle__note">
-            the discount is applied to your cart automatically and carried
-            through to checkout.
+            no code needed — the discount applies itself in your cart and at
+            checkout.
           </p>
         )}
       </div>

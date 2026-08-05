@@ -109,8 +109,8 @@
 */
 .btn--shiny {
   --shine: 255 255 255;
-  --shine-face: 38%;
-  --shine-edge: 55%;
+  --shine-face: 60%;
+  --shine-edge: 80%;
 
   position: relative;
   overflow: hidden;
@@ -121,18 +121,18 @@
    at the same strength a black band on white reads as a smudge, not a shine. */
 .btn--outline.btn--shiny {
   --shine: 17 17 17;
-  --shine-face: 11%;
-  --shine-edge: 20%;
+  --shine-face: 14%;
+  --shine-edge: 26%;
 }
 
 /* …until it inverts on hover, where the light sweep works again. */
 .btn--outline.btn--shiny:hover:not(:disabled) {
   --shine: 255 255 255;
-  --shine-face: 38%;
-  --shine-edge: 55%;
+  --shine-face: 60%;
+  --shine-edge: 80%;
 }
 
-/* Surface sweep: a narrow diagonal band of light. */
+/* Surface sweep: a diagonal band of light. */
 .btn__shine {
   position: absolute;
   inset: 0;
@@ -141,13 +141,20 @@
   pointer-events: none;
   background: linear-gradient(
     -75deg,
-    transparent calc(var(--x) + 18%),
+    transparent calc(var(--x) + 14%),
     rgb(var(--shine) / var(--shine-face)) calc(var(--x) + 27%),
-    transparent calc(var(--x) + 36%)
+    transparent calc(var(--x) + 40%)
   );
 }
 
-/* Edge sweep: the same gradient, masked down to the 1px border. */
+/*
+* Edge sweep: the same gradient, masked down to the 1px border.
+*
+* The `-webkit-` pair is not decoration. Safari only shipped the unprefixed
+* `mask-composite` in 18.2; without the prefixed fallback, older Safari
+* ignores the exclusion and paints the whole rectangle, washing the button out
+* instead of tracing its edge.
+*/
 .btn__shine--edge {
   padding: 1px;
   background: linear-gradient(
@@ -156,9 +163,13 @@
     rgb(var(--shine) / var(--shine-edge)) calc(var(--x) + 25%),
     rgb(var(--shine) / 8%) calc(var(--x) + 100%)
   );
+  -webkit-mask:
+    linear-gradient(#000, #000) content-box,
+    linear-gradient(#000, #000);
   mask:
     linear-gradient(#000, #000) content-box,
     linear-gradient(#000, #000);
+  -webkit-mask-composite: xor;
   mask-composite: exclude;
 }
 
@@ -522,6 +533,25 @@
 * Pop-up de bienvenue (offre -10%)
 * --------------------------------------------------
 */
+/*
+* Scroll lock that costs no layout.
+*
+* Hiding the body's overflow takes the scrollbar away, and the page reclaims
+* its width — everything widens when the pop-up opens and snaps back when it
+* closes. `--scrollbar-lock` is the measured width of that scrollbar (set by
+* NewsletterPopup as it opens), held open here so nothing moves. The fixed
+* header is pulled in by the same amount: it sits against the viewport, not
+* the padded body, and would otherwise fall out of line with the content.
+*/
+.is-scroll-locked {
+  overflow: hidden;
+  padding-right: var(--scrollbar-lock, 0px);
+}
+
+.is-scroll-locked .site-header {
+  right: var(--scrollbar-lock, 0px);
+}
+
 .popup-overlay {
   position: fixed;
   inset: 0;
@@ -625,7 +655,21 @@
   padding: 2rem 1.5rem;
   display: flex;
   flex-direction: column;
+  /* Reserves the height of the sign-up form so the dialog doesn't shrink when
+     the promo code replaces it — submitting must not resize anything either.
+     Above 48em the portrait visual already sets the height, so this never
+     comes into play there. */
+  min-height: 22rem;
+  justify-content: center;
   gap: 0.9rem;
+}
+
+/* Below ~360px the headline and the fine print each take an extra line, so the
+   form state grows past the reserve above. */
+@media (max-width: 22.5em) {
+  .popup__body {
+    min-height: 23.5rem;
+  }
 }
 
 @media (min-width: 48em) {

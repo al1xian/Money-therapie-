@@ -3,27 +3,36 @@
  *
  * A storefront cannot change a price: what the customer pays is decided by
  * Shopify at cart and checkout. So the offer is driven by a real Shopify
- * discount, and the storefront's job is to apply it to the cart automatically
- * when the set is added — see the `CustomBundleAdd` case in app/routes/cart.tsx.
+ * discount — and it is an **automatic** one, not a discount code.
  *
- * The matching discount must exist in Shopify Admin → Discounts, as a
- * "Buy X get Y" code discount using exactly this code, granting €10 off the
- * cap. Until it does, the page announces a reduction the cart will not apply.
- * The procedure is in docs/cap-offer.md.
+ * That distinction is the whole design. An automatic discount is evaluated by
+ * Shopify on the cart itself: as soon as the basket satisfies the conditions,
+ * the reduction appears in the totals and follows the customer into checkout.
+ * Nobody types anything, the storefront applies nothing, and there is no code
+ * to leak, mistype or share. The procedure to create it is in docs/cap-offer.md.
  *
- * Set the code to an empty string to switch the offer off: the cap then shows
- * at its real price everywhere and no code is applied.
+ * Until that discount exists in Shopify Admin → Discounts, the product page
+ * announces a reduction the cart will not apply.
  */
-export const CAP_DISCOUNT_CODE: string = 'CAP10';
 
 /** Amount taken off the cap, in the store's currency. */
 export const CAP_DISCOUNT_AMOUNT = 10;
 
-/** True while the cap offer is active. */
-export const CAP_OFFER_ENABLED: boolean = CAP_DISCOUNT_CODE.length > 0;
+/** Set to false to switch the offer off across the storefront. */
+export const CAP_OFFER_ENABLED = true;
 
 /**
- * Custom cart action: add the set's lines, then apply the offer's code.
+ * Optional discount **code** for the same offer.
+ *
+ * Empty, and meant to stay empty: the offer runs on an automatic discount. It
+ * exists as an escape hatch — if the offer ever has to be a code again (to
+ * restrict it to a campaign link, say), putting the code here makes the cart
+ * route attach it to every basket, exactly as before.
+ */
+export const CAP_DISCOUNT_CODE: string = '';
+
+/**
+ * Custom cart action: adds the set's two lines in one request.
  *
  * Kept registered in the cart route even when the offer is off — a browser
  * holding a cached page from when it was on would otherwise submit an action

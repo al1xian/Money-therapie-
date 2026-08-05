@@ -32,7 +32,7 @@ export function CartSummary({cart}: CartSummaryProps) {
         </span>
       </div>
 
-      <CapOfferNote discountCodes={cart?.discountCodes} currency={currency} />
+      <CapOfferNote lines={cart?.lines?.nodes} currency={currency} />
 
       <CartDiscounts discountCodes={cart?.discountCodes} />
 
@@ -56,27 +56,37 @@ export function CartSummary({cart}: CartSummaryProps) {
 /**
  * States the cap offer in the cart.
  *
- * Two wordings, and the difference matters: once Shopify reports the code as
- * applicable the reduction is really in the totals, so the note says so. While
- * it is not, the note stays an invitation — it never claims a discount the
- * customer has not got.
+ * The reduction is a Shopify *automatic* discount, so there is no code to look
+ * for: Shopify reports what it actually took off as a discount allocation on
+ * the line it applies to. Summing those allocations is therefore a statement
+ * about the real total, not a guess — which is why the note is allowed to say
+ * "applied" at all. With nothing allocated it stays an invitation, and never
+ * claims a discount the customer has not got.
  */
 function CapOfferNote({
-  discountCodes,
+  lines,
   currency,
 }: {
-  discountCodes?: CartApiQueryFragment['discountCodes'];
+  lines?: CartApiQueryFragment['lines']['nodes'];
   currency: string;
 }) {
   if (!CAP_OFFER_ENABLED) return null;
 
-  const active = (discountCodes ?? []).some((discount) => discount.applicable);
+  const discounted = (lines ?? []).reduce(
+    (total, line) =>
+      total +
+      (line.discountAllocations ?? []).reduce(
+        (sum, allocation) => sum + Number(allocation.discountedAmount.amount),
+        0,
+      ),
+    0,
+  );
 
   return (
-    <p className={`cap-offer ${active ? 'cap-offer--active' : ''}`}>
-      {active
-        ? `cap offer applied — ${formatMoney(CAP_DISCOUNT_AMOUNT, currency)} off, carried through to checkout`
-        : `add any other piece and the cap drops by ${formatMoney(CAP_DISCOUNT_AMOUNT, currency)}`}
+    <p className={`cap-offer ${discounted > 0 ? 'cap-offer--active' : ''}`}>
+      {discounted > 0
+        ? `offer applied — ${formatMoney(discounted, currency)} off, carried through to checkout`
+        : `add any other piece and the cap drops by ${formatMoney(CAP_DISCOUNT_AMOUNT, currency)}, automatically`}
     </p>
   );
 }

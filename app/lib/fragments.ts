@@ -59,6 +59,20 @@ export const CART_QUERY_FRAGMENT = `#graphql
         id
       }
     }
+    # An automatic "buy X get Y" reduction lands on the line it discounts, not
+    # on the cart — this is what tells the cart summary the cap offer really
+    # went through, with no discount code anywhere in sight.
+    discountAllocations {
+      discountedAmount {
+        ...Money
+      }
+      ... on CartAutomaticDiscountAllocation {
+        title
+      }
+      ... on CartCodeDiscountAllocation {
+        code
+      }
+    }
   }
   fragment CartLineComponent on ComponentizableCartLine {
     id
@@ -111,6 +125,19 @@ export const CART_QUERY_FRAGMENT = `#graphql
     }
     lineComponents {
       ...CartLine
+    }
+    # Same as on CartLine — the cart lines are a union of the two, so the
+    # summary can only read this field if both sides carry it.
+    discountAllocations {
+      discountedAmount {
+        ...Money
+      }
+      ... on CartAutomaticDiscountAllocation {
+        title
+      }
+      ... on CartCodeDiscountAllocation {
+        code
+      }
     }
   }
   fragment CartApiQuery on Cart {

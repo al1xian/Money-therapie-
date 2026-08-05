@@ -12,14 +12,14 @@ export const meta: Route.MetaFunction = () => {
 export const headers: HeadersFunction = ({actionHeaders}) => actionHeaders;
 
 /**
- * Keeps the cap offer's discount code attached to the cart after any change to
- * its lines, so the reduction reaches the cart summary and the checkout however
- * the customer got there — the offer box, a product page, or the cart itself.
+ * Attaches the cap offer's discount code to the cart after any change to its
+ * lines.
  *
- * The code is left on the cart permanently rather than added and removed as the
- * basket changes: Shopify is the one that decides whether the conditions are
- * met, and reports a code that does not qualify as `applicable: false`. The
- * cart UI only lists applicable codes, so an idle code is invisible.
+ * **Normally does nothing.** The offer runs on a Shopify *automatic* discount:
+ * Shopify evaluates the basket itself and puts the reduction in the totals,
+ * with no code involved and nothing for the storefront to apply. This only
+ * comes alive if `CAP_DISCOUNT_CODE` is filled in — the escape hatch described
+ * in app/lib/offers.ts.
  *
  * Never throws. Whatever happens to the discount, the line mutation that
  * preceded it stands — that is the sale.

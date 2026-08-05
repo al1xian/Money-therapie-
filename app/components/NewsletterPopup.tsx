@@ -1,30 +1,57 @@
 import {useEffect, useState} from 'react';
 import {CloseIcon} from '~/components/Icons';
 
-const STORAGE_KEY = 'reda-studio-newsletter-subscribed';
+const STORAGE_KEY = 'reda-studio-newsletter-seen';
 const PROMO_CODE = 'REDA10';
 const OPEN_DELAY_MS = 1200;
 
 /**
  * Welcome pop-up offering -10% in exchange for an email address.
  *
- * Shown at every visit *until the visitor actually subscribes*. The
- * localStorage flag is written only on a successful submission, never on a
- * simple close — someone who dismisses it still sees the offer next time,
- * while a subscriber is never asked again.
+ * Shown **once per visitor**: the localStorage flag is written the moment it
+ * opens, so it never comes back — whether the visitor subscribed, closed it,
+ * or simply ignored it. (It used to reappear at every visit until someone
+ * subscribed.) Clearing the browser's site data is what resets it.
  *
  * Posts through the same real /newsletter endpoint as the footer sign-up
  * (Shopify's own customer form), so every address lands in the store's
  * customer list — see docs/emails-newsletter.md. The promo code only appears
  * once that submission actually succeeds.
  */
+/*
+ * localStorage throws outright when a browser has storage blocked — Safari's
+ * private mode being the classic case. An unguarded read here would take the
+ * whole page down over a marketing pop-up, so both accesses fail soft: the
+ * visitor simply gets shown the offer.
+ */
+function alreadySeen(): boolean {
+  try {
+    return window.localStorage.getItem(STORAGE_KEY) !== null;
+  } catch {
+    return false;
+  }
+}
+
+function markSeen() {
+  try {
+    window.localStorage.setItem(STORAGE_KEY, '1');
+  } catch {
+    // Nothing to do: without storage the offer can't be remembered.
+  }
+}
+
 export function NewsletterPopup() {
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
 
   useEffect(() => {
-    if (window.localStorage.getItem(STORAGE_KEY)) return;
-    const timer = setTimeout(() => setOpen(true), OPEN_DELAY_MS);
+    if (alreadySeen()) return;
+    const timer = setTimeout(() => {
+      // Marked as seen on opening, not on closing: a visitor who navigates
+      // away with it still on screen doesn't get it again either.
+      markSeen();
+      setOpen(true);
+    }, OPEN_DELAY_MS);
     return () => clearTimeout(timer);
   }, []);
 
@@ -32,10 +59,24 @@ export function NewsletterPopup() {
     if (!open) return;
     const controller = new AbortController();
     document.addEventListener('keydown', (event) => event.key === 'Escape' && close(), {signal: controller.signal});
-    document.body.style.overflow = 'hidden';
+
+    /*
+     * Locking the page while the dialog is up must not resize anything.
+     * `overflow: hidden` removes the scrollbar, and on a desktop browser that
+     * hands ~15px back to the layout: the whole site widens as the pop-up
+     * appears and snaps back as it closes. So the exact width the scrollbar
+     * occupied is measured and held open — on the body for the page, and on
+     * the fixed header, which is positioned against the viewport and would
+     * otherwise drift out of line with the content underneath it.
+     */
+    const gap = window.innerWidth - document.documentElement.clientWidth;
+    document.documentElement.style.setProperty('--scrollbar-lock', `${gap}px`);
+    document.body.classList.add('is-scroll-locked');
+
     return () => {
       controller.abort();
-      document.body.style.overflow = '';
+      document.body.classList.remove('is-scroll-locked');
+      document.documentElement.style.removeProperty('--scrollbar-lock');
     };
   }, [open]);
 
@@ -63,8 +104,6 @@ export function NewsletterPopup() {
         body: body.toString(),
       });
       setStatus(res.ok ? 'done' : 'error');
-      // Only a real subscription silences the pop-up for good.
-      if (res.ok) window.localStorage.setItem(STORAGE_KEY, '1');
     } catch {
       setStatus('error');
     }
