@@ -7,10 +7,12 @@
  * France. The Admin policies still exist and are what Shopify's own checkout
  * links to — keep the two in step (see docs/legal-pages.md).
  *
- * Every blank marked with ⚠ has to be filled in with the company's real
- * details before this goes anywhere near a customer. They are deliberately
- * left as visible placeholders: a plausible-looking invented SIREN or address
- * would be worse than an obvious gap, because nobody would notice it.
+ * Passages naming the company — registered name, address, SIREN, VAT number,
+ * publication director, support email — are **absent, not written**. They were
+ * removed rather than guessed, and docs/legal-pages.md lists exactly which
+ * sentences and which two sections have to come back once those details are
+ * known. Until then, wherever the text used to give an email address it sends
+ * the customer to the contact page, which is real and works.
  */
 
 export type LegalSection = {
@@ -33,16 +35,6 @@ export type LegalDocument = {
   sections: LegalSection[];
 };
 
-/** Anything still carrying this needs the company's real details. */
-export const PLACEHOLDER = '⚠ to be completed';
-
-const COMPANY = `⚠ to be completed — registered company name`;
-const ADDRESS = `⚠ to be completed — registered address`;
-const REGISTRATION = `⚠ to be completed — SIREN / company registration number`;
-const VAT = `⚠ to be completed — intra-community VAT number`;
-const DIRECTOR = `⚠ to be completed — name of the publication director`;
-const SUPPORT_EMAIL = `⚠ to be completed — support email address`;
-
 export const LEGAL_DOCUMENTS: LegalDocument[] = [
   {
     handle: 'terms',
@@ -55,7 +47,7 @@ export const LEGAL_DOCUMENTS: LegalDocument[] = [
       {
         heading: '1. who we are',
         body: [
-          `This site is operated by ${COMPANY}, registered at ${ADDRESS} under ${REGISTRATION}, VAT ${VAT}. Throughout these terms, "we", "us" and "reda studio" refer to that company, and "you" refers to the person placing an order or browsing the site.`,
+          `Throughout these terms, "we", "us" and "reda studio" refer to the company operating this store, and "you" refers to the person placing an order or browsing the site.`,
           `These terms apply to every order placed through this store. Placing an order means you accept them, so please read them before you buy. We may change them at any time; the version that governs your order is the one published when you place it.`,
         ],
       },
@@ -132,7 +124,7 @@ export const LEGAL_DOCUMENTS: LegalDocument[] = [
       {
         heading: '12. complaints and disputes',
         body: [
-          `Write to us first at ${SUPPORT_EMAIL}. Most things are settled that way.`,
+          `Write to us first, from the contact page on this site. Most things are settled that way.`,
           `If we cannot agree, you may use the European Commission's online dispute resolution platform at ec.europa.eu/consumers/odr, or refer the matter to a consumer mediator, free of charge to you.`,
           `These terms are governed by French law. If you are a consumer, you keep the protection of the mandatory rules of the country where you live.`,
         ],
@@ -190,7 +182,7 @@ export const LEGAL_DOCUMENTS: LegalDocument[] = [
       {
         heading: 'wrong address, failed delivery',
         body: [
-          `Please check your address before confirming. We can correct it only while the order is still being prepared — write to us immediately at ${SUPPORT_EMAIL}.`,
+          `Please check your address before confirming. We can correct it only while the order is still being prepared — write to us immediately from the contact page.`,
           `If a parcel comes back to us because the address was wrong or nobody collected it, we will refund the items but not the original shipping, and reshipping is at your cost.`,
         ],
       },
@@ -232,7 +224,7 @@ export const LEGAL_DOCUMENTS: LegalDocument[] = [
       {
         heading: 'how to return',
         body: [
-          `Write to us at ${SUPPORT_EMAIL} with your order number and what you are sending back. We reply with the return address and instructions within one business day.`,
+          `Write to us from the contact page with your order number and what you are sending back. We reply with the return address and instructions within one business day.`,
           `Return shipping is at your cost unless the item is faulty or we sent the wrong one, in which case we cover it. Use a tracked service — until the parcel reaches us, it is your responsibility.`,
         ],
       },
@@ -271,7 +263,7 @@ export const LEGAL_DOCUMENTS: LegalDocument[] = [
       {
         heading: 'who is responsible',
         body: [
-          `${COMPANY}, ${ADDRESS}, is the data controller for the personal data collected through this site. For any question about your data, write to ${SUPPORT_EMAIL}.`,
+          `The company operating this store is the data controller for the personal data collected through it. For any question about your data, write to us from the contact page and we will answer.`,
         ],
       },
       {
@@ -315,7 +307,7 @@ export const LEGAL_DOCUMENTS: LegalDocument[] = [
         heading: 'your rights',
         body: [
           `Under the GDPR you can ask us to give you a copy of your data, correct it, delete it, restrict what we do with it, or send it to another provider. You can object to processing based on legitimate interest, and withdraw consent for marketing at any time — every email has an unsubscribe link.`,
-          `Write to ${SUPPORT_EMAIL}. We answer within one month. If you are not satisfied, you can complain to the CNIL at cnil.fr.`,
+          `Write to us from the contact page. We answer within one month. If you are not satisfied, you can complain to the CNIL at cnil.fr.`,
         ],
       },
       {
@@ -332,23 +324,9 @@ export const LEGAL_DOCUMENTS: LegalDocument[] = [
     handle: 'legal-notice',
     title: 'legal notice',
     navLabel: 'legal notice',
-    intro: 'Publisher, host and contact details, as required by French law.',
+    intro: 'Hosting, intellectual property and dispute resolution.',
     updated: 'August 2026',
     sections: [
-      {
-        heading: 'site publisher',
-        body: [
-          `${COMPANY}`,
-          `Registered address: ${ADDRESS}`,
-          `Registration: ${REGISTRATION}`,
-          `Intra-community VAT: ${VAT}`,
-          `Contact: ${SUPPORT_EMAIL}`,
-        ],
-      },
-      {
-        heading: 'publication director',
-        body: [DIRECTOR],
-      },
       {
         heading: 'hosting',
         body: [

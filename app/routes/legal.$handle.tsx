@@ -2,7 +2,6 @@ import {Link, useLoaderData} from 'react-router';
 import type {Route} from './+types/legal.$handle';
 import {
   LEGAL_DOCUMENTS,
-  PLACEHOLDER,
   findLegalDocument,
   type LegalSection,
 } from '~/data/legal';
@@ -83,7 +82,7 @@ function Section({section}: {section: LegalSection}) {
     <section className="legal__section">
       <h2>{section.heading}</h2>
       {section.body.map((paragraph) => (
-        <Paragraph key={paragraph} text={paragraph} />
+        <p key={paragraph}>{paragraph}</p>
       ))}
       {section.list && (
         <ul className="legal__list">
@@ -94,18 +93,4 @@ function Section({section}: {section: LegalSection}) {
       )}
     </section>
   );
-}
-
-/**
- * Marks the blanks.
- *
- * A paragraph still carrying a placeholder is rendered as a visible warning
- * rather than as body copy — the point is that an unfilled company address
- * cannot quietly read as filled in.
- */
-function Paragraph({text}: {text: string}) {
-  if (text.includes(PLACEHOLDER)) {
-    return <p className="legal__todo">{text}</p>;
-  }
-  return <p>{text}</p>;
 }

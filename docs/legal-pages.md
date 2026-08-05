@@ -18,22 +18,35 @@ reasons: they are versioned with the code and reviewable in a diff, and Shopify
 has no slot at all for a French *mentions légales*, which a site selling into
 France is required to publish.
 
-## ⚠ Before this goes live
+## ⚠ What is missing, and where it goes back
 
-Several passages carry a visible `⚠ to be completed` marker and render in red
-on the page. They are the company's real details:
+Everything naming the company was **removed rather than guessed**, pending the
+real details. Nothing on the pages is wrong today — but two things are absent
+that French law requires a site selling to consumers to publish, so this list
+is the work still to do, not a nicety:
 
-- registered company name
-- registered address
-- SIREN / company registration number
-- intra-community VAT number
-- name of the publication director
-- support email address
+**Two whole sections were deleted from the Legal Notice** (`handle:
+'legal-notice'` in `app/data/legal.ts`, which now starts at *hosting*):
 
-They are deliberately loud. A plausible invented address would be worse than an
-obvious gap, because nobody would ever notice it. Fill them in at the top of
-`app/data/legal.ts` — each appears once, in a constant, and flows to every page
-that needs it.
+- **site publisher** — registered company name, registered address, SIREN,
+  intra-community VAT number, contact address
+- **publication director** — the name of the person responsible for
+  publication
+
+**One sentence was shortened**, in Terms & Conditions § *who we are*. It used
+to open by naming the operating company, its address, its registration and its
+VAT number before defining "we" and "you". It now only defines the terms.
+
+**One sentence was rewritten**, in Privacy Policy § *who is responsible*. It
+named the controller and its address; it now says "the company operating this
+store", which is true but does not identify it. The GDPR expects the controller
+to be identified by name.
+
+**Five places used to give a support email address** and now send the customer
+to the contact page instead — Terms § *complaints and disputes*, Shipping §
+*wrong address, failed delivery*, Returns § *how to return*, and Privacy in both
+*who is responsible* and *your rights*. Those read perfectly well as they are;
+change them back only if you would rather publish an address than a form.
 
 While you are there, read the documents. They are written from how this store
 actually operates — 1 to 3 business days to ship, 48 hours in France, 30 days

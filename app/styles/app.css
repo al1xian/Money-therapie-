@@ -4291,14 +4291,6 @@
   background: var(--color-ink);
 }
 
-/* A blank that still needs the company's real details. Loud on purpose —
-   an unfilled registered address must not read as filled in. */
-.legal__todo {
-  border-left: 2px solid var(--color-sale);
-  padding-left: 0.85rem;
-  color: var(--color-sale) !important;
-}
-
 .legal__foot {
   margin-top: 3rem;
   padding-top: 1.5rem;
