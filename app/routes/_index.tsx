@@ -35,7 +35,7 @@ export function links() {
     {
       rel: 'preload',
       as: 'image',
-      href: '/images/P1973928-2.webp',
+      href: '/images/hero-desktop.webp',
       media: '(min-width: 48em)',
     },
   ];
@@ -80,8 +80,8 @@ export default function Homepage() {
     <div className="home">
       <AnimatedHero
         imageMobileSrc="/images/hero-mobile.webp"
-        imageDesktopSrc="/images/P1973928-2.webp"
-        imageAlt="Two people wearing reda studio, urban setting"
+        imageDesktopSrc="/images/hero-desktop.webp"
+        imageAlt="Two men in reda studio checked overshirts and black shorts, against a brick facade"
         eyebrow="new collection"
         title="reda studio"
         description="designed for people with ambition."

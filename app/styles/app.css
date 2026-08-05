@@ -1936,6 +1936,25 @@
 }
 
 
+/* Cap offer, stated in the cart summary. */
+.cap-offer {
+  margin: 0.25rem 0 0.75rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px dashed var(--color-line);
+  border-radius: 0.5rem;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--color-muted);
+}
+
+/* Once Shopify confirms the code, the note reads as a fact, not an offer. */
+.cap-offer--active {
+  border-style: solid;
+  border-color: var(--color-certified);
+  color: var(--color-certified);
+}
+
 /*
 * --------------------------------------------------
 * Newsletter

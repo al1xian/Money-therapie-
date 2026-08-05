@@ -2,6 +2,7 @@ import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import type {CartLayout} from '~/components/CartMain';
 import {CartForm, Money, type OptimisticCart} from '@shopify/hydrogen';
 import {useRef} from 'react';
+import {CAP_DISCOUNT_AMOUNT, CAP_OFFER_ENABLED} from '~/lib/offers';
 
 type CartSummaryProps = {
   cart: OptimisticCart<CartApiQueryFragment | null>;
@@ -30,6 +31,8 @@ export function CartSummary({cart}: CartSummaryProps) {
         </span>
       </div>
 
+      <CapOfferNote discountCodes={cart?.discountCodes} currency={currency} />
+
       <CartDiscounts discountCodes={cart?.discountCodes} />
 
       <div className="cart-summary__row">
@@ -46,6 +49,34 @@ export function CartSummary({cart}: CartSummaryProps) {
 
       <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} />
     </div>
+  );
+}
+
+/**
+ * States the cap offer in the cart.
+ *
+ * Two wordings, and the difference matters: once Shopify reports the code as
+ * applicable the reduction is really in the totals, so the note says so. While
+ * it is not, the note stays an invitation — it never claims a discount the
+ * customer has not got.
+ */
+function CapOfferNote({
+  discountCodes,
+  currency,
+}: {
+  discountCodes?: CartApiQueryFragment['discountCodes'];
+  currency: string;
+}) {
+  if (!CAP_OFFER_ENABLED) return null;
+
+  const active = (discountCodes ?? []).some((discount) => discount.applicable);
+
+  return (
+    <p className={`cap-offer ${active ? 'cap-offer--active' : ''}`}>
+      {active
+        ? `cap offer applied — ${formatMoney(CAP_DISCOUNT_AMOUNT, currency)} off, carried through to checkout`
+        : `add any other piece and the cap drops by ${formatMoney(CAP_DISCOUNT_AMOUNT, currency)}`}
+    </p>
   );
 }
 

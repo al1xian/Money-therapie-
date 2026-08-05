@@ -11,6 +11,42 @@ export const meta: Route.MetaFunction = () => {
 
 export const headers: HeadersFunction = ({actionHeaders}) => actionHeaders;
 
+/**
+ * Keeps the cap offer's discount code attached to the cart after any change to
+ * its lines, so the reduction reaches the cart summary and the checkout however
+ * the customer got there — the offer box, a product page, or the cart itself.
+ *
+ * The code is left on the cart permanently rather than added and removed as the
+ * basket changes: Shopify is the one that decides whether the conditions are
+ * met, and reports a code that does not qualify as `applicable: false`. The
+ * cart UI only lists applicable codes, so an idle code is invisible.
+ *
+ * Never throws. Whatever happens to the discount, the line mutation that
+ * preceded it stands — that is the sale.
+ */
+async function withCapDiscount(
+  cart: Route.ActionArgs['context']['cart'],
+  result: CartQueryDataReturn,
+): Promise<CartQueryDataReturn> {
+  if (!CAP_DISCOUNT_CODE || !result?.cart) return result;
+
+  try {
+    const codes = (result.cart.discountCodes ?? []).map(
+      (discount) => discount.code,
+    );
+    if (codes.includes(CAP_DISCOUNT_CODE)) return result;
+
+    const discounted = await cart.updateDiscountCodes([
+      ...codes,
+      CAP_DISCOUNT_CODE,
+    ]);
+    return discounted?.cart ? discounted : result;
+  } catch (error) {
+    console.error('Cap discount could not be applied', error);
+    return result;
+  }
+}
+
 export async function action({request, context}: Route.ActionArgs) {
   const {cart} = context;
 
@@ -27,17 +63,11 @@ export async function action({request, context}: Route.ActionArgs) {
 
   switch (action) {
     case CartForm.ACTIONS.LinesAdd:
-      result = await cart.addLines(inputs.lines);
+      result = await withCapDiscount(cart, await cart.addLines(inputs.lines));
       break;
     /*
-     * Bundle add: the set's lines, plus the offer's discount code when the
-     * offer is running. One round trip keeps the two cart mutations sequential
-     * — two concurrent writes to the same cart can conflict.
-     *
-     * Adding the lines is the part that must not fail: it is the sale. The
-     * discount is applied inside a try/catch so that a missing, expired or
-     * rejected code can never take the cart mutation down with it. The
-     * customer ends up with the items either way, and can always check out.
+     * Bundle add: the set's lines. The offer's code is attached afterwards by
+     * `withCapDiscount`, like every other line mutation.
      *
      * The case stays registered even when the offer is off, so a browser
      * holding a cached page from when it was on still adds to cart instead of
@@ -46,33 +76,14 @@ export async function action({request, context}: Route.ActionArgs) {
     case BUNDLE_ADD_ACTION: {
       // A custom action's inputs are untyped, so the lines are narrowed here.
       const bundleLines = inputs.lines as Parameters<typeof cart.addLines>[0];
-      result = await cart.addLines(bundleLines);
-
-      if (CAP_DISCOUNT_CODE) {
-        try {
-          const applied = (result?.cart?.discountCodes ?? [])
-            .filter((discount) => discount.applicable)
-            .map((discount) => discount.code);
-
-          if (!applied.includes(CAP_DISCOUNT_CODE)) {
-            const discounted = await cart.updateDiscountCodes([
-              ...applied,
-              CAP_DISCOUNT_CODE,
-            ]);
-            // Only adopt the discounted cart if it really came back.
-            if (discounted?.cart) result = discounted;
-          }
-        } catch (error) {
-          console.error('Cap discount could not be applied', error);
-        }
-      }
+      result = await withCapDiscount(cart, await cart.addLines(bundleLines));
       break;
     }
     case CartForm.ACTIONS.LinesUpdate:
-      result = await cart.updateLines(inputs.lines);
+      result = await withCapDiscount(cart, await cart.updateLines(inputs.lines));
       break;
     case CartForm.ACTIONS.LinesRemove:
-      result = await cart.removeLines(inputs.lineIds);
+      result = await withCapDiscount(cart, await cart.removeLines(inputs.lineIds));
       break;
     case CartForm.ACTIONS.DiscountCodesUpdate: {
       const formDiscountCode = inputs.discountCode;
