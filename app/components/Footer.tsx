@@ -1,6 +1,7 @@
 import {NavLink, Link} from 'react-router';
 import type {HeaderQuery} from 'storefrontapi.generated';
 import {InstagramIcon, TiktokIcon} from '~/components/Icons';
+import {INSTAGRAM_URL} from '~/lib/social';
 import {Newsletter} from '~/components/Newsletter';
 
 interface FooterProps {
@@ -36,7 +37,7 @@ export function Footer({header}: FooterProps) {
             pieces made to last. fast delivery across france.
           </p>
           <div className="site-footer__social">
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" aria-label="Instagram">
               <InstagramIcon />
             </a>
             <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok">

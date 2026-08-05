@@ -1,4 +1,5 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
+import {INSTAGRAM_HANDLE, INSTAGRAM_URL} from '~/lib/social';
 
 /**
  * Videos served from `public/videos`. Add or remove one by editing this array
@@ -245,7 +246,15 @@ export function WornVideos() {
   return (
     <section className="worn" aria-labelledby="worn-heading">
       <h2 className="worn__title" id="worn-heading">
-        our products worn
+        they talk about us :{' '}
+        <a
+          className="worn__handle"
+          href={INSTAGRAM_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {INSTAGRAM_HANDLE}
+        </a>
       </h2>
 
       <div className="worn__viewport">

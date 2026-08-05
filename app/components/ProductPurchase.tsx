@@ -120,7 +120,7 @@ export function ProductPurchase({
           {available ? 'add to cart' : 'sold out'}
         </AddToCartButton>
         <BuyNowButton disabled={!available} lines={lines}>
-          acheter maintenant
+          buy now
         </BuyNowButton>
       </div>
 

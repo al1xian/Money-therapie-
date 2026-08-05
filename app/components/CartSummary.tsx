@@ -3,6 +3,7 @@ import type {CartLayout} from '~/components/CartMain';
 import {CartForm, Money, type OptimisticCart} from '@shopify/hydrogen';
 import {useRef} from 'react';
 import {CAP_DISCOUNT_AMOUNT, CAP_OFFER_ENABLED} from '~/lib/offers';
+import {ShinyLink} from '~/components/ShinyButton';
 
 type CartSummaryProps = {
   cart: OptimisticCart<CartApiQueryFragment | null>;
@@ -91,9 +92,9 @@ function formatMoney(amount: number, currency: string) {
 function CartCheckoutActions({checkoutUrl}: {checkoutUrl?: string}) {
   if (!checkoutUrl) return null;
   return (
-    <a href={checkoutUrl} target="_self" className="btn btn--full">
+    <ShinyLink href={checkoutUrl} target="_self" className="btn btn--full">
       proceed to checkout
-    </a>
+    </ShinyLink>
   );
 }
 

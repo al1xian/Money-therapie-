@@ -98,6 +98,84 @@
   color: var(--color-paper);
 }
 
+/*
+* Shiny buttons (see ShinyButton.tsx).
+*
+* framer-motion animates `--x` from 100% to -100% on a loop; both layers below
+* are positioned off it, so the highlight sweeps across the surface and along
+* the edge together. `--shine` is the RGB triplet of the highlight: white on
+* the solid black button, ink on the outlined one — and back to white when the
+* outlined button inverts on hover.
+*/
+.btn--shiny {
+  --shine: 255 255 255;
+  --shine-face: 38%;
+  --shine-edge: 55%;
+
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* On the outlined button the sweep is dark instead of light, and much fainter:
+   at the same strength a black band on white reads as a smudge, not a shine. */
+.btn--outline.btn--shiny {
+  --shine: 17 17 17;
+  --shine-face: 11%;
+  --shine-edge: 20%;
+}
+
+/* …until it inverts on hover, where the light sweep works again. */
+.btn--outline.btn--shiny:hover:not(:disabled) {
+  --shine: 255 255 255;
+  --shine-face: 38%;
+  --shine-edge: 55%;
+}
+
+/* Surface sweep: a narrow diagonal band of light. */
+.btn__shine {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    -75deg,
+    transparent calc(var(--x) + 18%),
+    rgb(var(--shine) / var(--shine-face)) calc(var(--x) + 27%),
+    transparent calc(var(--x) + 36%)
+  );
+}
+
+/* Edge sweep: the same gradient, masked down to the 1px border. */
+.btn__shine--edge {
+  padding: 1px;
+  background: linear-gradient(
+    -75deg,
+    rgb(var(--shine) / 8%) calc(var(--x) + 20%),
+    rgb(var(--shine) / var(--shine-edge)) calc(var(--x) + 25%),
+    rgb(var(--shine) / 8%) calc(var(--x) + 100%)
+  );
+  mask:
+    linear-gradient(#000, #000) content-box,
+    linear-gradient(#000, #000);
+  mask-composite: exclude;
+}
+
+/* Above both layers, so the label never gets washed out by the sweep. */
+.btn__label {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* A button that can't be pressed shouldn't be inviting a press. */
+.btn--shiny:disabled .btn__shine {
+  display: none;
+}
+
 .badge-sale {
   position: absolute;
   top: 0.75rem;
@@ -1572,6 +1650,23 @@
   text-transform: lowercase;
   text-align: center;
   padding: 0 1rem;
+}
+
+/*
+* The Instagram handle inside the heading. Underlined so it reads as the one
+* clickable word in the title, and kept from breaking mid-handle on narrow
+* screens.
+*/
+.worn__handle {
+  white-space: nowrap;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 0.06em;
+  transition: opacity 200ms var(--ease-out-soft);
+}
+
+.worn__handle:hover {
+  opacity: 0.55;
 }
 
 .worn__viewport {

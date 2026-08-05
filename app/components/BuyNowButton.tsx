@@ -1,5 +1,6 @@
 import {Form} from 'react-router';
 import {CartForm, type OptimisticCartLineInput} from '@shopify/hydrogen';
+import {ShinyButton} from '~/components/ShinyButton';
 
 /**
  * "Buy now": adds the line to the cart, then goes straight to the Shopify
@@ -37,9 +38,9 @@ export function BuyNowButton({
       />
       {/* Tells the cart action to answer with a redirect to checkout. */}
       <input type="hidden" name="checkoutAfterAdd" value="true" />
-      <button type="submit" className="btn btn--full" disabled={disabled}>
+      <ShinyButton type="submit" className="btn btn--full" disabled={disabled}>
         {children}
-      </button>
+      </ShinyButton>
     </Form>
   );
 }
