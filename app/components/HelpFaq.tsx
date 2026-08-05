@@ -1,7 +1,14 @@
 import {useId, useState} from 'react';
 import type {ReactNode} from 'react';
 
-/** Rotating cross: a plus that becomes a minus as the row opens. */
+/**
+ * A plus that turns into a minus as the row opens: the whole cross makes a
+ * half-turn while the upright bar fades out, leaving the horizontal one.
+ *
+ * The half-turn matters. A quarter-turn maps the upright bar onto the
+ * horizontal axis and the horizontal one onto the upright axis — so fading the
+ * upright bar leaves a *vertical* stroke, not a minus.
+ */
 function PlusIcon() {
   return (
     <svg
@@ -181,12 +188,22 @@ function HelpRow({
       </button>
 
       {/*
-        `grid-template-rows: 0fr → 1fr` opens the panel without anyone having
-        to guess its height, unlike a max-height picked by eye. The panel stays
-        in the DOM so the transition can run in both directions.
+        Three nested elements, one job each — which is what makes the movement
+        read as one gesture rather than several.
+
+        `panel` owns the height: `grid-template-rows: 0fr → 1fr` animates the
+        content's real height without anyone having to guess it.
+        `panel-inner` is the clipper, and never moves — a transform on an
+        `overflow: hidden` box drags its clipping rectangle along, so the
+        content would shift without ever appearing to slide.
+        `panel-content` is the only thing that fades and slides.
+
+        All three stay in the DOM so the transition runs in both directions.
       */}
       <div className="help-faq__panel" id={panelId}>
-        <div className="help-faq__panel-inner">{item.answer}</div>
+        <div className="help-faq__panel-inner">
+          <div className="help-faq__panel-content">{item.answer}</div>
+        </div>
       </div>
     </div>
   );

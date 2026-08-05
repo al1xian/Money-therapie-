@@ -1895,13 +1895,26 @@
   text-transform: lowercase;
 }
 
+/*
+* One clock for the whole accordion.
+*
+* Every moving part used to carry its own duration — 300, 350, 400, 450ms —
+* so opening a row was four animations finishing at four different moments.
+* That is what read as clumsy rather than smooth. `--faq-open` drives
+* everything that travels with the row's height; `--faq-tint` is the shorter
+* beat for colour changes, which should land first so the row looks committed
+* before it has finished growing.
+*/
 .help-faq__list {
+  --faq-open: 420ms;
+  --faq-tint: 240ms;
+
   border-top: 1px solid var(--color-line);
 }
 
 .help-faq__item {
   border-bottom: 1px solid var(--color-line);
-  transition: border-color 300ms var(--ease-out-soft);
+  transition: border-color var(--faq-tint) var(--ease-out-soft);
 }
 
 .help-faq__item--open {
@@ -1928,7 +1941,7 @@
   font-weight: 700;
   letter-spacing: 0.14em;
   color: var(--color-muted);
-  transition: color 300ms var(--ease-out-soft);
+  transition: color var(--faq-tint) var(--ease-out-soft);
 }
 
 .help-faq__item--open .help-faq__index,
@@ -1947,9 +1960,9 @@
   border-radius: 0.6rem;
   color: var(--color-ink);
   transition:
-    background 300ms var(--ease-out-soft),
-    border-color 300ms var(--ease-out-soft),
-    color 300ms var(--ease-out-soft);
+    background var(--faq-tint) var(--ease-out-soft),
+    border-color var(--faq-tint) var(--ease-out-soft),
+    color var(--faq-tint) var(--ease-out-soft);
 }
 
 .help-faq__item--open .help-faq__icon {
@@ -1964,30 +1977,34 @@
   font-weight: 700;
   letter-spacing: -0.01em;
   text-transform: lowercase;
-  transition: transform 400ms var(--ease-out-soft);
+  transition: transform var(--faq-open) var(--ease-out-soft);
 }
 
 .help-faq__trigger:hover .help-faq__question {
   transform: translateX(4px);
 }
 
-/* The plus loses its vertical bar as the row opens, becoming a minus. */
+/*
+* The cross makes a half-turn while its upright bar fades, so it lands as a
+* minus. A quarter-turn would swap the two bars onto each other's axis and
+* leave an upright stroke instead.
+*/
 .help-faq__toggle {
   flex-shrink: 0;
   color: var(--color-muted);
   transition:
-    transform 400ms var(--ease-out-soft),
-    color 300ms var(--ease-out-soft);
+    transform var(--faq-open) var(--ease-out-soft),
+    color var(--faq-tint) var(--ease-out-soft);
 }
 
 .help-faq__item--open .help-faq__toggle {
-  transform: rotate(90deg);
+  transform: rotate(180deg);
   color: var(--color-ink);
 }
 
 .help-faq__toggle-bar {
   transform-origin: 50% 50%;
-  transition: opacity 300ms var(--ease-out-soft);
+  transition: opacity var(--faq-tint) var(--ease-out-soft);
 }
 
 .help-faq__item--open .help-faq__toggle-bar {
@@ -2001,25 +2018,43 @@
 .help-faq__panel {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 450ms var(--ease-out-soft);
+  transition: grid-template-rows var(--faq-open) var(--ease-out-soft);
 }
 
 .help-faq__item--open .help-faq__panel {
   grid-template-rows: 1fr;
 }
 
+/* The clipper. Deliberately has no transform of its own: moving it would move
+   the clipping rectangle with it, and the content would jump rather than
+   slide out from under the edge. */
 .help-faq__panel-inner {
   overflow: hidden;
-  opacity: 0;
-  transform: translateY(-6px);
-  transition:
-    opacity 350ms var(--ease-out-soft),
-    transform 450ms var(--ease-out-soft);
 }
 
-.help-faq__item--open .help-faq__panel-inner {
+/*
+* Closing: the text goes first, quickly, so the row collapses onto something
+* that has already gone rather than dragging visible words down with it.
+*/
+.help-faq__panel-content {
+  opacity: 0;
+  transform: translateY(-8px);
+  transition:
+    opacity 150ms var(--ease-out-soft),
+    transform 200ms var(--ease-out-soft);
+}
+
+/*
+* Opening: the reverse. The row starts growing on its own for a beat, then the
+* text catches up and settles with it — the delays are what turn four
+* simultaneous movements into one gesture.
+*/
+.help-faq__item--open .help-faq__panel-content {
   opacity: 1;
   transform: translateY(0);
+  transition:
+    opacity 280ms var(--ease-out-soft) 110ms,
+    transform var(--faq-open) var(--ease-out-soft) 70ms;
 }
 
 .help-faq__panel-inner p {
@@ -2066,11 +2101,25 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .help-faq__item,
+  .help-faq__index,
+  .help-faq__icon,
   .help-faq__panel,
-  .help-faq__panel-inner,
+  .help-faq__panel-content,
+  .help-faq__item--open .help-faq__panel-content,
   .help-faq__toggle,
+  .help-faq__toggle-bar,
   .help-faq__question {
     transition: none;
+  }
+
+  /* The row still has to open — it just does it instantly. */
+  .help-faq__panel-content {
+    transform: none;
+  }
+
+  .help-faq__trigger:hover .help-faq__question {
+    transform: none;
   }
 }
 
