@@ -7,6 +7,7 @@ import {
   useId,
 } from 'react';
 import {CloseIcon} from '~/components/Icons';
+import {lockScroll, unlockScroll} from '~/lib/scrollLock';
 
 type AsideType = 'search' | 'cart' | 'mobile' | 'closed';
 type AsideContextValue = {
@@ -33,17 +34,29 @@ export function Aside({
   const id = useId();
 
   useEffect(() => {
+    if (!expanded) return;
+
     const abortController = new AbortController();
-    if (expanded) {
-      document.addEventListener(
-        'keydown',
-        (event: KeyboardEvent) => {
-          if (event.key === 'Escape') close();
-        },
-        {signal: abortController.signal},
-      );
-    }
-    return () => abortController.abort();
+    document.addEventListener(
+      'keydown',
+      (event: KeyboardEvent) => {
+        if (event.key === 'Escape') close();
+      },
+      {signal: abortController.signal},
+    );
+
+    /*
+     * The page behind the drawer used to keep scrolling: reaching the bottom
+     * of the cart and carrying on would drag the homepage along underneath it.
+     * The lock measures what it costs the layout and gives it straight back,
+     * so opening a drawer moves nothing — see app/lib/scrollLock.ts.
+     */
+    lockScroll();
+
+    return () => {
+      abortController.abort();
+      unlockScroll();
+    };
   }, [close, expanded]);
 
   return (

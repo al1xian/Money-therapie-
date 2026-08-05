@@ -534,14 +534,27 @@
 * --------------------------------------------------
 */
 /*
+* Reserve the scrollbar's column permanently.
+*
+* This is the first line of defence against the site changing width, and it
+* covers more than dialogs: without it, navigating from a page that scrolls to
+* one that doesn't makes the whole layout jump sideways. Chrome 94+, Firefox
+* 97+ and Safari 18.2+ honour it; older browsers fall back to the measured
+* compensation below, which is why lockScroll() measures the gap rather than
+* assuming it.
+*/
+html {
+  scrollbar-gutter: stable;
+}
+
+/*
 * Scroll lock that costs no layout.
 *
-* Hiding the body's overflow takes the scrollbar away, and the page reclaims
-* its width — everything widens when the pop-up opens and snaps back when it
-* closes. `--scrollbar-lock` is the measured width of that scrollbar (set by
-* NewsletterPopup as it opens), held open here so nothing moves. The fixed
-* header is pulled in by the same amount: it sits against the viewport, not
-* the padded body, and would otherwise fall out of line with the content.
+* `--scrollbar-lock` is whatever width the layout actually gained when the
+* lock was applied — zero on a browser that honoured the gutter above. It is
+* given back here as padding so nothing moves. The fixed header is pulled in
+* by the same amount: it sits against the viewport, not the padded body, and
+* would otherwise fall out of line with the content underneath it.
 */
 .is-scroll-locked {
   overflow: hidden;

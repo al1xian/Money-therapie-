@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react';
 import {CloseIcon} from '~/components/Icons';
+import {lockScroll, unlockScroll} from '~/lib/scrollLock';
 
 const STORAGE_KEY = 'reda-studio-newsletter-seen';
 
@@ -111,23 +112,13 @@ export function NewsletterPopup() {
     const controller = new AbortController();
     document.addEventListener('keydown', (event) => event.key === 'Escape' && close(), {signal: controller.signal});
 
-    /*
-     * Locking the page while the dialog is up must not resize anything.
-     * `overflow: hidden` removes the scrollbar, and on a desktop browser that
-     * hands ~15px back to the layout: the whole site widens as the pop-up
-     * appears and snaps back as it closes. So the exact width the scrollbar
-     * occupied is measured and held open — on the body for the page, and on
-     * the fixed header, which is positioned against the viewport and would
-     * otherwise drift out of line with the content underneath it.
-     */
-    const gap = window.innerWidth - document.documentElement.clientWidth;
-    document.documentElement.style.setProperty('--scrollbar-lock', `${gap}px`);
-    document.body.classList.add('is-scroll-locked');
+    // Shared with the cart, search and menu drawers — see app/lib/scrollLock.ts
+    // for why locking the page must not be allowed to resize it.
+    lockScroll();
 
     return () => {
       controller.abort();
-      document.body.classList.remove('is-scroll-locked');
-      document.documentElement.style.removeProperty('--scrollbar-lock');
+      unlockScroll();
     };
   }, [open]);
 
