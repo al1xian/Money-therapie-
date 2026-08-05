@@ -2,16 +2,38 @@ import {useEffect, useState} from 'react';
 import {CloseIcon} from '~/components/Icons';
 
 const STORAGE_KEY = 'reda-studio-newsletter-seen';
+
+/**
+ * The key used before the pop-up became once-per-visitor. Still honoured on
+ * read: someone who had already subscribed back then must not be asked again
+ * just because the flag was renamed.
+ */
+const LEGACY_STORAGE_KEY = 'reda-studio-newsletter-subscribed';
+
+/**
+ * The same flag, as a cookie.
+ *
+ * Two records of one fact, on purpose — they are evicted under different
+ * rules, and either one is enough to keep the pop-up away. It matters most on
+ * Safari, where script-written localStorage is capped at seven days of
+ * inactivity: a visitor who dismissed the pop-up and came back a fortnight
+ * later would otherwise see it again.
+ */
+const COOKIE_NAME = 'reda_newsletter_seen';
+const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
+
 const PROMO_CODE = 'REDA10';
 const OPEN_DELAY_MS = 1200;
 
 /**
  * Welcome pop-up offering -10% in exchange for an email address.
  *
- * Shown **once per visitor**: the localStorage flag is written the moment it
- * opens, so it never comes back — whether the visitor subscribed, closed it,
- * or simply ignored it. (It used to reappear at every visit until someone
- * subscribed.) Clearing the browser's site data is what resets it.
+ * Shown **once per visitor**: the flag is written the moment it opens and
+ * again when it closes, so it never comes back — whether the visitor
+ * subscribed, dismissed it, or simply ignored it. (It used to reappear at
+ * every visit until someone subscribed.) It is recorded twice, in localStorage
+ * and in a one-year cookie, because browsers evict the two under different
+ * rules; only clearing the browser's site data resets both.
  *
  * Posts through the same real /newsletter endpoint as the footer sign-up
  * (Shopify's own customer form), so every address lands in the store's
@@ -21,20 +43,49 @@ const OPEN_DELAY_MS = 1200;
 /*
  * localStorage throws outright when a browser has storage blocked — Safari's
  * private mode being the classic case. An unguarded read here would take the
- * whole page down over a marketing pop-up, so both accesses fail soft: the
+ * whole page down over a marketing pop-up, so every access fails soft: the
  * visitor simply gets shown the offer.
  */
-function alreadySeen(): boolean {
+function hasCookie(): boolean {
   try {
-    return window.localStorage.getItem(STORAGE_KEY) !== null;
+    return document.cookie
+      .split(';')
+      .some((entry) => entry.trim().startsWith(`${COOKIE_NAME}=`));
   } catch {
     return false;
   }
 }
 
+function hasStorageFlag(): boolean {
+  try {
+    return (
+      window.localStorage.getItem(STORAGE_KEY) !== null ||
+      window.localStorage.getItem(LEGACY_STORAGE_KEY) !== null
+    );
+  } catch {
+    return false;
+  }
+}
+
+/** Either record is enough — the pop-up has been shown before. */
+function alreadySeen(): boolean {
+  return hasCookie() || hasStorageFlag();
+}
+
+/**
+ * Writes both records. Called when the pop-up opens and again when it closes:
+ * the second write costs nothing and covers the case where the first one was
+ * refused — a storage quota, a permission that changed mid-visit.
+ */
 function markSeen() {
   try {
     window.localStorage.setItem(STORAGE_KEY, '1');
+  } catch {
+    // Nothing to do — the cookie below is the other half of the belt.
+  }
+
+  try {
+    document.cookie = `${COOKIE_NAME}=1; path=/; max-age=${COOKIE_MAX_AGE_SECONDS}; SameSite=Lax`;
   } catch {
     // Nothing to do: without storage the offer can't be remembered.
   }
@@ -81,6 +132,10 @@ export function NewsletterPopup() {
   }, [open]);
 
   function close() {
+    // Written again here, not only on opening: closing is the moment the
+    // visitor is most explicit about not wanting it, and a second write covers
+    // a first one that silently failed.
+    markSeen();
     setOpen(false);
   }
 
