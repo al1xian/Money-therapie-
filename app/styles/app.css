@@ -789,6 +789,15 @@
   opacity: 0.6;
 }
 
+/* Set apart from the collections above it: a service, not a category. */
+.mobile-nav__service {
+  margin-top: 1rem;
+  border-top: 1px solid var(--color-line);
+  color: var(--color-muted);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
 /*
 * --------------------------------------------------
 * Recherche
@@ -4121,4 +4130,530 @@
   border-left-width: 0.5rem;
   margin: 1rem;
   padding: 1rem;
+}
+
+/*
+* --------------------------------------------------
+* Pages légales (/legal/*)
+* --------------------------------------------------
+*/
+.legal {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 3.5rem 1.25rem 5rem;
+}
+
+.legal__header {
+  padding-bottom: 2.5rem;
+  border-bottom: 1px solid var(--color-line);
+}
+
+/* The rule under the header runs the full width of the page; only the text
+   inside it is held to a comfortable measure. */
+.legal__title {
+  max-width: 24ch;
+}
+
+.legal__intro {
+  max-width: 46ch;
+}
+
+.legal__eyebrow {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.legal__title {
+  margin-top: 0.9rem;
+  font-size: var(--section-title-size);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  text-transform: lowercase;
+}
+
+.legal__intro {
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--color-muted);
+}
+
+.legal__updated {
+  margin-top: 1.25rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.legal__layout {
+  display: grid;
+  gap: 2.5rem;
+  padding-top: 2.5rem;
+}
+
+/* On a phone the document index is a wrapped row of chips above the text;
+   from 64em it becomes a column that stays with you as you scroll. */
+.legal__nav-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-bottom: 0.9rem;
+}
+
+.legal__nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.legal__nav a {
+  display: inline-block;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--color-muted);
+  text-decoration: none;
+  transition:
+    border-color 220ms var(--ease-out-soft),
+    color 220ms var(--ease-out-soft),
+    background 220ms var(--ease-out-soft);
+}
+
+.legal__nav a:hover {
+  border-color: var(--color-ink);
+  color: var(--color-ink);
+}
+
+.legal__nav a[aria-current='page'] {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-paper);
+}
+
+.legal__section + .legal__section {
+  margin-top: 2.75rem;
+}
+
+.legal__section h2 {
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-transform: lowercase;
+  margin-bottom: 0.9rem;
+}
+
+.legal__section p {
+  font-size: 0.88rem;
+  line-height: 1.85;
+  color: var(--color-muted);
+  max-width: 68ch;
+}
+
+.legal__section p + p {
+  margin-top: 0.9rem;
+}
+
+.legal__list {
+  margin-top: 1rem;
+  padding-left: 0;
+  list-style: none;
+  max-width: 68ch;
+}
+
+.legal__list li {
+  position: relative;
+  padding-left: 1.1rem;
+  font-size: 0.88rem;
+  line-height: 1.85;
+  color: var(--color-muted);
+}
+
+.legal__list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.85em;
+  width: 0.35rem;
+  height: 1px;
+  background: var(--color-ink);
+}
+
+/* A blank that still needs the company's real details. Loud on purpose —
+   an unfilled registered address must not read as filled in. */
+.legal__todo {
+  border-left: 2px solid var(--color-sale);
+  padding-left: 0.85rem;
+  color: var(--color-sale) !important;
+}
+
+.legal__foot {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-line);
+  font-size: 0.82rem;
+  color: var(--color-muted);
+}
+
+.legal__foot a,
+.legal__section a {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (min-width: 64em) {
+  .legal__layout {
+    grid-template-columns: 15rem 1fr;
+    gap: 4rem;
+  }
+
+  .legal__nav {
+    position: sticky;
+    top: calc(var(--header-height) + 2rem);
+    align-self: start;
+  }
+
+  .legal__nav ul {
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .legal__nav a {
+    width: 100%;
+    border-radius: 0.4rem;
+  }
+}
+
+/*
+* --------------------------------------------------
+* Suivi de commande (/order-tracking)
+* --------------------------------------------------
+*/
+.tracking {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 3.5rem 1.25rem 5rem;
+}
+
+.tracking__eyebrow {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.tracking__title {
+  margin-top: 0.9rem;
+  font-size: var(--section-title-size);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  text-transform: lowercase;
+}
+
+.tracking__intro {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--color-muted);
+}
+
+.tracking__form {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2.5rem;
+  padding: 1.5rem;
+  border: 1px solid var(--color-line);
+  border-radius: 0.75rem;
+  background: var(--color-tile);
+}
+
+.tracking__field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.tracking__field label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.tracking__field input {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--color-line);
+  border-radius: 0.4rem;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font: inherit;
+  font-size: 0.9rem;
+  transition: border-color 200ms var(--ease-out-soft);
+}
+
+.tracking__field input:focus {
+  outline: none;
+  border-color: var(--color-ink);
+}
+
+.tracking__error {
+  margin-top: 1.25rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--color-sale);
+  border-radius: 0.5rem;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--color-sale);
+}
+
+.tracking__gate {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid var(--color-ink);
+  border-radius: 0.75rem;
+}
+
+.tracking__gate h2 {
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-transform: lowercase;
+  margin-bottom: 0.6rem;
+}
+
+.tracking__gate p {
+  font-size: 0.84rem;
+  line-height: 1.75;
+  color: var(--color-muted);
+  margin-bottom: 1.1rem;
+}
+
+.tracking__result {
+  margin-top: 2rem;
+  border: 1px solid var(--color-ink);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.tracking__result-head {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+
+.tracking__result-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.tracking__result-value {
+  margin-top: 0.3rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.tracking__result-value--status {
+  text-transform: capitalize;
+}
+
+.tracking__pending,
+.tracking__status-link {
+  padding: 1.25rem 1.5rem;
+  font-size: 0.84rem;
+  line-height: 1.7;
+  color: var(--color-muted);
+}
+
+.tracking__status-link a {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.tracking__shipment {
+  padding: 1.5rem;
+  border-top: 1px solid var(--color-line);
+}
+
+.tracking__shipment-index {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-bottom: 1rem;
+}
+
+.tracking__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 1.1rem;
+  margin: 0;
+}
+
+.tracking__grid dt {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.tracking__grid dd {
+  margin: 0.3rem 0 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-transform: capitalize;
+  word-break: break-word;
+}
+
+/* Tracking numbers are codes, not prose — they keep their own casing. */
+.tracking__grid dd a {
+  color: var(--color-ink);
+  text-transform: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.tracking__history {
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-line);
+}
+
+.tracking__history-title {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-bottom: 1rem;
+}
+
+.tracking__history ol {
+  list-style: none;
+  padding: 0 0 0 0.6rem;
+  margin: 0;
+  /* The vertical rail the dots sit on. */
+  border-left: 1px solid var(--color-line);
+}
+
+.tracking__history li {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+  padding: 0 0 1.1rem 1.1rem;
+  font-size: 0.82rem;
+  color: var(--color-muted);
+}
+
+.tracking__history li:last-child {
+  padding-bottom: 0;
+}
+
+.tracking__event-dot {
+  position: absolute;
+  left: -0.31rem;
+  top: 0.42em;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--color-paper);
+  border: 1px solid var(--color-line);
+}
+
+.tracking__event-status {
+  text-transform: capitalize;
+}
+
+/* The most recent event is the answer to "where is my parcel" — it reads as
+   the answer, and everything above it as context. */
+.tracking__event--latest {
+  color: var(--color-ink);
+  font-weight: 700;
+}
+
+.tracking__event--latest .tracking__event-dot {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+}
+
+.tracking__event--latest time {
+  font-weight: 400;
+  color: var(--color-muted);
+}
+
+.tracking__help {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--color-line);
+}
+
+.tracking__help h2 {
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-transform: lowercase;
+  margin-bottom: 0.9rem;
+}
+
+.tracking__help p {
+  font-size: 0.84rem;
+  line-height: 1.8;
+  color: var(--color-muted);
+}
+
+.tracking__help p + p {
+  margin-top: 0.8rem;
+}
+
+.tracking__help a {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (min-width: 48em) {
+  .tracking {
+    padding: 4.5rem 1.5rem 6rem;
+  }
+
+  .tracking__form {
+    padding: 2rem;
+  }
+
+  /* Two fields side by side, the button spanning both. */
+  .tracking__form {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .tracking__form > button {
+    grid-column: 1 / -1;
+  }
+
+  .legal {
+    padding: 4.5rem 1.5rem 6rem;
+  }
 }

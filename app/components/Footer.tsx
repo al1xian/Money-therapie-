@@ -9,16 +9,23 @@ interface FooterProps {
 }
 
 const INFO_LINKS = [
+  {title: 'track my order', to: '/order-tracking'},
   {title: 'faq', to: '/faq'},
   {title: 'our story', to: '/about'},
   {title: 'contact', to: '/contact'},
 ];
 
+/*
+ * These point at the storefront's own documents under /legal, not at Shopify
+ * Admin's policy pages: the text lives in the repo, and Shopify has no slot at
+ * all for a legal notice. See docs/legal-pages.md.
+ */
 const POLICY_LINKS = [
-  {title: 'shipping', to: '/policies/shipping-policy'},
-  {title: 'returns', to: '/policies/refund-policy'},
-  {title: 'terms & legal', to: '/policies/terms-of-service'},
-  {title: 'privacy', to: '/policies/privacy-policy'},
+  {title: 'shipping', to: '/legal/shipping'},
+  {title: 'returns & refunds', to: '/legal/returns'},
+  {title: 'terms & conditions', to: '/legal/terms'},
+  {title: 'privacy', to: '/legal/privacy'},
+  {title: 'legal notice', to: '/legal/legal-notice'},
 ];
 
 export function Footer({header}: FooterProps) {

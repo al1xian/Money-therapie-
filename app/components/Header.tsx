@@ -97,7 +97,7 @@ export function HeaderMenu({
     <nav className={className} role="navigation">
       {viewport === 'mobile' && (
         <NavLink to="/" end onClick={close} prefetch="intent">
-          accueil
+          home
         </NavLink>
       )}
       {collections.map((collection) => (
@@ -111,6 +111,18 @@ export function HeaderMenu({
           {collection.title.toLowerCase()}
         </NavLink>
       ))}
+      {/* Service links sit under the collections rather than among them, and
+          only on mobile: the desktop bar stays a list of what's for sale. */}
+      {viewport === 'mobile' && (
+        <NavLink
+          to="/order-tracking"
+          className="mobile-nav__service"
+          onClick={close}
+          prefetch="intent"
+        >
+          track my order
+        </NavLink>
+      )}
     </nav>
   );
 }

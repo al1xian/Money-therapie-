@@ -111,7 +111,8 @@ const ITEMS: HelpItem[] = [
       <p>
         we process and ship all orders within 1&ndash;3 business days. once
         dispatched from our paris studio, delivery takes 48 hours anywhere in
-        france, with tracking on every parcel.
+        france, with tracking on every parcel &mdash; follow yours on the{' '}
+        <a href="/order-tracking">order tracking page</a>.
       </p>
     ),
   },
@@ -127,7 +128,7 @@ const ITEMS: HelpItem[] = [
         <p>
           refunds are issued once the returned item reaches us and has been
           checked. the full procedure is on our{' '}
-          <a href="/policies/refund-policy">returns page</a>.
+          <a href="/legal/returns">returns page</a>.
         </p>
       </>
     ),
@@ -138,9 +139,9 @@ const ITEMS: HelpItem[] = [
     answer: (
       <p>
         our terms are available at any time:{' '}
-        <a href="/policies/terms-of-service">terms of service</a>,{' '}
-        <a href="/policies/privacy-policy">privacy policy</a> and{' '}
-        <a href="/policies/shipping-policy">shipping policy</a>.
+        <a href="/legal/terms">terms of service</a>,{' '}
+        <a href="/legal/privacy">privacy policy</a> and{' '}
+        <a href="/legal/shipping">shipping policy</a>.
       </p>
     ),
   },

@@ -112,7 +112,7 @@ export function getProductFaq(description = ''): FaqItem[] {
         <>
           shipped from our studio in paris and delivered within 48 hours
           anywhere in france, with tracking. full details on our{' '}
-          <a href="/policies/shipping-policy">shipping page</a>.
+          <a href="/legal/shipping">shipping page</a>.
         </>
       ),
     },
@@ -121,7 +121,7 @@ export function getProductFaq(description = ''): FaqItem[] {
       answer: (
         <>
           returns and exchanges accepted within 30 days. full details on our{' '}
-          <a href="/policies/refund-policy">returns page</a>.
+          <a href="/legal/returns">returns page</a>.
         </>
       ),
     },

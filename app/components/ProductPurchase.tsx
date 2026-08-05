@@ -88,7 +88,7 @@ export function ProductPurchase({
       </div>
 
       <p className="buybox__tax">
-        taxes included · <a href="/policies/shipping-policy">shipping</a>{' '}
+        taxes included · <a href="/legal/shipping">shipping</a>{' '}
         calculated at checkout.
       </p>
 
