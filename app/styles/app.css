@@ -4662,3 +4662,145 @@ html {
     padding: 4.5rem 1.5rem 6rem;
   }
 }
+
+/*
+* --------------------------------------------------
+* Index des collections (/collections) — destination de « shop now »
+* --------------------------------------------------
+*/
+.shop-index {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 1rem 4.5rem;
+}
+
+.shop-index__header {
+  padding-bottom: 2rem;
+}
+
+.shop-index__eyebrow {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.shop-index__title {
+  margin-top: 0.9rem;
+  font-size: var(--section-title-size);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  text-transform: lowercase;
+}
+
+.shop-index__intro {
+  margin-top: 0.9rem;
+  max-width: 42ch;
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: var(--color-muted);
+}
+
+/*
+* Two per row, at every width, scrolling down the page.
+*
+* Fixed at two rather than auto-fitting: the pairing is the layout, and letting
+* it become three or four on a wide screen would turn an editorial grid into a
+* catalogue listing. The tiles grow with the viewport instead.
+*/
+.shop-index__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.shop-tile {
+  display: block;
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+/* The ratio is set here rather than left to each photo: collection images
+   come in whatever shape the merchant uploaded, and a grid whose rows change
+   height with them stops reading as a grid. */
+.shop-tile__media {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  background: var(--color-tile);
+  border-radius: 2px;
+}
+
+.shop-tile__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 600ms var(--ease-out-soft);
+}
+
+.shop-tile:hover .shop-tile__media img {
+  transform: scale(1.04);
+}
+
+/* A collection with neither its own image nor a product still fills its tile
+   instead of collapsing the row. */
+.shop-tile__placeholder {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--color-tile);
+}
+
+/* Black, under the image — never white-on-photo, which is unreadable on a
+   pale shot. */
+.shop-tile__name {
+  display: block;
+  padding: 0.75rem 0.15rem 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+
+.shop-index__empty {
+  padding: 2rem 0;
+  font-size: 0.88rem;
+  color: var(--color-muted);
+}
+
+.shop-index__empty a {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.shop-index__foot {
+  display: flex;
+  justify-content: center;
+  padding-top: 3rem;
+}
+
+@media (min-width: 48em) {
+  .shop-index {
+    padding: 4rem 1.5rem 6rem;
+  }
+
+  .shop-index__grid {
+    gap: 1.25rem;
+  }
+
+  .shop-tile__name {
+    padding-top: 0.9rem;
+    font-size: 0.95rem;
+  }
+}
+
+@media (min-width: 64em) {
+  .shop-index__grid {
+    gap: 1.75rem;
+  }
+}

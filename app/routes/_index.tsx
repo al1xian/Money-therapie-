@@ -54,10 +54,7 @@ async function loadCriticalData({context}: Route.LoaderArgs) {
   // « summer drop » et « all in drop » restent visibles dans le header, sur
   // /collections et dans la vitrine des pages produit, mais pas sur l'accueil.
   const visible = withoutHomeHiddenCollections(collections.nodes);
-  return {
-    collections: visible,
-    featuredCollection: visible[0] ?? null,
-  };
+  return {collections: visible};
 }
 
 function loadDeferredData({context}: Route.LoaderArgs) {
@@ -74,7 +71,6 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 
 export default function Homepage() {
   const data = useLoaderData<typeof loader>();
-  const featured = data.featuredCollection;
 
   return (
     <div className="home">
@@ -85,10 +81,10 @@ export default function Homepage() {
         eyebrow="new collection"
         title="reda studio"
         description="designed for people with ambition."
-        ctaButton={{
-          text: 'shop now',
-          href: featured ? `/collections/${featured.handle}` : '/collections/all',
-        }}
+        // "shop now" opens the collections index rather than dropping the
+        // visitor into whichever collection happens to be newest — from the
+        // hero, the useful next step is seeing what there is to choose from.
+        ctaButton={{text: 'shop now', href: '/collections'}}
         secondaryCta={{text: 'our story', href: '/about'}}
       />
 

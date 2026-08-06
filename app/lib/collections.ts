@@ -36,6 +36,24 @@ function matches(
   return names.some((name) => name === handle || name === title);
 }
 
+/**
+ * Drops the collection Shopify creates by itself.
+ *
+ * Every store gets a "Home page" collection (handle `frontpage`) whether the
+ * merchant wants it or not. It is a theme fixture rather than a category, and
+ * listing it beside the real collections is confusing. Both the header nav and
+ * the collections index filter it out through here, so the rule lives once.
+ */
+export function withoutAutoCollections<
+  T extends {handle: string; title: string},
+>(collections: T[]): T[] {
+  return collections.filter(
+    (collection) =>
+      collection.handle !== 'frontpage' &&
+      normalize(collection.title) !== 'home page',
+  );
+}
+
 /** True when the collection must not appear on the homepage. */
 export function isHiddenFromHome(collection: {
   handle: string;

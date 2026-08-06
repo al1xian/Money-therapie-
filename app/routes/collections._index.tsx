@@ -1,99 +1,118 @@
 import {useLoaderData, Link} from 'react-router';
 import type {Route} from './+types/collections._index';
-import {getPaginationVariables, Image} from '@shopify/hydrogen';
-import type {CollectionFragment} from 'storefrontapi.generated';
-import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import {Image} from '@shopify/hydrogen';
+import type {StoreCollectionFragment} from 'storefrontapi.generated';
+import {Reveal} from '~/components/Reveal';
+import {withoutAutoCollections} from '~/lib/collections';
 
-export async function loader(args: Route.LoaderArgs) {
-  // Start fetching non-critical data without blocking time to first byte
-  const deferredData = loadDeferredData(args);
-
-  // Await the critical data required to render initial state of the page
-  const criticalData = await loadCriticalData(args);
-
-  return {...deferredData, ...criticalData};
-}
+export const meta: Route.MetaFunction = () => {
+  return [
+    {title: 'reda studio | collections'},
+    {
+      name: 'description',
+      content: 'Every reda studio collection, in one place.',
+    },
+  ];
+};
 
 /**
- * Load data necessary for rendering content above the fold. This is the critical data
- * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
+ * Where "shop now" lands: every collection, two per row, scrolling.
+ *
+ * Deliberately not paginated. The store has a handful of collections, and
+ * making someone click "next" to see the fourth one would be worse than
+ * loading them all — `first: 100` covers the catalogue many times over.
  */
-async function loadCriticalData({context, request}: Route.LoaderArgs) {
-  const paginationVariables = getPaginationVariables(request, {
-    pageBy: 4,
+export async function loader({context}: Route.LoaderArgs) {
+  const {collections} = await context.storefront.query(COLLECTIONS_QUERY, {
+    variables: {first: 100},
   });
 
-  const [{collections}] = await Promise.all([
-    context.storefront.query(COLLECTIONS_QUERY, {
-      variables: paginationVariables,
-    }),
-    // Add other queries here, so that they are loaded in parallel
-  ]);
-
-  return {collections};
-}
-
-/**
- * Load data for rendering content below the fold. This data is deferred and will be
- * fetched after the initial page load. If it's unavailable, the page should still 200.
- * Make sure to not throw any errors here, as it will cause the page to 500.
- */
-function loadDeferredData({context}: Route.LoaderArgs) {
-  return {};
+  return {collections: withoutAutoCollections(collections.nodes)};
 }
 
 export default function Collections() {
   const {collections} = useLoaderData<typeof loader>();
 
   return (
-    <div className="collections">
-      <h1>Collections</h1>
-      <PaginatedResourceSection<CollectionFragment>
-        connection={collections}
-        resourcesClassName="collections-grid"
-      >
-        {({node: collection, index}) => (
-          <CollectionItem
-            key={collection.id}
-            collection={collection}
-            index={index}
-          />
-        )}
-      </PaginatedResourceSection>
+    <div className="shop-index">
+      <header className="shop-index__header">
+        <p className="shop-index__eyebrow">shop</p>
+        <h1 className="shop-index__title">all collections</h1>
+        <p className="shop-index__intro">
+          every piece we make, sorted. tap a collection to see what&rsquo;s in
+          it.
+        </p>
+      </header>
+
+      {collections.length > 0 ? (
+        <div className="shop-index__grid">
+          {collections.map((collection, index) => (
+            <CollectionTile
+              key={collection.id}
+              collection={collection}
+              index={index}
+            />
+          ))}
+        </div>
+      ) : (
+        <p className="shop-index__empty">
+          no collections published yet. everything we have is in{' '}
+          <Link to="/collections/all">all products</Link>.
+        </p>
+      )}
+
+      <div className="shop-index__foot">
+        <Link to="/collections/all" className="btn">
+          browse all products
+        </Link>
+      </div>
     </div>
   );
 }
 
-function CollectionItem({
+function CollectionTile({
   collection,
   index,
 }: {
-  collection: CollectionFragment;
+  collection: StoreCollectionFragment;
   index: number;
 }) {
+  /*
+   * Collections often have no image of their own in Shopify. Rather than a
+   * grey box, fall back to the first product's photo — which is what the
+   * collection is anyway.
+   */
+  const image = collection.image ?? collection.products.nodes[0]?.featuredImage;
+
   return (
-    <Link
-      className="collection-item"
-      key={collection.id}
-      to={`/collections/${collection.handle}`}
-      prefetch="intent"
-    >
-      {collection?.image && (
-        <Image
-          alt={collection.image.altText || collection.title}
-          aspectRatio="1/1"
-          data={collection.image}
-          loading={index < 3 ? 'eager' : undefined}
-          sizes="(min-width: 45em) 400px, 100vw"
-        />
-      )}
-      <h5>{collection.title}</h5>
-    </Link>
+    <Reveal as="div">
+      <Link
+        className="shop-tile"
+        to={`/collections/${collection.handle}`}
+        prefetch="intent"
+      >
+        <span className="shop-tile__media">
+          {image ? (
+            <Image
+              alt={image.altText || collection.title}
+              aspectRatio="4/5"
+              data={image}
+              // The first row is above the fold on every viewport.
+              loading={index < 2 ? 'eager' : 'lazy'}
+              sizes="(min-width: 64em) 520px, 50vw"
+            />
+          ) : (
+            <span className="shop-tile__placeholder" aria-hidden="true" />
+          )}
+        </span>
+        <span className="shop-tile__name">{collection.title.toLowerCase()}</span>
+      </Link>
+    </Reveal>
   );
 }
 
 const COLLECTIONS_QUERY = `#graphql
-  fragment Collection on Collection {
+  fragment StoreCollection on Collection {
     id
     title
     handle
@@ -104,29 +123,29 @@ const COLLECTIONS_QUERY = `#graphql
       width
       height
     }
+    # Only ever used as the tile's fallback image when the collection itself
+    # has none — hence first: 1.
+    products(first: 1) {
+      nodes {
+        id
+        featuredImage {
+          id
+          url
+          altText
+          width
+          height
+        }
+      }
+    }
   }
   query StoreCollections(
     $country: CountryCode
-    $endCursor: String
-    $first: Int
     $language: LanguageCode
-    $last: Int
-    $startCursor: String
+    $first: Int
   ) @inContext(country: $country, language: $language) {
-    collections(
-      first: $first,
-      last: $last,
-      before: $startCursor,
-      after: $endCursor
-    ) {
+    collections(first: $first, sortKey: UPDATED_AT, reverse: true) {
       nodes {
-        ...Collection
-      }
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-        startCursor
-        endCursor
+        ...StoreCollection
       }
     }
   }
