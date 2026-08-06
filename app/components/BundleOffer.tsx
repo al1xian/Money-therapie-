@@ -2,7 +2,11 @@ import {Image, Money} from '@shopify/hydrogen';
 import type {MoneyV2} from '@shopify/hydrogen/storefront-api-types';
 import {AddToCartButton} from '~/components/AddToCartButton';
 import {useAside} from '~/components/Aside';
-import {CAP_DISCOUNT_AMOUNT, CAP_OFFER_ENABLED} from '~/lib/offers';
+import {
+  CAP_DISCOUNT_AMOUNT,
+  CAP_DISCOUNT_CODE,
+  CAP_OFFER_ENABLED,
+} from '~/lib/offers';
 
 export type GiftProduct = {
   id: string;
@@ -159,10 +163,22 @@ export function BundleOffer({
         </AddToCartButton>
 
         {showsDiscount && (
-          <p className="bundle__note">
-            no code needed — the discount applies itself in your cart and at
-            checkout.
-          </p>
+          <div className="bundle__note">
+            {CAP_DISCOUNT_CODE ? (
+              <>
+                <p>
+                  we add code <strong>{CAP_DISCOUNT_CODE}</strong> to your cart
+                  automatically. it stays visible there, and you can type it in
+                  yourself at any time.
+                </p>
+              </>
+            ) : (
+              <p>
+                the discount applies itself in your cart and at checkout — no
+                code needed.
+              </p>
+            )}
+          </div>
         )}
       </div>
     </section>

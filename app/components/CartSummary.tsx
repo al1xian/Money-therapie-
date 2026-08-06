@@ -2,7 +2,11 @@ import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import type {CartLayout} from '~/components/CartMain';
 import {CartForm, Money, type OptimisticCart} from '@shopify/hydrogen';
 import {useRef} from 'react';
-import {CAP_DISCOUNT_AMOUNT, CAP_OFFER_ENABLED} from '~/lib/offers';
+import {
+  CAP_DISCOUNT_AMOUNT,
+  CAP_DISCOUNT_CODE,
+  CAP_OFFER_ENABLED,
+} from '~/lib/offers';
 import {ShinyLink} from '~/components/ShinyButton';
 
 type CartSummaryProps = {
@@ -82,11 +86,27 @@ function CapOfferNote({
     0,
   );
 
+  if (discounted > 0) {
+    return (
+      <p className="cap-offer cap-offer--active">
+        offer applied — {formatMoney(discounted, currency)} off, carried through
+        to checkout
+      </p>
+    );
+  }
+
   return (
-    <p className={`cap-offer ${discounted > 0 ? 'cap-offer--active' : ''}`}>
-      {discounted > 0
-        ? `offer applied — ${formatMoney(discounted, currency)} off, carried through to checkout`
-        : `add any other piece and the cap drops by ${formatMoney(CAP_DISCOUNT_AMOUNT, currency)}, automatically`}
+    <p className="cap-offer">
+      add any other piece and the cap drops by{' '}
+      {formatMoney(CAP_DISCOUNT_AMOUNT, currency)}
+      {CAP_DISCOUNT_CODE ? (
+        <>
+          {' '}
+          — with code <strong>{CAP_DISCOUNT_CODE}</strong>, which we add for you
+        </>
+      ) : (
+        ', automatically'
+      )}
     </p>
   );
 }
