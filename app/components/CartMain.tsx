@@ -4,6 +4,7 @@ import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/Aside';
 import {CartLineItem, type CartLine} from '~/components/CartLineItem';
 import {CartSummary} from './CartSummary';
+import {CartSuggestions} from './CartSuggestions';
 
 export type CartLayout = 'page' | 'aside';
 
@@ -39,7 +40,12 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
   const childrenMap = getLineItemChildrenMap(cart?.lines?.nodes ?? []);
 
   if (!cartHasItems) {
-    return <CartEmpty />;
+    return (
+      <>
+        <CartEmpty />
+        <CartSuggestions cart={cart} layout={layout} />
+      </>
+    );
   }
 
   return (
@@ -60,6 +66,7 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
         })}
       </ul>
       <CartSummary cart={cart} layout={layout} />
+      <CartSuggestions cart={cart} layout={layout} />
     </>
   );
 }
@@ -70,8 +77,8 @@ function CartEmpty() {
     <div className="cart-empty">
       <p>your cart is empty.</p>
       <br />
-      <Link to="/collections/all" onClick={close} prefetch="viewport" className="btn--ghost">
-        continuer mes achats
+      <Link to="/collections" onClick={close} prefetch="viewport" className="btn--ghost">
+        continue shopping
       </Link>
     </div>
   );

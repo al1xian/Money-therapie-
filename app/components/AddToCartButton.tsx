@@ -11,6 +11,7 @@ export function AddToCartButton({
   onClick,
   className = 'btn btn--full',
   bundle = false,
+  shiny = true,
 }: {
   analytics?: unknown;
   children: React.ReactNode;
@@ -23,8 +24,16 @@ export function AddToCartButton({
    * and applies the offer's discount code in the same request.
    */
   bundle?: boolean;
+  /**
+   * The sweeping highlight. On the page's main call to action it earns its
+   * keep; on a row of small size chips it would mean a dozen animation loops
+   * running for as long as the drawer is open, for an effect nobody would see
+   * on a 60px button. Those pass `shiny={false}`.
+   */
+  shiny?: boolean;
 }) {
   const action = bundle ? BUNDLE_ADD_ACTION : CartForm.ACTIONS.LinesAdd;
+  const Button = shiny ? ShinyButton : 'button';
 
   return (
     <CartForm route="/cart" inputs={{lines}} action={action}>
@@ -35,14 +44,14 @@ export function AddToCartButton({
             type="hidden"
             value={JSON.stringify(analytics)}
           />
-          <ShinyButton
+          <Button
             type="submit"
             className={className}
             onClick={onClick}
             disabled={disabled ?? fetcher.state !== 'idle'}
           >
             {fetcher.state !== 'idle' ? 'adding…' : children}
-          </ShinyButton>
+          </Button>
         </>
       )}
     </CartForm>

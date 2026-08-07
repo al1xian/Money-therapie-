@@ -1,4 +1,4 @@
-import {Suspense, useState} from 'react';
+import {Suspense, useId, useState} from 'react';
 import {Await, NavLink, useAsyncValue} from 'react-router';
 import {
   type CartViewPayload,
@@ -9,8 +9,14 @@ import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/Aside';
 import {useHeaderTone} from '~/lib/header-tone';
 import {BagIcon, BurgerIcon, SearchIcon} from '~/components/Icons';
+import {
+  buildNavGroups,
+  NAV_SERVICE_LINKS,
+  type NavCollection,
+  type NavGroup,
+} from '~/lib/nav';
 
-export type NavCollection = {id: string; title: string; handle: string};
+export type {NavCollection};
 
 interface HeaderProps {
   header: HeaderQuery;
@@ -91,39 +97,123 @@ export function HeaderMenu({
   viewport: Viewport;
 }) {
   const {close} = useAside();
-  const className = viewport === 'desktop' ? 'site-header__nav' : 'mobile-nav';
+  const groups = buildNavGroups(collections);
+
+  if (viewport === 'desktop') {
+    return (
+      <nav className="site-header__nav" role="navigation">
+        {groups.map((group) => (
+          <DesktopGroup key={group.id} group={group} />
+        ))}
+      </nav>
+    );
+  }
 
   return (
-    <nav className={className} role="navigation">
-      {viewport === 'mobile' && (
-        <NavLink to="/" end onClick={close} prefetch="intent">
-          home
-        </NavLink>
-      )}
-      {collections.map((collection) => (
-        <NavLink
-          className={viewport === 'desktop' ? 'site-header__nav-link' : undefined}
-          key={collection.id}
-          to={`/collections/${collection.handle}`}
-          onClick={close}
-          prefetch="intent"
-        >
-          {collection.title.toLowerCase()}
-        </NavLink>
+    <nav className="mobile-nav" role="navigation">
+      <NavLink to="/" end onClick={close} prefetch="intent">
+        home
+      </NavLink>
+
+      {groups.map((group) => (
+        <MobileGroup key={group.id} group={group} onNavigate={close} />
       ))}
-      {/* Service links sit under the collections rather than among them, and
-          only on mobile: the desktop bar stays a list of what's for sale. */}
-      {viewport === 'mobile' && (
+
+      {/* Service links sit under the categories, not among them. */}
+      {NAV_SERVICE_LINKS.map((link) => (
         <NavLink
-          to="/order-tracking"
+          key={link.to}
+          to={link.to}
           className="mobile-nav__service"
           onClick={close}
           prefetch="intent"
         >
-          track my order
+          {link.label}
         </NavLink>
-      )}
+      ))}
     </nav>
+  );
+}
+
+/**
+ * Desktop: the group name in the bar, its collections in a panel underneath.
+ *
+ * Opened by hover and by `:focus-within`, with no state to keep in sync. The
+ * label has to be a real button for that to work: the panel is hidden with
+ * `visibility: hidden`, which makes everything inside it unfocusable, so
+ * `:focus-within` could never fire from the links themselves. Tabbing to the
+ * button opens the panel, and the links become reachable because they are now
+ * visible.
+ */
+function DesktopGroup({group}: {group: NavGroup}) {
+  return (
+    <div className="nav-group">
+      <button
+        type="button"
+        className="site-header__nav-link nav-group__label"
+      >
+        {group.label}
+      </button>
+      <div className="nav-group__panel">
+        <ul>
+          {group.collections.map((collection) => (
+            <li key={collection.id}>
+              <NavLink
+                to={`/collections/${collection.handle}`}
+                prefetch="intent"
+              >
+                {collection.title.toLowerCase()}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Mobile: a collapsible group. `grid-template-rows: 0fr → 1fr` opens it to the
+ * height of its own contents, so the panel never needs a guessed max-height.
+ */
+function MobileGroup({
+  group,
+  onNavigate,
+}: {
+  group: NavGroup;
+  onNavigate: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const panelId = useId();
+
+  return (
+    <div className={`mobile-group ${open ? 'mobile-group--open' : ''}`}>
+      <button
+        type="button"
+        className="mobile-group__trigger"
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => setOpen((current) => !current)}
+      >
+        <span>{group.label}</span>
+        <span className="mobile-group__chevron" aria-hidden="true" />
+      </button>
+
+      <div className="mobile-group__panel" id={panelId}>
+        <div className="mobile-group__panel-inner">
+          {group.collections.map((collection) => (
+            <NavLink
+              key={collection.id}
+              to={`/collections/${collection.handle}`}
+              onClick={onNavigate}
+              prefetch="intent"
+            >
+              {collection.title.toLowerCase()}
+            </NavLink>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 

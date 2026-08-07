@@ -4804,3 +4804,276 @@ html {
     gap: 1.75rem;
   }
 }
+
+/*
+* --------------------------------------------------
+* Menu arborescent — deux groupes au lieu d'une liste plate
+* --------------------------------------------------
+*/
+
+/* Desktop: the group name in the bar, its collections in a panel below. */
+.nav-group {
+  position: relative;
+}
+
+.nav-group__label {
+  display: inline-block;
+  background: none;
+  border: none;
+  font: inherit;
+  cursor: pointer;
+  color: inherit;
+}
+
+/*
+* Opened on hover and on `:focus-within`. That second selector is what makes
+* the menu usable from the keyboard without a line of JavaScript: tabbing into
+* a link inside the panel keeps it open.
+*/
+.nav-group__panel {
+  position: absolute;
+  top: 100%;
+  left: -0.75rem;
+  z-index: 5;
+  min-width: 11rem;
+  padding: 0.6rem 0;
+  margin-top: 0.35rem;
+  background: var(--color-paper);
+  border: 1px solid var(--color-line);
+  border-radius: 0.4rem;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 8%);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition:
+    opacity 180ms var(--ease-out-soft),
+    transform 180ms var(--ease-out-soft),
+    visibility 180ms;
+}
+
+.nav-group:hover .nav-group__panel,
+.nav-group:focus-within .nav-group__panel {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.nav-group__panel ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-group__panel a {
+  display: block;
+  padding: 0.5rem 1rem;
+  font-size: 0.78rem;
+  text-transform: lowercase;
+  color: var(--color-ink);
+  text-decoration: none;
+  transition: background 150ms var(--ease-out-soft);
+}
+
+.nav-group__panel a:hover,
+.nav-group__panel a[aria-current='page'] {
+  background: var(--color-tile);
+  text-decoration: none;
+}
+
+/* Mobile: a collapsible group per category. */
+.mobile-group {
+  border-bottom: 1px solid var(--color-line);
+}
+
+.mobile-group__trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  color: var(--color-ink);
+  font: inherit;
+  font-size: 0.9rem;
+  text-transform: lowercase;
+}
+
+/* A chevron drawn from two borders — no icon file for one arrow. */
+.mobile-group__chevron {
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 1.5px solid var(--color-ink);
+  border-bottom: 1.5px solid var(--color-ink);
+  transform: rotate(45deg) translate(-0.1rem, -0.1rem);
+  transition: transform 300ms var(--ease-out-soft);
+}
+
+.mobile-group--open .mobile-group__chevron {
+  transform: rotate(225deg) translate(-0.1rem, -0.1rem);
+}
+
+.mobile-group__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 320ms var(--ease-out-soft);
+}
+
+.mobile-group--open .mobile-group__panel {
+  grid-template-rows: 1fr;
+}
+
+.mobile-group__panel-inner {
+  overflow: hidden;
+}
+
+/* Indented, lighter, and without the row borders the top level carries — the
+   nesting has to be visible at a glance. */
+.mobile-group__panel-inner a {
+  display: block;
+  padding: 0.6rem 0 0.6rem 1rem;
+  border-bottom: none;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.mobile-group__panel-inner a:last-child {
+  padding-bottom: 1rem;
+}
+
+.mobile-group__panel-inner a[aria-current='page'] {
+  color: var(--color-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-group__panel,
+  .mobile-group__panel,
+  .mobile-group__chevron {
+    transition: none;
+  }
+}
+
+/*
+* --------------------------------------------------
+* Suggestions dans le panier
+* --------------------------------------------------
+*/
+.cart-suggest {
+  border-top: 1px solid var(--color-line);
+  padding: 1.25rem 0 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.cart-suggest__title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-bottom: 1rem;
+}
+
+.cart-suggest__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.cart-suggest__row {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 0.85rem;
+  align-items: start;
+}
+
+.cart-suggest__media {
+  display: block;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--color-tile);
+}
+
+.cart-suggest__media img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.cart-suggest__body {
+  min-width: 0;
+}
+
+.cart-suggest__name {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.cart-suggest__name:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.cart-suggest__price {
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  color: var(--color-muted);
+}
+
+/* One button per available size. Wraps rather than scrolls: in a narrow
+   drawer a hidden size is a size nobody buys. */
+.cart-suggest__variants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.55rem;
+}
+
+.cart-suggest__add {
+  min-height: 0;
+  padding: 0.32rem 0.7rem;
+  font-size: 0.7rem;
+  text-transform: lowercase;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  cursor: pointer;
+  transition:
+    background 180ms var(--ease-out-soft),
+    border-color 180ms var(--ease-out-soft),
+    color 180ms var(--ease-out-soft);
+}
+
+.cart-suggest__add:hover:not(:disabled) {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-paper);
+}
+
+.cart-suggest__add:disabled {
+  opacity: 0.45;
+  cursor: wait;
+}
+
+/* On the full cart page there is room to breathe. */
+@media (min-width: 48em) {
+  .cart-suggest--page {
+    padding-top: 2rem;
+    margin-top: 2rem;
+  }
+
+  .cart-suggest--page .cart-suggest__list {
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 1.5rem;
+  }
+}

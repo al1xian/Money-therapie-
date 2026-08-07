@@ -16,6 +16,7 @@ import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from './components/PageLayout';
+import {withoutAutoCollections} from '~/lib/collections';
 
 export type RootLoader = typeof loader;
 
@@ -117,12 +118,10 @@ async function loadCriticalData({context}: Route.LoaderArgs) {
     // Add other queries here, so that they are loaded in parallel
   ]);
 
-  // Shopify auto-creates a "Home page" collection (handle "frontpage") on
-  // every store — it's not a real product category, so it's excluded from
-  // the nav built from real collections.
-  const navCollections = collections.nodes.filter(
-    (collection) => collection.handle !== 'frontpage' && collection.title.toLowerCase() !== 'home page',
-  );
+  // Shopify auto-creates a "Home page" collection on every store; it isn't a
+  // real product category. The rule lives in ~/lib/collections so the header
+  // and the collections index can't drift apart.
+  const navCollections = withoutAutoCollections(collections.nodes);
 
   return {header, navCollections};
 }
@@ -148,10 +147,27 @@ function loadDeferredData({context}: Route.LoaderArgs) {
       console.error(error);
       return null;
     });
+  /*
+   * Products offered inside the cart drawer. Deferred and cached, because it
+   * is a suggestion: it must never hold up the page, and the drawer opens with
+   * it already in hand rather than starting a request at the moment someone
+   * wants to check out.
+   */
+  const cartSuggestions = storefront
+    .query(CART_SUGGESTIONS_QUERY, {
+      cache: storefront.CacheShort(),
+      variables: {first: 8},
+    })
+    .catch((error: Error) => {
+      console.error(error);
+      return null;
+    });
+
   return {
     cart: cart.get(),
     isLoggedIn: customerAccount.isLoggedIn(),
     footer,
+    cartSuggestions,
   };
 }
 
@@ -222,3 +238,51 @@ export function ErrorBoundary() {
     </div>
   );
 }
+
+/**
+ * The products offered in the cart drawer.
+ *
+ * Newest first, with every variant's availability, because the drawer offers a
+ * one-tap add: it has to know which sizes are actually buyable rather than
+ * sending someone to a sold-out variant.
+ */
+const CART_SUGGESTIONS_QUERY = `#graphql
+  fragment SuggestedProduct on Product {
+    id
+    title
+    handle
+    availableForSale
+    featuredImage {
+      id
+      url
+      altText
+      width
+      height
+    }
+    priceRange {
+      minVariantPrice {
+        amount
+        currencyCode
+      }
+    }
+    variants(first: 12) {
+      nodes {
+        id
+        title
+        availableForSale
+        price {
+          amount
+          currencyCode
+        }
+      }
+    }
+  }
+  query CartSuggestions($country: CountryCode, $language: LanguageCode, $first: Int)
+    @inContext(country: $country, language: $language) {
+    products(first: $first, sortKey: UPDATED_AT, reverse: true) {
+      nodes {
+        ...SuggestedProduct
+      }
+    }
+  }
+` as const;
