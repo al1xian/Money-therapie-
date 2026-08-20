@@ -8,6 +8,7 @@ import {
   SECOND_ITEM_DISCOUNT_PERCENT,
 } from '~/lib/offers';
 import {ShinyLink} from '~/components/ShinyButton';
+import {useI18n, useT} from '~/lib/i18n';
 
 type CartSummaryProps = {
   cart: OptimisticCart<CartApiQueryFragment | null>;
@@ -18,6 +19,7 @@ type CartSummaryProps = {
 const FREE_SHIPPING_THRESHOLD = 150;
 
 export function CartSummary({cart}: CartSummaryProps) {
+  const {t, locale} = useI18n();
   const subtotal = Number(cart?.cost?.subtotalAmount?.amount ?? 0);
   const currency = cart?.cost?.subtotalAmount?.currencyCode ?? 'EUR';
   const remaining = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
@@ -31,8 +33,10 @@ export function CartSummary({cart}: CartSummaryProps) {
         </div>
         <span className="shipping-progress__label">
           {remaining > 0
-            ? `${formatMoney(remaining, currency)} away from free shipping`
-            : 'free shipping unlocked ✓'}
+            ? t('cart.freeShippingAway', {
+                amount: formatMoney(remaining, currency, locale),
+              })
+            : t('cart.freeShippingUnlocked')}
         </span>
       </div>
 
@@ -41,7 +45,7 @@ export function CartSummary({cart}: CartSummaryProps) {
       <CartDiscounts discountCodes={cart?.discountCodes} />
 
       <div className="cart-summary__row">
-        <span>subtotal</span>
+        <span>{t('cart.subtotal')}</span>
         <span>
           {cart?.cost?.subtotalAmount?.amount ? (
             <Money data={cart.cost.subtotalAmount} />
@@ -50,7 +54,7 @@ export function CartSummary({cart}: CartSummaryProps) {
           )}
         </span>
       </div>
-      <p className="cart-summary__note">taxes included · shipping calculated at checkout</p>
+      <p className="cart-summary__note">{t('cart.taxNote')}</p>
 
       <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} />
     </div>
@@ -73,6 +77,7 @@ function OfferNote({
   lines?: CartApiQueryFragment['lines']['nodes'];
   currency: string;
 }) {
+  const {t, locale} = useI18n();
   if (!OFFER_ENABLED) return null;
 
   const discounted = (lines ?? []).reduce(
@@ -88,8 +93,9 @@ function OfferNote({
   if (discounted > 0) {
     return (
       <p className="cap-offer cap-offer--active">
-        offer applied — {formatMoney(discounted, currency)} off, carried through
-        to checkout
+        {t('cart.offerApplied', {
+          amount: formatMoney(discounted, currency, locale),
+        })}
       </p>
     );
   }
@@ -99,37 +105,42 @@ function OfferNote({
     0,
   );
 
+  const key = items >= 2
+    ? (OFFER_DISCOUNT_CODE ? 'cart.offerActiveCode' : 'cart.offerActiveAuto')
+    : (OFFER_DISCOUNT_CODE ? 'cart.offerInviteCode' : 'cart.offerInviteAuto');
+
   return (
     <p className="cap-offer">
-      {items >= 2
-        ? `your second piece is ${SECOND_ITEM_DISCOUNT_PERCENT}% off`
-        : `add a second piece and ${SECOND_ITEM_DISCOUNT_PERCENT}% comes off it`}
-      {OFFER_DISCOUNT_CODE ? (
-        <>
-          {' '}
-          — with code <strong>{OFFER_DISCOUNT_CODE}</strong>, which we add for
-          you
-        </>
-      ) : (
-        ', automatically'
-      )}
+      {t(key, {
+        percent: SECOND_ITEM_DISCOUNT_PERCENT,
+        code: OFFER_DISCOUNT_CODE,
+      })}
     </p>
   );
 }
 
-function formatMoney(amount: number, currency: string) {
+/**
+ * Amounts follow the language, not just the currency: "€10.50" in English,
+ * "10,50 €" in French. Same number, and the one a French customer expects to
+ * read.
+ */
+function formatMoney(amount: number, currency: string, locale: string) {
   try {
-    return new Intl.NumberFormat('en-US', {style: 'currency', currency}).format(amount);
+    return new Intl.NumberFormat(locale === 'fr' ? 'fr-FR' : 'en-IE', {
+      style: 'currency',
+      currency,
+    }).format(amount);
   } catch {
     return `${amount.toFixed(2)} ${currency}`;
   }
 }
 
 function CartCheckoutActions({checkoutUrl}: {checkoutUrl?: string}) {
+  const t = useT();
   if (!checkoutUrl) return null;
   return (
     <ShinyLink href={checkoutUrl} target="_self" className="btn btn--full">
-      proceed to checkout
+      {t('cart.checkout')}
     </ShinyLink>
   );
 }
@@ -139,6 +150,7 @@ function CartDiscounts({
 }: {
   discountCodes?: CartApiQueryFragment['discountCodes'];
 }) {
+  const t = useT();
   const inputRef = useRef<HTMLInputElement>(null);
   const codes: string[] =
     discountCodes?.filter((discount) => discount.applicable)?.map(({code}) => code) || [];
@@ -150,7 +162,7 @@ function CartDiscounts({
           <div className="cart-summary__row">
             <code>{codes.join(', ')}</code>
             <button type="submit" className="link">
-              retirer
+              {t('cart.remove')}
             </button>
           </div>
         </UpdateDiscountForm>
@@ -158,8 +170,14 @@ function CartDiscounts({
 
       <UpdateDiscountForm discountCodes={codes}>
         <div className="cart-discount-form">
-          <input ref={inputRef} type="text" name="discountCode" placeholder="promo code" aria-label="promo code" />
-          <button type="submit">ok</button>
+          <input
+            ref={inputRef}
+            type="text"
+            name="discountCode"
+            placeholder={t('cart.promoCode')}
+            aria-label={t('cart.promoCode')}
+          />
+          <button type="submit">{t('cart.apply')}</button>
         </div>
       </UpdateDiscountForm>
     </div>

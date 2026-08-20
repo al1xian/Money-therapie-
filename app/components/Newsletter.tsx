@@ -1,4 +1,5 @@
 import {useState} from 'react';
+import {useT} from '~/lib/i18n';
 
 /**
  * Newsletter sign-up. Posts to the Shopify customer form endpoint (the same
@@ -7,6 +8,7 @@ import {useState} from 'react';
  */
 export function Newsletter() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+  const t = useT();
 
   async function submit(form: HTMLFormElement) {
     const email = (form.elements.namedItem('email') as HTMLInputElement)?.value;
@@ -41,34 +43,34 @@ export function Newsletter() {
 
   return (
     <div className="newsletter">
-      <p>sign up for early access to new drops.</p>
-      <p>−10% off your first order.</p>
+      <p>{t('news.pitch1')}</p>
+      <p>{t('news.pitch2')}</p>
 
       {status === 'done' ? (
-        <p className="newsletter__success">thank you &mdash; you&rsquo;re in.</p>
+        <p className="newsletter__success">{t('news.thanks')}</p>
       ) : (
         <form className="newsletter__form" onSubmit={onSubmit}>
           <input
             type="text"
             name="firstName"
-            placeholder="first name (optional)"
+            placeholder={t('news.firstName')}
             autoComplete="given-name"
-            aria-label="first name"
+            aria-label={t('news.firstNameLabel')}
           />
           <input
             type="email"
             name="email"
-            placeholder="email"
+            placeholder={t('news.placeholder')}
             required
             autoComplete="email"
-            aria-label="email"
+            aria-label={t('news.emailLabel')}
           />
           <button type="submit" className="btn" disabled={status === 'loading'}>
-            {status === 'loading' ? '…' : 'sign up'}
+            {status === 'loading' ? '…' : t('news.subscribe')}
           </button>
           {status === 'error' && (
             <p className="form-error" role="alert" style={{width: '100%'}}>
-              something went wrong, please try again.
+              {t('news.error')}
             </p>
           )}
         </form>

@@ -4886,3 +4886,159 @@ html {
     gap: 1.5rem;
   }
 }
+
+/*
+* --------------------------------------------------
+* Sélecteur de langue (header)
+* --------------------------------------------------
+*/
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+  padding: 0.12rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  /* Borrows the header's own colour, so it turns white over the hero exactly
+     like the wordmark does, with no second rule to keep in step. */
+  opacity: 0.6;
+  transition: opacity 200ms var(--ease-out-soft);
+}
+
+.lang-switch:hover,
+.lang-switch:focus-within {
+  opacity: 1;
+}
+
+.lang-switch__option {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.14rem 0.45rem;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: inherit;
+  transition:
+    background 200ms var(--ease-out-soft),
+    color 200ms var(--ease-out-soft);
+}
+
+/*
+* The chosen language is filled in, so the pair reads as one control with a
+* current value rather than two loose buttons. Stated for both header tones
+* rather than derived: over the hero the header is white on a photo, and a
+* clever inversion would have been one browser quirk away from unreadable.
+*/
+.lang-switch__option[data-active='true'] {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+
+.site-header--transparent .lang-switch__option[data-active='true'] {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+@media (max-width: 47.99em) {
+  .lang-switch__option {
+    padding: 0.14rem 0.38rem;
+    font-size: 0.58rem;
+  }
+}
+
+/*
+* --------------------------------------------------
+* Offre : choix de la deuxième pièce
+* --------------------------------------------------
+*/
+.bundle__choices {
+  border: none;
+  margin: 1.25rem 0 0;
+  padding: 1rem 0 0;
+  border-top: 1px solid var(--color-line);
+}
+
+.bundle__choices-label {
+  padding: 0;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-bottom: 0.85rem;
+}
+
+.bundle__choices-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(5.2rem, 1fr));
+  gap: 0.6rem;
+}
+
+.bundle__choice {
+  display: block;
+  cursor: pointer;
+  text-align: center;
+  border: 1px solid var(--color-line);
+  border-radius: 0.5rem;
+  padding: 0.4rem;
+  transition:
+    border-color 200ms var(--ease-out-soft),
+    background 200ms var(--ease-out-soft);
+}
+
+.bundle__choice:hover {
+  border-color: var(--color-muted);
+}
+
+.bundle__choice[data-selected='true'] {
+  border-color: var(--color-ink);
+  background: var(--color-tile);
+}
+
+/* The radio stays in the accessibility tree and keeps keyboard control; it is
+   the tile around it that is visible. */
+.bundle__choice input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bundle__choice:focus-within {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+.bundle__choice-thumb {
+  display: block;
+  overflow: hidden;
+  border-radius: 0.35rem;
+  background: var(--color-paper);
+  aspect-ratio: 1 / 1;
+}
+
+.bundle__choice-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bundle__choice-name {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--color-ink);
+  /* Two lines at most: a long product name must not make one tile taller than
+     its neighbours and break the grid. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

@@ -9,6 +9,8 @@ import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/Aside';
 import {useHeaderTone} from '~/lib/header-tone';
 import {BagIcon, BurgerIcon, SearchIcon} from '~/components/Icons';
+import {LanguageSwitcher} from '~/components/LanguageSwitcher';
+import {useT} from '~/lib/i18n';
 import {
   buildNavGroups,
   NAV_SERVICE_LINKS,
@@ -31,6 +33,7 @@ type Viewport = 'desktop' | 'mobile';
 export function Header({header, cart, navCollections}: HeaderProps) {
   const {shop} = header;
   const {open} = useAside();
+  const t = useT();
   const {transparent} = useHeaderTone();
   // Drives a short press animation on the wordmark; cleared on animation end
   // so it can replay on every click.
@@ -51,7 +54,7 @@ export function Header({header, cart, navCollections}: HeaderProps) {
         <button
           className="site-header__icon-btn site-header__burger"
           onClick={() => open('mobile')}
-          aria-label="Open menu"
+          aria-label={t('nav.openMenu')}
         >
           <BurgerIcon />
         </button>
@@ -75,11 +78,14 @@ export function Header({header, cart, navCollections}: HeaderProps) {
       </NavLink>
 
       <div className="site-header__side site-header__side--end">
-        <span className="site-header__currency">EUR</span>
+        <span className="site-header__currency" aria-label="Euro">
+          EUR&nbsp;€
+        </span>
+        <LanguageSwitcher />
         <button
           className="site-header__icon-btn"
           onClick={() => open('search')}
-          aria-label="Search"
+          aria-label={t('nav.search')}
         >
           <SearchIcon />
         </button>
@@ -97,6 +103,7 @@ export function HeaderMenu({
   viewport: Viewport;
 }) {
   const {close} = useAside();
+  const t = useT();
   const groups = buildNavGroups(collections);
 
   if (viewport === 'desktop') {
@@ -112,7 +119,7 @@ export function HeaderMenu({
   return (
     <nav className="mobile-nav" role="navigation">
       <NavLink to="/" end onClick={close} prefetch="intent">
-        home
+        {t('nav.home')}
       </NavLink>
 
       {groups.map((group) => (
@@ -128,7 +135,7 @@ export function HeaderMenu({
           onClick={close}
           prefetch="intent"
         >
-          {link.label}
+          {t(link.labelKey)}
         </NavLink>
       ))}
     </nav>
@@ -146,13 +153,15 @@ export function HeaderMenu({
  * visible.
  */
 function DesktopGroup({group}: {group: NavGroup}) {
+  const t = useT();
+
   return (
     <div className="nav-group">
       <button
         type="button"
         className="site-header__nav-link nav-group__label"
       >
-        {group.label}
+        {t(group.labelKey)}
       </button>
       <div className="nav-group__panel">
         <ul>
@@ -185,6 +194,7 @@ function MobileGroup({
 }) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
+  const t = useT();
 
   return (
     <div className={`mobile-group ${open ? 'mobile-group--open' : ''}`}>
@@ -195,7 +205,7 @@ function MobileGroup({
         aria-controls={panelId}
         onClick={() => setOpen((current) => !current)}
       >
-        <span>{group.label}</span>
+        <span>{t(group.labelKey)}</span>
         <span className="mobile-group__chevron" aria-hidden="true" />
       </button>
 

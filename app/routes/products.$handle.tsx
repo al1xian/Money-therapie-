@@ -125,31 +125,47 @@ function loadDeferredData(
       return [];
     });
 
-  // The piece suggested as the second half of the pair, looked up in the real
-  // catalogue. If no match exists, the box simply doesn't render — the offer
-  // still applies to any second item the customer picks themselves.
-  const pairedProduct = context.storefront
-    .query(PAIRED_PRODUCT_QUERY, {variables: {query: PAIRED_SEARCH_QUERY}})
-    .then((data) => {
-      const node = data?.products?.nodes?.[0];
-      if (!node) return null;
-      const variant = node.variants?.nodes?.[0];
-      if (!variant?.availableForSale) return null;
-      return {
-        id: node.id,
-        title: node.title,
-        handle: node.handle,
-        featuredImage: node.featuredImage,
-        variantId: variant.id,
-        price: variant.price,
-      };
-    })
+  /*
+   * The pieces the customer can choose from as the second half of the pair.
+   *
+   * Was a single hardcoded search for "casquette" — which made the offer look
+   * like a cap promotion when it has never been one: the Shopify discount
+   * applies to any second item. Now it offers a real choice, drawn from the
+   * catalogue, and the customer picks.
+   */
+  const pairChoices = context.storefront
+    .query(PAIR_CHOICES_QUERY, {variables: {first: 12}})
+    .then((data) =>
+      (data?.products?.nodes ?? [])
+        .filter(
+          (node) =>
+            // Never offer the product the customer is already looking at, and
+            // never offer something that can't be bought.
+            node.handle !== handle &&
+            node.availableForSale &&
+            node.variants?.nodes?.some((variant) => variant.availableForSale),
+        )
+        .map((node) => {
+          const variant = node.variants.nodes.find(
+            (candidate) => candidate.availableForSale,
+          )!;
+          return {
+            id: node.id,
+            title: node.title,
+            handle: node.handle,
+            featuredImage: node.featuredImage,
+            variantId: variant.id,
+            price: variant.price,
+          };
+        })
+        .slice(0, MAX_PAIR_CHOICES),
+    )
     .catch((error: Error) => {
       console.error(error);
-      return null;
+      return [];
     });
 
-  return {recommended, showcaseCollections, pairedProduct};
+  return {recommended, showcaseCollections, pairChoices};
 }
 
 /** First sentence of the product description, for the short blurb in the buy box. */
@@ -162,7 +178,7 @@ function shortenDescription(description: string): string {
 }
 
 export default function Product() {
-  const {product, recommended, showcaseCollections, pairedProduct} =
+  const {product, recommended, showcaseCollections, pairChoices} =
     useLoaderData<typeof loader>();
 
   const selectedVariant = useOptimisticVariant(
@@ -227,16 +243,16 @@ export default function Product() {
             }
           />
 
-          {/* Limited offer: this product paired with a suggested second one. */}
+          {/* Limited offer: this product plus a second one the customer picks. */}
           <Suspense fallback={null}>
-            <Await resolve={pairedProduct}>
-              {(paired) => (
+            <Await resolve={pairChoices}>
+              {(choices) => (
                 <BundleOffer
                   productTitle={title}
                   productImage={product.images.nodes[0] ?? selectedVariant?.image}
                   productPrice={selectedVariant?.price}
                   productVariantId={selectedVariant?.id}
-                  pairedWith={paired}
+                  choices={choices}
                   available={available}
                 />
               )}
@@ -522,23 +538,23 @@ const PRODUCT_RECOMMENDATIONS_QUERY = `#graphql
 ` as const;
 
 /**
- * Which catalogue product is suggested as the second half of the pair. A
- * Shopify search term, so renaming it in the admin doesn't break anything —
- * and if no match exists the box hides itself instead of inventing a product.
+ * How many pieces the offer proposes. Enough to feel like a real choice,
+ * few enough that the box stays a box rather than a second catalogue.
  */
-const PAIRED_SEARCH_QUERY = 'casquette';
+const MAX_PAIR_CHOICES = 6;
 
-const PAIRED_PRODUCT_QUERY = `#graphql
-  query PdpPairedProduct(
-    $query: String!
+const PAIR_CHOICES_QUERY = `#graphql
+  query PdpPairChoices(
+    $first: Int
     $country: CountryCode
     $language: LanguageCode
   ) @inContext(country: $country, language: $language) {
-    products(first: 1, query: $query) {
+    products(first: $first, sortKey: BEST_SELLING) {
       nodes {
         id
         title
         handle
+        availableForSale
         featuredImage {
           id
           url
@@ -546,7 +562,7 @@ const PAIRED_PRODUCT_QUERY = `#graphql
           width
           height
         }
-        variants(first: 1) {
+        variants(first: 10) {
           nodes {
             id
             availableForSale

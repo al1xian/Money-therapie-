@@ -1,3 +1,5 @@
+import {useT} from '~/lib/i18n';
+
 /**
  * Quantity stepper. Clamped between 1 and `max` (the variant's available
  * stock when Shopify reports it), so the customer can't submit a quantity
@@ -14,13 +16,14 @@ export function QuantitySelector({
   max?: number | null;
   disabled?: boolean;
 }) {
+  const t = useT();
   const ceiling = typeof max === 'number' && max > 0 ? max : Infinity;
   const canDecrease = !disabled && value > 1;
   const canIncrease = !disabled && value < ceiling;
 
   return (
     <div className="quantity">
-      <span className="quantity__label">quantity</span>
+      <span className="quantity__label">{t('product.quantity')}</span>
       <div className="quantity__control">
         <button
           type="button"

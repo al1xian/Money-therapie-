@@ -1,5 +1,7 @@
 import {useId, useState} from 'react';
 import type {ReactNode} from 'react';
+import {Link} from 'react-router';
+import {useT, type Translate} from '~/lib/i18n';
 
 /**
  * A plus that turns into a minus as the row opens: the whole cross makes a
@@ -103,60 +105,60 @@ type HelpItem = {
   answer: ReactNode;
 };
 
-const ITEMS: HelpItem[] = [
-  {
-    icon: <TruckIcon />,
-    question: 'shipping time',
-    answer: (
-      <p>
-        we process and ship all orders within 1&ndash;3 business days. once
-        dispatched from our paris studio, delivery takes 48 hours anywhere in
-        france, with tracking on every parcel &mdash; follow yours on the{' '}
-        <a href="/order-tracking">order tracking page</a>.
-      </p>
-    ),
-  },
-  {
-    icon: <ReturnIcon />,
-    question: 'returns & exchanges',
-    answer: (
-      <>
+/**
+ * Built inside the component rather than as a module constant, because every
+ * string in it depends on the language and a constant would be frozen at
+ * whatever the first render happened to be.
+ */
+function buildItems(t: Translate): HelpItem[] {
+  return [
+    {
+      icon: <TruckIcon />,
+      question: t('faq.shipping'),
+      answer: (
         <p>
-          returns and exchanges are accepted within 30 days of delivery, on
-          unworn pieces in their original packaging.
+          {t('faq.shippingBody')}{' '}
+          <Link to="/order-tracking">{t('faq.trackingPage')}</Link>.
         </p>
+      ),
+    },
+    {
+      icon: <ReturnIcon />,
+      question: t('faq.returns'),
+      answer: (
+        <>
+          <p>{t('faq.returnsBody1')}</p>
+          <p>
+            {t('faq.returnsBody2')}{' '}
+            <Link to="/legal/returns">{t('faq.returnsPage')}</Link>.
+          </p>
+        </>
+      ),
+    },
+    {
+      icon: <ShieldIcon />,
+      question: t('faq.legal'),
+      answer: (
         <p>
-          refunds are issued once the returned item reaches us and has been
-          checked. the full procedure is on our{' '}
-          <a href="/legal/returns">returns page</a>.
+          {t('faq.legalBody')}{' '}
+          <Link to="/legal/terms">{t('faq.terms')}</Link>,{' '}
+          <Link to="/legal/privacy">{t('faq.privacy')}</Link> {t('faq.and')}{' '}
+          <Link to="/legal/shipping">{t('faq.shippingPolicy')}</Link>.
         </p>
-      </>
-    ),
-  },
-  {
-    icon: <ShieldIcon />,
-    question: 'legal policies',
-    answer: (
-      <p>
-        our terms are available at any time:{' '}
-        <a href="/legal/terms">terms of service</a>,{' '}
-        <a href="/legal/privacy">privacy policy</a> and{' '}
-        <a href="/legal/shipping">shipping policy</a>.
-      </p>
-    ),
-  },
-  {
-    icon: <ChatIcon />,
-    question: 'support',
-    answer: (
-      <p>
-        a question about sizing, an order in progress or a return? write to us
-        from the <a href="/contact">contact page</a> and we will reply within 24
-        working hours.
-      </p>
-    ),
-  },
-];
+      ),
+    },
+    {
+      icon: <ChatIcon />,
+      question: t('faq.support'),
+      answer: (
+        <p>
+          {t('faq.supportBody')} <Link to="/contact">{t('faq.contactPage')}</Link>{' '}
+          {t('faq.supportBodyEnd')}
+        </p>
+      ),
+    },
+  ];
+}
 
 function HelpRow({
   item,
@@ -217,16 +219,18 @@ function HelpRow({
  */
 export function HelpFaq() {
   const [openIndex, setOpenIndex] = useState(-1);
+  const t = useT();
+  const items = buildItems(t);
 
   return (
     <section className="help-faq" aria-labelledby="help-faq-heading">
-      <p className="help-faq__eyebrow">support</p>
+      <p className="help-faq__eyebrow">{t('faq.eyebrow')}</p>
       <h2 className="help-faq__title" id="help-faq-heading">
-        need some help?
+        {t('faq.title')}
       </h2>
 
       <div className="help-faq__list">
-        {ITEMS.map((item, index) => (
+        {items.map((item, index) => (
           <HelpRow
             key={item.question}
             item={item}

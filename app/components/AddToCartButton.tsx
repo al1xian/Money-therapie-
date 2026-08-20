@@ -2,6 +2,7 @@ import {type FetcherWithComponents} from 'react-router';
 import {CartForm, type OptimisticCartLineInput} from '@shopify/hydrogen';
 import {BUNDLE_ADD_ACTION} from '~/lib/offers';
 import {ShinyButton} from '~/components/ShinyButton';
+import {useT} from '~/lib/i18n';
 
 export function AddToCartButton({
   analytics,
@@ -32,6 +33,7 @@ export function AddToCartButton({
    */
   shiny?: boolean;
 }) {
+  const t = useT();
   const action = bundle ? BUNDLE_ADD_ACTION : CartForm.ACTIONS.LinesAdd;
   const Button = shiny ? ShinyButton : 'button';
 
@@ -50,7 +52,7 @@ export function AddToCartButton({
             onClick={onClick}
             disabled={disabled ?? fetcher.state !== 'idle'}
           >
-            {fetcher.state !== 'idle' ? 'adding…' : children}
+            {fetcher.state !== 'idle' ? t('product.adding') : children}
           </Button>
         </>
       )}

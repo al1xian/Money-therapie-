@@ -5,6 +5,7 @@ import {useAside} from '~/components/Aside';
 import {CartLineItem, type CartLine} from '~/components/CartLineItem';
 import {CartSummary} from './CartSummary';
 import {CartSuggestions} from './CartSuggestions';
+import {useT} from '~/lib/i18n';
 
 export type CartLayout = 'page' | 'aside';
 
@@ -73,12 +74,14 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
 
 function CartEmpty() {
   const {close} = useAside();
+  const t = useT();
+
   return (
     <div className="cart-empty">
-      <p>your cart is empty.</p>
+      <p>{t('cart.empty')}</p>
       <br />
       <Link to="/collections" onClick={close} prefetch="viewport" className="btn--ghost">
-        continue shopping
+        {t('cart.continue')}
       </Link>
     </div>
   );

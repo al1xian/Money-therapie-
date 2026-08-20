@@ -4,6 +4,7 @@ import {Image} from '@shopify/hydrogen';
 import type {StoreCollectionFragment} from 'storefrontapi.generated';
 import {Reveal} from '~/components/Reveal';
 import {withoutAutoCollections} from '~/lib/collections';
+import {useT} from '~/lib/i18n';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -32,16 +33,14 @@ export async function loader({context}: Route.LoaderArgs) {
 
 export default function Collections() {
   const {collections} = useLoaderData<typeof loader>();
+  const t = useT();
 
   return (
     <div className="shop-index">
       <header className="shop-index__header">
-        <p className="shop-index__eyebrow">shop</p>
-        <h1 className="shop-index__title">all collections</h1>
-        <p className="shop-index__intro">
-          every piece we make, sorted. tap a collection to see what&rsquo;s in
-          it.
-        </p>
+        <p className="shop-index__eyebrow">{t('collections.eyebrow')}</p>
+        <h1 className="shop-index__title">{t('collections.title')}</h1>
+        <p className="shop-index__intro">{t('collections.intro')}</p>
       </header>
 
       {collections.length > 0 ? (
@@ -56,14 +55,14 @@ export default function Collections() {
         </div>
       ) : (
         <p className="shop-index__empty">
-          no collections published yet. everything we have is in{' '}
-          <Link to="/collections/all">all products</Link>.
+          {t('collections.empty')}{' '}
+          <Link to="/collections/all">{t('home.allProducts')}</Link>.
         </p>
       )}
 
       <div className="shop-index__foot">
         <Link to="/collections/all" className="btn">
-          browse all products
+          {t('collections.browseAll')}
         </Link>
       </div>
     </div>

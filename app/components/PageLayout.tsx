@@ -10,6 +10,7 @@ import {Footer} from '~/components/Footer';
 import {Header, HeaderMenu, type NavCollection} from '~/components/Header';
 import {CartMain} from '~/components/CartMain';
 import {NewsletterPopup} from '~/components/NewsletterPopup';
+import {useT} from '~/lib/i18n';
 import {SearchIcon} from '~/components/Icons';
 import {HeaderToneProvider} from '~/lib/header-tone';
 import {
@@ -67,8 +68,10 @@ export function PageLayout({
 }
 
 function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
+  const t = useT();
+
   return (
-    <Aside type="cart" heading="cart">
+    <Aside type="cart" heading={t('cart.title')}>
       <Suspense fallback={<p>loading…</p>}>
         <Await resolve={cart}>
           {(resolved) => <CartMain cart={resolved} layout="aside" />}
@@ -80,8 +83,9 @@ function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
 
 function SearchAside() {
   const queriesDatalistId = useId();
+  const t = useT();
   return (
-    <Aside type="search" heading="search">
+    <Aside type="search" heading={t('nav.search')}>
       <div className="predictive-search">
         <SearchFormPredictive>
           {({fetchResults, goToSearch, inputRef}) => (
@@ -159,8 +163,10 @@ function SearchAside() {
 }
 
 function MobileMenuAside({collections}: {collections: NavCollection[]}) {
+  const t = useT();
+
   return (
-    <Aside type="mobile" heading="menu">
+    <Aside type="mobile" heading={t('nav.menu')}>
       <HeaderMenu collections={collections} viewport="mobile" />
     </Aside>
   );

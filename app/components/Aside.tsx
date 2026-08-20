@@ -8,6 +8,7 @@ import {
 } from 'react';
 import {CloseIcon} from '~/components/Icons';
 import {lockScroll, unlockScroll} from '~/lib/scrollLock';
+import {useT} from '~/lib/i18n';
 
 type AsideType = 'search' | 'cart' | 'mobile' | 'closed';
 type AsideContextValue = {
@@ -32,6 +33,7 @@ export function Aside({
   const {type: activeType, close} = useAside();
   const expanded = type === activeType;
   const id = useId();
+  const t = useT();
 
   useEffect(() => {
     if (!expanded) return;
@@ -66,13 +68,13 @@ export function Aside({
       role="dialog"
       aria-labelledby={id}
     >
-      <button className="close-outside" onClick={close} aria-label="Close" />
+      <button className="close-outside" onClick={close} aria-label={t('nav.close')} />
       <aside className="drawer">
         <header className="drawer__header">
           <h3 id={id} className="drawer__heading">
             {heading}
           </h3>
-          <button className="drawer__close" onClick={close} aria-label="Close">
+          <button className="drawer__close" onClick={close} aria-label={t('nav.close')}>
             <CloseIcon />
           </button>
         </header>

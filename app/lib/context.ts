@@ -1,4 +1,5 @@
 import {createHydrogenContext} from '@shopify/hydrogen';
+import {localeFromRequest, shopifyLanguage} from '~/lib/i18n/locale';
 import {AppSession} from '~/lib/session';
 import {CART_QUERY_FRAGMENT} from '~/lib/fragments';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
@@ -52,8 +53,17 @@ export async function createHydrogenRouterContext(
       cache,
       waitUntil,
       session,
-      // Or detect from URL path based on locale subpath, cookies, or any other strategy
-      i18n: {language: 'FR', country: 'FR'},
+      /*
+       * The visitor's chosen language, read from its cookie. This is what
+       * makes Shopify answer in that language — product titles, descriptions,
+       * collection names — for whatever the merchant has published in Shopify
+       * Admin. It was hardcoded to FR while the whole site was in English,
+       * which meant asking Shopify for one language and rendering another.
+       *
+       * The country stays FR: it drives prices and shipping, not wording, and
+       * the shop sells from France.
+       */
+      i18n: {language: shopifyLanguage(localeFromRequest(request)), country: 'FR'},
       cart: {
         queryFragment: CART_QUERY_FRAGMENT,
       },

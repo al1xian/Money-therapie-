@@ -10,6 +10,7 @@ import {Newsletter} from '~/components/Newsletter';
 import {HomeReviews} from '~/components/HomeReviews';
 import {HelpFaq} from '~/components/HelpFaq';
 import {withoutHomeHiddenCollections} from '~/lib/collections';
+import {useT} from '~/lib/i18n';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -70,6 +71,7 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 
 export default function Homepage() {
   const data = useLoaderData<typeof loader>();
+  const t = useT();
 
   return (
     <div className="home">
@@ -77,14 +79,14 @@ export default function Homepage() {
         imageMobileSrc="/images/hero2-mobile.webp"
         imageDesktopSrc="/images/hero-desktop1.webp"
         imageAlt="Two men in reda studio checked overshirts and black shorts, against a brick facade"
-        eyebrow="new collection"
+        eyebrow={t('home.eyebrow')}
         title="reda studio"
-        description="designed for people with ambition."
+        description={t('home.tagline')}
         // "shop now" opens the collections index rather than dropping the
         // visitor into whichever collection happens to be newest — from the
         // hero, the useful next step is seeing what there is to choose from.
-        ctaButton={{text: 'shop now', href: '/collections'}}
-        secondaryCta={{text: 'our story', href: '/about'}}
+        ctaButton={{text: t('home.shopNow'), href: '/collections'}}
+        secondaryCta={{text: t('home.ourStory'), href: '/about'}}
       />
 
       <CollectionsSlider collections={data.collections} />
@@ -107,11 +109,13 @@ function AllProducts({
 }: {
   products: Promise<AllProductsQuery | null>;
 }) {
+  const t = useT();
+
   return (
     <section aria-labelledby="catalogue-heading">
       <Reveal as="section">
         <h2 id="catalogue-heading" className="section-title">
-          all products
+          {t('home.allProducts')}
         </h2>
       </Reveal>
       <Suspense fallback={<div className="product-grid" aria-hidden="true" />}>
@@ -132,7 +136,7 @@ function AllProducts({
         </Await>
       </Suspense>
       <div className="view-all">
-        <Link to="/collections/all">view all</Link>
+        <Link to="/collections/all">{t('home.viewAll')}</Link>
       </div>
     </section>
   );

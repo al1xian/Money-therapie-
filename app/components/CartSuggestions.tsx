@@ -9,6 +9,7 @@ import type {
 import type {loader as rootLoader} from '~/root';
 import {AddToCartButton} from '~/components/AddToCartButton';
 import type {CartLayout} from '~/components/CartMain';
+import {useT} from '~/lib/i18n';
 
 /** How many suggestions the drawer offers before it starts nagging. */
 const MAX_SUGGESTIONS = 3;
@@ -30,6 +31,7 @@ export function CartSuggestions({
   layout: CartLayout;
 }) {
   const rootData = useRouteLoaderData<typeof rootLoader>('root');
+  const t = useT();
   if (!rootData?.cartSuggestions) return null;
 
   // Everything already in the basket, so we never suggest it back.
@@ -57,7 +59,7 @@ export function CartSuggestions({
               aria-labelledby="cart-suggest-heading"
             >
               <h3 className="cart-suggest__title" id="cart-suggest-heading">
-                complete your order
+                {t('cart.suggestTitle')}
               </h3>
               <ul className="cart-suggest__list">
                 {products.map((product) => (
@@ -73,6 +75,7 @@ export function CartSuggestions({
 }
 
 function SuggestionRow({product}: {product: SuggestedProductFragment}) {
+  const t = useT();
   const variants = product.variants.nodes.filter(
     (variant) => variant.availableForSale,
   );
@@ -127,7 +130,7 @@ function SuggestionRow({product}: {product: SuggestedProductFragment}) {
               lines={[{merchandiseId: variant.id, quantity: 1}]}
               shiny={false}
             >
-              {single ? 'add' : variant.title.toLowerCase()}
+              {single ? t('cart.add') : variant.title.toLowerCase()}
             </AddToCartButton>
           ))}
         </div>

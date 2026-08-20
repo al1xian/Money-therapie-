@@ -10,6 +10,7 @@ import {ProductSizeGuide, type SizeEntry} from '~/components/ProductSizeGuide';
 import {StarRating} from '~/components/StarRating';
 import {useAside} from '~/components/Aside';
 import type {ProductRating} from '~/lib/rating';
+import {useT} from '~/lib/i18n';
 
 /**
  * The buy box: everything the customer needs to pick a variant and add it to
@@ -46,6 +47,7 @@ export function ProductPurchase({
 }) {
   const {open: openAside} = useAside();
   const [quantity, setQuantity] = useState(1);
+  const t = useT();
 
   const priceAmount = Number(price?.amount ?? 0);
   const compareAmount = Number(compareAtPrice?.amount ?? 0);
@@ -55,10 +57,13 @@ export function ProductPurchase({
       : 0;
 
   const stock = !available
-    ? {className: 'buybox__stock--out', label: 'sold out'}
+    ? {className: 'buybox__stock--out', label: t('product.soldOut')}
     : quantityAvailable !== null && quantityAvailable > 0 && quantityAvailable <= 5
-      ? {className: 'buybox__stock--low', label: `low stock — ${quantityAvailable} left`}
-      : {className: 'buybox__stock--in', label: 'in stock'};
+      ? {
+          className: 'buybox__stock--low',
+          label: t('product.lowStock', {count: quantityAvailable}),
+        }
+      : {className: 'buybox__stock--in', label: t('product.inStock')};
 
   const lines = variantId ? [{merchandiseId: variantId, quantity}] : [];
 
@@ -70,11 +75,9 @@ export function ProductPurchase({
         <div className="rating-summary">
           <StarRating rating={rating.value} size={14} />
           <span className="rating-summary__text">
-            rated <strong>{rating.value.toString()}</strong> out of 5
+            {t('product.ratedOutOf', {value: rating.value.toString()})}
             {typeof rating.count === 'number' && (
-              <>
-                {' '}from <strong>{rating.count}</strong> reviews
-              </>
+              <> {t('product.fromReviews', {count: rating.count})}</>
             )}
           </span>
         </div>
@@ -88,8 +91,9 @@ export function ProductPurchase({
       </div>
 
       <p className="buybox__tax">
-        taxes included · <a href="/legal/shipping">shipping</a>{' '}
-        calculated at checkout.
+        {t('product.taxIncluded')}{' '}
+        <a href="/legal/shipping">{t('product.shipping')}</a>{' '}
+        {t('product.calculatedAtCheckout')}
       </p>
 
       {shortDescription && <p className="buybox__blurb">{shortDescription}</p>}
@@ -117,17 +121,17 @@ export function ProductPurchase({
           onClick={() => openAside('cart')}
           lines={lines}
         >
-          {available ? 'add to cart' : 'sold out'}
+          {available ? t('product.addToCart') : t('product.soldOut')}
         </AddToCartButton>
         <BuyNowButton disabled={!available} lines={lines}>
-          buy now
+          {t('product.buyNow')}
         </BuyNowButton>
       </div>
 
       <ul className="buybox__perks">
-        <li>48-hour delivery across france</li>
-        <li>30-day returns &amp; exchanges</li>
-        <li>secure payment</li>
+        <li>{t('product.perk.delivery')}</li>
+        <li>{t('product.perk.returns')}</li>
+        <li>{t('product.perk.payment')}</li>
       </ul>
     </div>
   );

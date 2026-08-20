@@ -1,5 +1,6 @@
 import {useId, useRef, useState} from 'react';
 import {ChevronDownIcon} from '~/components/Icons';
+import {useT} from '~/lib/i18n';
 
 /**
  * Collapsible product description. Collapsed by default: only the heading,
@@ -19,6 +20,7 @@ export function ProductDescription({
   intro?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const t = useT();
   const panelId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -60,7 +62,7 @@ export function ProductDescription({
         aria-controls={panelId}
         onClick={toggle}
       >
-        <span className="description__label">description</span>
+        <span className="description__label">{t('product.description')}</span>
         <ChevronDownIcon className="description__chevron" />
       </button>
 

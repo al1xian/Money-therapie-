@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react';
 import {CloseIcon} from '~/components/Icons';
 import {lockScroll, unlockScroll} from '~/lib/scrollLock';
+import {useT} from '~/lib/i18n';
 
 const STORAGE_KEY = 'reda-studio-newsletter-seen';
 
@@ -95,6 +96,7 @@ function markSeen() {
 export function NewsletterPopup() {
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+  const t = useT();
 
   useEffect(() => {
     if (alreadySeen()) return;
@@ -163,10 +165,10 @@ export function NewsletterPopup() {
   if (!open) return null;
 
   return (
-    <div className="popup-overlay" role="dialog" aria-modal aria-label="Welcome offer">
-      <button className="popup-overlay__close-outside" onClick={close} aria-label="Close" />
+    <div className="popup-overlay" role="dialog" aria-modal aria-label={t('popup.title')}>
+      <button className="popup-overlay__close-outside" onClick={close} aria-label={t('nav.close')} />
       <div className="popup">
-        <button type="button" className="popup__close" onClick={close} aria-label="Close">
+        <button type="button" className="popup__close" onClick={close} aria-label={t('nav.close')}>
           <CloseIcon />
         </button>
 
@@ -182,38 +184,36 @@ export function NewsletterPopup() {
         </div>
 
         <div className="popup__body">
-          <h2>-10% off your first order</h2>
+          <h2>{t('popup.title')}</h2>
 
           {status === 'done' ? (
             <div className="popup__code">
-              <p className="popup__code-label">your promo code</p>
+              <p className="popup__code-label">{t('popup.codeLabel')}</p>
               <p className="popup__code-value">{PROMO_CODE}</p>
-              <p className="popup__code-hint">valid on your next order.</p>
+              <p className="popup__code-hint">{t('popup.codeHint')}</p>
             </div>
           ) : (
             <>
-              <p className="popup__text">
-                leave your email and your promo code appears right after. quick, simple, no spam.
-              </p>
+              <p className="popup__text">{t('popup.text')}</p>
               <form className="popup__form" onSubmit={onSubmit}>
                 <input
                   type="email"
                   name="email"
-                  placeholder="email address"
-                  aria-label="email address"
+                  placeholder={t('news.placeholder')}
+                  aria-label={t('news.emailLabel')}
                   autoComplete="email"
                   required
                 />
                 <button type="submit" className="btn btn--full" disabled={status === 'loading'}>
-                  {status === 'loading' ? '…' : 'get my -10% now'}
+                  {status === 'loading' ? '…' : t('popup.cta')}
                 </button>
                 {status === 'error' && (
                   <p className="form-error" role="alert">
-                    something went wrong, please try again.
+                    {t('news.error')}
                   </p>
                 )}
               </form>
-              <p className="popup__fineprint">no spam. exclusive offers and private sales only.</p>
+              <p className="popup__fineprint">{t('popup.fineprint')}</p>
             </>
           )}
         </div>

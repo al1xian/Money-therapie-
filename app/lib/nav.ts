@@ -1,3 +1,5 @@
+import type {TranslationKey} from './i18n/dictionary';
+
 /**
  * Turns the flat list of Shopify collections into the two-level menu.
  *
@@ -19,7 +21,8 @@ export type NavCollection = {
 export type NavGroup = {
   /** Stable key for the accordion / dropdown state. */
   id: string;
-  label: string;
+  /** Dictionary key — the label itself is resolved at render time. */
+  labelKey: TranslationKey;
   collections: NavCollection[];
 };
 
@@ -83,8 +86,16 @@ export function buildNavGroups(collections: NavCollection[]): NavGroup[] {
   const basics = collections.filter((collection) => !isDrop(collection));
 
   return [
-    {id: 'basics', label: 'our basics', collections: sortBy(basics, BASICS_ORDER)},
-    {id: 'drops', label: 'our drops', collections: sortBy(drops, DROPS_ORDER)},
+    {
+      id: 'basics',
+      labelKey: 'nav.basics' as const,
+      collections: sortBy(basics, BASICS_ORDER),
+    },
+    {
+      id: 'drops',
+      labelKey: 'nav.drops' as const,
+      collections: sortBy(drops, DROPS_ORDER),
+    },
   ].filter((group) => group.collections.length > 0);
 }
 
@@ -92,7 +103,7 @@ export function buildNavGroups(collections: NavCollection[]): NavGroup[] {
  * The service pages that close the menu, in the order asked for: tracking
  * first, then the terms.
  */
-export const NAV_SERVICE_LINKS = [
-  {label: 'track my order', to: '/order-tracking'},
-  {label: 'conditions', to: '/legal/terms'},
+export const NAV_SERVICE_LINKS: Array<{labelKey: TranslationKey; to: string}> = [
+  {labelKey: 'nav.track', to: '/order-tracking'},
+  {labelKey: 'nav.conditions', to: '/legal/terms'},
 ];

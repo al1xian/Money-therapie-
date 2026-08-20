@@ -17,6 +17,8 @@ import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from './components/PageLayout';
 import {withoutAutoCollections} from '~/lib/collections';
+import {I18nProvider} from '~/lib/i18n';
+import {DEFAULT_LOCALE, localeFromRequest} from '~/lib/i18n/locale';
 
 export type RootLoader = typeof loader;
 
@@ -104,8 +106,9 @@ export async function loader(args: Route.LoaderArgs) {
  * Load data necessary for rendering content above the fold. This is the critical data
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  */
-async function loadCriticalData({context}: Route.LoaderArgs) {
+async function loadCriticalData({context, request}: Route.LoaderArgs) {
   const {storefront} = context;
+  const locale = localeFromRequest(request);
 
   const [header, {collections}] = await Promise.all([
     storefront.query(HEADER_QUERY, {
@@ -123,7 +126,7 @@ async function loadCriticalData({context}: Route.LoaderArgs) {
   // and the collections index can't drift apart.
   const navCollections = withoutAutoCollections(collections.nodes);
 
-  return {header, navCollections};
+  return {header, navCollections, locale};
 }
 
 /**
@@ -173,9 +176,13 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 
 export function Layout({children}: {children?: React.ReactNode}) {
   const nonce = useNonce();
+  // Read here rather than passed down, because Layout also wraps the error
+  // boundary, where the loader data may be absent — hence the fallback.
+  const data = useRouteLoaderData<RootLoader>('root');
+  const locale = data?.locale ?? DEFAULT_LOCALE;
 
   return (
-    <html lang="en">
+    <html lang={locale}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -186,7 +193,7 @@ export function Layout({children}: {children?: React.ReactNode}) {
         <Links />
       </head>
       <body>
-        {children}
+        <I18nProvider locale={locale}>{children}</I18nProvider>
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
       </body>
