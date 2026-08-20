@@ -3,7 +3,7 @@ import type {Route} from './+types/cart';
 import type {CartQueryDataReturn} from '@shopify/hydrogen';
 import {CartForm} from '@shopify/hydrogen';
 import {CartMain} from '~/components/CartMain';
-import {BUNDLE_ADD_ACTION, CAP_DISCOUNT_CODE} from '~/lib/offers';
+import {BUNDLE_ADD_ACTION, OFFER_DISCOUNT_CODE} from '~/lib/offers';
 
 export const meta: Route.MetaFunction = () => {
   return [{title: `reda studio | cart`}];
@@ -12,37 +12,37 @@ export const meta: Route.MetaFunction = () => {
 export const headers: HeadersFunction = ({actionHeaders}) => actionHeaders;
 
 /**
- * Attaches the cap offer's discount code to the cart after any change to its
+ * Attaches the offer's discount code to the cart after any change to its
  * lines.
  *
  * **Normally does nothing.** The offer runs on a Shopify *automatic* discount:
  * Shopify evaluates the basket itself and puts the reduction in the totals,
  * with no code involved and nothing for the storefront to apply. This only
- * comes alive if `CAP_DISCOUNT_CODE` is filled in — the escape hatch described
- * in app/lib/offers.ts.
+ * comes alive if `OFFER_DISCOUNT_CODE` is filled in — the escape hatch
+ * described in app/lib/offers.ts.
  *
  * Never throws. Whatever happens to the discount, the line mutation that
  * preceded it stands — that is the sale.
  */
-async function withCapDiscount(
+async function withOfferDiscount(
   cart: Route.ActionArgs['context']['cart'],
   result: CartQueryDataReturn,
 ): Promise<CartQueryDataReturn> {
-  if (!CAP_DISCOUNT_CODE || !result?.cart) return result;
+  if (!OFFER_DISCOUNT_CODE || !result?.cart) return result;
 
   try {
     const codes = (result.cart.discountCodes ?? []).map(
       (discount) => discount.code,
     );
-    if (codes.includes(CAP_DISCOUNT_CODE)) return result;
+    if (codes.includes(OFFER_DISCOUNT_CODE)) return result;
 
     const discounted = await cart.updateDiscountCodes([
       ...codes,
-      CAP_DISCOUNT_CODE,
+      OFFER_DISCOUNT_CODE,
     ]);
     return discounted?.cart ? discounted : result;
   } catch (error) {
-    console.error('Cap discount could not be applied', error);
+    console.error('Offer discount could not be applied', error);
     return result;
   }
 }
@@ -63,11 +63,11 @@ export async function action({request, context}: Route.ActionArgs) {
 
   switch (action) {
     case CartForm.ACTIONS.LinesAdd:
-      result = await withCapDiscount(cart, await cart.addLines(inputs.lines));
+      result = await withOfferDiscount(cart, await cart.addLines(inputs.lines));
       break;
     /*
-     * Bundle add: the set's lines. The offer's code is attached afterwards by
-     * `withCapDiscount`, like every other line mutation.
+     * Pair add: both lines in one request. The offer's code is attached
+     * afterwards by `withOfferDiscount`, like every other line mutation.
      *
      * The case stays registered even when the offer is off, so a browser
      * holding a cached page from when it was on still adds to cart instead of
@@ -76,14 +76,14 @@ export async function action({request, context}: Route.ActionArgs) {
     case BUNDLE_ADD_ACTION: {
       // A custom action's inputs are untyped, so the lines are narrowed here.
       const bundleLines = inputs.lines as Parameters<typeof cart.addLines>[0];
-      result = await withCapDiscount(cart, await cart.addLines(bundleLines));
+      result = await withOfferDiscount(cart, await cart.addLines(bundleLines));
       break;
     }
     case CartForm.ACTIONS.LinesUpdate:
-      result = await withCapDiscount(cart, await cart.updateLines(inputs.lines));
+      result = await withOfferDiscount(cart, await cart.updateLines(inputs.lines));
       break;
     case CartForm.ACTIONS.LinesRemove:
-      result = await withCapDiscount(cart, await cart.removeLines(inputs.lineIds));
+      result = await withOfferDiscount(cart, await cart.removeLines(inputs.lineIds));
       break;
     case CartForm.ACTIONS.DiscountCodesUpdate: {
       const formDiscountCode = inputs.discountCode;

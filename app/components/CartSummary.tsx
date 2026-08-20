@@ -3,9 +3,9 @@ import type {CartLayout} from '~/components/CartMain';
 import {CartForm, Money, type OptimisticCart} from '@shopify/hydrogen';
 import {useRef} from 'react';
 import {
-  CAP_DISCOUNT_AMOUNT,
-  CAP_DISCOUNT_CODE,
-  CAP_OFFER_ENABLED,
+  OFFER_DISCOUNT_CODE,
+  OFFER_ENABLED,
+  SECOND_ITEM_DISCOUNT_PERCENT,
 } from '~/lib/offers';
 import {ShinyLink} from '~/components/ShinyButton';
 
@@ -36,7 +36,7 @@ export function CartSummary({cart}: CartSummaryProps) {
         </span>
       </div>
 
-      <CapOfferNote lines={cart?.lines?.nodes} currency={currency} />
+      <OfferNote lines={cart?.lines?.nodes} currency={currency} />
 
       <CartDiscounts discountCodes={cart?.discountCodes} />
 
@@ -58,23 +58,22 @@ export function CartSummary({cart}: CartSummaryProps) {
 }
 
 /**
- * States the cap offer in the cart.
+ * States the second-piece offer in the cart.
  *
- * The reduction is a Shopify *automatic* discount, so there is no code to look
- * for: Shopify reports what it actually took off as a discount allocation on
- * the line it applies to. Summing those allocations is therefore a statement
- * about the real total, not a guess — which is why the note is allowed to say
- * "applied" at all. With nothing allocated it stays an invitation, and never
- * claims a discount the customer has not got.
+ * There is no code to look for: Shopify reports what it actually took off as a
+ * discount allocation on the line it applies to. Summing those allocations is
+ * therefore a statement about the real total rather than an estimate — which
+ * is why this is allowed to say "applied" at all. With nothing allocated it
+ * stays an invitation, and never claims a reduction the customer has not got.
  */
-function CapOfferNote({
+function OfferNote({
   lines,
   currency,
 }: {
   lines?: CartApiQueryFragment['lines']['nodes'];
   currency: string;
 }) {
-  if (!CAP_OFFER_ENABLED) return null;
+  if (!OFFER_ENABLED) return null;
 
   const discounted = (lines ?? []).reduce(
     (total, line) =>
@@ -95,14 +94,21 @@ function CapOfferNote({
     );
   }
 
+  const items = (lines ?? []).reduce(
+    (total, line) => total + (line.quantity ?? 0),
+    0,
+  );
+
   return (
     <p className="cap-offer">
-      add any other piece and the cap drops by{' '}
-      {formatMoney(CAP_DISCOUNT_AMOUNT, currency)}
-      {CAP_DISCOUNT_CODE ? (
+      {items >= 2
+        ? `your second piece is ${SECOND_ITEM_DISCOUNT_PERCENT}% off`
+        : `add a second piece and ${SECOND_ITEM_DISCOUNT_PERCENT}% comes off it`}
+      {OFFER_DISCOUNT_CODE ? (
         <>
           {' '}
-          — with code <strong>{CAP_DISCOUNT_CODE}</strong>, which we add for you
+          — with code <strong>{OFFER_DISCOUNT_CODE}</strong>, which we add for
+          you
         </>
       ) : (
         ', automatically'

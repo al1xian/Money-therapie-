@@ -125,10 +125,11 @@ function loadDeferredData(
       return [];
     });
 
-  // The bundle's gift item, looked up in the real catalogue. If the shop has no
-  // cap, the whole offer simply doesn't render.
-  const giftProduct = context.storefront
-    .query(GIFT_PRODUCT_QUERY, {variables: {query: GIFT_SEARCH_QUERY}})
+  // The piece suggested as the second half of the pair, looked up in the real
+  // catalogue. If no match exists, the box simply doesn't render — the offer
+  // still applies to any second item the customer picks themselves.
+  const pairedProduct = context.storefront
+    .query(PAIRED_PRODUCT_QUERY, {variables: {query: PAIRED_SEARCH_QUERY}})
     .then((data) => {
       const node = data?.products?.nodes?.[0];
       if (!node) return null;
@@ -148,7 +149,7 @@ function loadDeferredData(
       return null;
     });
 
-  return {recommended, showcaseCollections, giftProduct};
+  return {recommended, showcaseCollections, pairedProduct};
 }
 
 /** First sentence of the product description, for the short blurb in the buy box. */
@@ -161,7 +162,7 @@ function shortenDescription(description: string): string {
 }
 
 export default function Product() {
-  const {product, recommended, showcaseCollections, giftProduct} =
+  const {product, recommended, showcaseCollections, pairedProduct} =
     useLoaderData<typeof loader>();
 
   const selectedVariant = useOptimisticVariant(
@@ -226,16 +227,16 @@ export default function Product() {
             }
           />
 
-          {/* Limited offer: this product bundled with a gift item. */}
+          {/* Limited offer: this product paired with a suggested second one. */}
           <Suspense fallback={null}>
-            <Await resolve={giftProduct}>
-              {(gift) => (
+            <Await resolve={pairedProduct}>
+              {(paired) => (
                 <BundleOffer
                   productTitle={title}
                   productImage={product.images.nodes[0] ?? selectedVariant?.image}
                   productPrice={selectedVariant?.price}
                   productVariantId={selectedVariant?.id}
-                  gift={gift}
+                  pairedWith={paired}
                   available={available}
                 />
               )}
@@ -521,14 +522,14 @@ const PRODUCT_RECOMMENDATIONS_QUERY = `#graphql
 ` as const;
 
 /**
- * Which catalogue product plays the gift in the bundle offer. A Shopify search
- * term, so renaming the cap in the admin doesn't break anything — and if no
- * match exists the offer hides itself instead of inventing a product.
+ * Which catalogue product is suggested as the second half of the pair. A
+ * Shopify search term, so renaming it in the admin doesn't break anything —
+ * and if no match exists the box hides itself instead of inventing a product.
  */
-const GIFT_SEARCH_QUERY = 'casquette';
+const PAIRED_SEARCH_QUERY = 'casquette';
 
-const GIFT_PRODUCT_QUERY = `#graphql
-  query PdpGiftProduct(
+const PAIRED_PRODUCT_QUERY = `#graphql
+  query PdpPairedProduct(
     $query: String!
     $country: CountryCode
     $language: LanguageCode
