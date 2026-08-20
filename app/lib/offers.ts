@@ -18,18 +18,19 @@ export const SECOND_ITEM_DISCOUNT_PERCENT = 30;
 export const OFFER_ENABLED = true;
 
 /**
- * Optional discount **code**.
+ * The offer's discount **code**, exactly as spelled in Shopify — uppercase, no
+ * spaces. It has to match the Shopify discount character for character, or the
+ * storefront applies a code Shopify does not know.
  *
- * Empty by default, which means the offer runs on a Shopify *automatic*
- * discount: Shopify evaluates the basket itself and the reduction appears with
- * nothing typed and nothing applied by the storefront.
+ * The customer never has to type it: app/routes/cart.tsx attaches it to the
+ * cart after every change. It is shown so they can recognise and check it.
  *
- * Put a code here and app/routes/cart.tsx goes back to attaching it to the
- * cart after every change — useful to restrict the offer to a campaign link.
- * Never run a code and an automatic discount for the same offer at once, or
- * the reductions stack.
+ * Emptying this switches the storefront to expecting a Shopify *automatic*
+ * discount instead, and it stops applying anything itself. Never run a code
+ * and an automatic discount for the same offer at once, or the reductions
+ * stack.
  */
-export const OFFER_DISCOUNT_CODE: string = '';
+export const OFFER_DISCOUNT_CODE: string = 'REDA1130';
 
 /**
  * Custom cart action: adds the pair's two lines in one request.

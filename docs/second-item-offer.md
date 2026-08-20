@@ -19,8 +19,9 @@ Shopify. So the offer needs a real discount to exist in Shopify.
 
 1. **admin.shopify.com** → your store → **Discounts** → **Create discount** →
    **Buy X get Y**.
-2. **Method**: **Automatic discount** — *not* "Discount code". Nothing to type,
-   nothing to leak, and it applies to everyone.
+2. **Method**: **Discount code**, spelled exactly `REDA1130` — uppercase, no
+   spaces. It has to match `OFFER_DISCOUNT_CODE` in `app/lib/offers.ts`
+   character for character.
 3. **Title**: what the customer will see on their receipt, e.g.
    `Second piece −30%`.
 4. **Customer buys**: *Minimum quantity of items* → `1` → **Any product** (or
@@ -41,18 +42,29 @@ differently, tell me and I'll change the one function that computes it.
 The cart never depends on that rule: it reports the figure Shopify actually
 allocated, so it stays correct either way.
 
-## If you'd rather have a code
+## The code in use
 
-Create the same discount as a **Discount code** instead, then put that code in
-`app/lib/offers.ts`:
+`REDA1130`, set in `app/lib/offers.ts`. The storefront attaches it to the cart
+after every change, so the customer never has to type it — they just get to see
+it, on the product page and in the cart.
 
-```ts
-export const OFFER_DISCOUNT_CODE: string = 'PACK30';
-```
+Renaming it means changing it in Shopify **and** in that file; the two must
+match exactly, including case.
 
-The storefront then attaches it to the cart after every change, so the customer
-still doesn't have to type it — they just get to see it. Never run a code and
-an automatic discount for the same offer at once, or the reductions stack.
+### If you'd rather have no code at all
+
+Create the same discount as an **Automatic discount** in Shopify and set
+`OFFER_DISCOUNT_CODE` to an empty string. The offer then works on the
+conditions alone, with nothing to share. Never run a code and an automatic
+discount for the same offer at once, or the reductions stack.
+
+### What a code costs you
+
+It travels. Once it is on the site it ends up on voucher aggregators, and
+anyone holding it can try it on any basket. Shopify's conditions still decide
+whether it applies, so it cannot be used on the wrong products — but it will be
+used by people you never sent it to, and it can only be withdrawn from
+everybody at once.
 
 ## Changing the percentage
 

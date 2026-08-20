@@ -152,9 +152,10 @@ export function BundleOffer({
           <div className="bundle__note">
             {OFFER_DISCOUNT_CODE ? (
               <p>
-                we add code <strong>{OFFER_DISCOUNT_CODE}</strong> to your cart
-                automatically. it stays visible there, and you can type it in
-                yourself at any time.
+                works with any second piece, not just this pair. we add code{' '}
+                <strong>{OFFER_DISCOUNT_CODE}</strong> to your cart for you —
+                it stays visible there, and you can type it in yourself at any
+                time.
               </p>
             ) : (
               <p>
