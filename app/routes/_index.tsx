@@ -8,7 +8,6 @@ import {AnimatedHero} from '~/components/AnimatedHero';
 import {Reveal} from '~/components/Reveal';
 import {Newsletter} from '~/components/Newsletter';
 import {HomeReviews} from '~/components/HomeReviews';
-import {WornVideos} from '~/components/WornVideos';
 import {HelpFaq} from '~/components/HelpFaq';
 import {withoutHomeHiddenCollections} from '~/lib/collections';
 
@@ -95,8 +94,6 @@ export default function Homepage() {
       <HomeReviews />
 
       <HelpFaq />
-
-      <WornVideos />
 
       <Reveal as="section">
         <Newsletter />

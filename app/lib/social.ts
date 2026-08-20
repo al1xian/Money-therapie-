@@ -1,10 +1,9 @@
 /**
- * The brand's social accounts, in one place — the video rail heading and the
- * footer icon both point here, so the handle is changed once.
+ * The brand's Instagram account.
  *
- * `INSTAGRAM_URL` is the canonical address for `INSTAGRAM_HANDLE`; if the
- * account is ever renamed, edit the handle and the URL together.
+ * Kept in its own module rather than inline in the footer: it was shared with
+ * the "they talk about us" video rail, and it will be shared again the next
+ * time the handle appears anywhere. Changing the account means changing this
+ * line, not hunting through components.
  */
-export const INSTAGRAM_HANDLE = '@redastudio.fr';
-
 export const INSTAGRAM_URL = 'https://www.instagram.com/redastudio.fr/';
