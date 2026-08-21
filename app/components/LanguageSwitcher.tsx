@@ -4,7 +4,10 @@ import {useI18n, LOCALES, type Locale} from '~/lib/i18n';
 const LABELS: Record<Locale, string> = {en: 'EN', fr: 'FR'};
 
 /**
- * EN / FR, in the header.
+ * EN / FR.
+ *
+ * Lives in the settings block (menu drawer and footer), not in the header bar
+ * — see `LocalePreferences` in app/components/Header.tsx.
  *
  * Submits to /locale, which stores the choice and redirects straight back to
  * the page the visitor is on — so switching language never costs them their

@@ -29,6 +29,8 @@ export const en = {
   'nav.cart': 'Cart',
   'nav.close': 'Close',
   'nav.language': 'Language',
+  'nav.currency': 'Currency',
+  'nav.settings': 'settings',
 
   // — home —
   'home.eyebrow': 'new collection',
@@ -268,6 +270,8 @@ export const fr: Record<TranslationKey, string> = {
   'nav.cart': 'Panier',
   'nav.close': 'Fermer',
   'nav.language': 'Langue',
+  'nav.currency': 'Devise',
+  'nav.settings': 'paramètres',
 
   // — accueil —
   'home.eyebrow': 'nouvelle collection',

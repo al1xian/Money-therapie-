@@ -2096,9 +2096,21 @@ html {
 }
 
 .site-footer__bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
   border-top: 1px solid var(--color-line);
   padding: 1.1rem 1rem;
   text-align: center;
+}
+
+@media (min-width: 40em) {
+  .site-footer__bottom {
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: left;
+  }
 }
 
 .site-footer__copy {
@@ -4889,7 +4901,7 @@ html {
 
 /*
 * --------------------------------------------------
-* Sélecteur de langue (header)
+* Paramètres : langue & devise (menu + footer)
 * --------------------------------------------------
 */
 .lang-switch {
@@ -4937,15 +4949,78 @@ html {
   color: var(--color-paper);
 }
 
-.site-header--transparent .lang-switch__option[data-active='true'] {
-  background: var(--color-paper);
-  color: var(--color-ink);
-}
 
 @media (max-width: 47.99em) {
   .lang-switch__option {
     padding: 0.14rem 0.38rem;
     font-size: 0.58rem;
+  }
+}
+
+/* The block itself — one small settings panel, used twice. */
+.locale-prefs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.locale-prefs__title {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.locale-prefs__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.locale-prefs__label {
+  font-size: 0.8rem;
+  text-transform: lowercase;
+  color: var(--color-ink);
+}
+
+.locale-prefs__value {
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--color-muted);
+}
+
+/* In the menu drawer: set apart from the links above it, like the service
+   links are, so it reads as settings rather than as another destination. */
+.mobile-nav__settings {
+  margin-top: 1.25rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--color-line);
+}
+
+/* In the footer: compact, and on one line once there is room for it. */
+.site-footer__prefs {
+  align-items: center;
+  gap: 0.35rem 0.9rem;
+}
+
+.site-footer__prefs .locale-prefs__title {
+  display: none;
+}
+
+.site-footer__prefs .locale-prefs__row {
+  gap: 0.5rem;
+}
+
+.site-footer__prefs .locale-prefs__label {
+  color: var(--color-muted);
+  font-size: 0.72rem;
+}
+
+@media (min-width: 30em) {
+  .site-footer__prefs {
+    flex-direction: row;
   }
 }
 

@@ -10,6 +10,7 @@ import {useAside} from '~/components/Aside';
 import {useHeaderTone} from '~/lib/header-tone';
 import {BagIcon, BurgerIcon, SearchIcon} from '~/components/Icons';
 import {LanguageSwitcher} from '~/components/LanguageSwitcher';
+import {CURRENCY_SYMBOL, CURRENCY_CODE} from '~/lib/currency';
 import {useT} from '~/lib/i18n';
 import {
   buildNavGroups,
@@ -78,10 +79,17 @@ export function Header({header, cart, navCollections}: HeaderProps) {
       </NavLink>
 
       <div className="site-header__side site-header__side--end">
-        <span className="site-header__currency" aria-label="Euro">
-          EUR&nbsp;€
+        {/* The symbol alone, with the code kept for screen readers — a bare
+            "€" is unambiguous to look at and says nothing when spoken.
+            `role="img"` is what makes the label announced at all: aria-label
+            on a plain span is ignored by most screen readers. */}
+        <span
+          className="site-header__currency"
+          role="img"
+          aria-label={CURRENCY_CODE}
+        >
+          {CURRENCY_SYMBOL}
         </span>
-        <LanguageSwitcher />
         <button
           className="site-header__icon-btn"
           onClick={() => open('search')}
@@ -138,6 +146,8 @@ export function HeaderMenu({
           {t(link.labelKey)}
         </NavLink>
       ))}
+
+      <LocalePreferences className="mobile-nav__settings" />
     </nav>
   );
 }
@@ -263,5 +273,39 @@ function CartButton({count}: {count: number}) {
       <BagIcon />
       {count > 0 && <span className="site-header__cart-count">{count}</span>}
     </button>
+  );
+}
+
+/**
+ * Store preferences — language and currency — as a small settings block.
+ *
+ * The language switcher used to sit loose in the header bar. It now lives
+ * here, next to the currency it belongs with: two facts about how the shop is
+ * displayed, stated in one place instead of scattered across the chrome. The
+ * block is rendered inside the menu drawer and in the footer, so it is
+ * reachable on a phone and on a desktop without the header carrying it.
+ *
+ * The currency is a statement, not a control: Shopify prices this storefront
+ * in euros, and offering a switch that cannot change the price would be a lie.
+ */
+export function LocalePreferences({className}: {className?: string}) {
+  const t = useT();
+
+  return (
+    <div className={['locale-prefs', className].filter(Boolean).join(' ')}>
+      <span className="locale-prefs__title">{t('nav.settings')}</span>
+
+      <div className="locale-prefs__row">
+        <span className="locale-prefs__label">{t('nav.language')}</span>
+        <LanguageSwitcher />
+      </div>
+
+      <div className="locale-prefs__row">
+        <span className="locale-prefs__label">{t('nav.currency')}</span>
+        <span className="locale-prefs__value">
+          {CURRENCY_CODE}&nbsp;{CURRENCY_SYMBOL}
+        </span>
+      </div>
+    </div>
   );
 }
