@@ -5,7 +5,6 @@ import {INSTAGRAM_URL} from '~/lib/social';
 import {useT} from '~/lib/i18n';
 import type {TranslationKey} from '~/lib/i18n';
 import {Newsletter} from '~/components/Newsletter';
-import {LocalePreferences} from '~/components/Header';
 
 interface FooterProps {
   header: HeaderQuery;
@@ -86,13 +85,10 @@ export function Footer({header}: FooterProps) {
         </div>
       </div>
 
-      {/* Language and currency live here, with the rest of the shop's
-          settings, rather than in the header bar. */}
       <div className="site-footer__bottom">
         <span className="site-footer__copy">
           © {year} {shopName.toLowerCase()}
         </span>
-        <LocalePreferences className="site-footer__prefs" />
       </div>
     </footer>
   );

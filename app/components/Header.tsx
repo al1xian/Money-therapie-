@@ -79,17 +79,6 @@ export function Header({header, cart, navCollections}: HeaderProps) {
       </NavLink>
 
       <div className="site-header__side site-header__side--end">
-        {/* The symbol alone, with the code kept for screen readers — a bare
-            "€" is unambiguous to look at and says nothing when spoken.
-            `role="img"` is what makes the label announced at all: aria-label
-            on a plain span is ignored by most screen readers. */}
-        <span
-          className="site-header__currency"
-          role="img"
-          aria-label={CURRENCY_CODE}
-        >
-          {CURRENCY_SYMBOL}
-        </span>
         <button
           className="site-header__icon-btn"
           onClick={() => open('search')}

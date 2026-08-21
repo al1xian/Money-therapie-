@@ -6,8 +6,10 @@ const LABELS: Record<Locale, string> = {en: 'EN', fr: 'FR'};
 /**
  * EN / FR.
  *
- * Lives in the settings block (menu drawer and footer), not in the header bar
- * — see `LocalePreferences` in app/components/Header.tsx.
+ * Lives in the settings block at the foot of the menu drawer, not in the
+ * header bar — see `LocalePreferences` in app/components/Header.tsx. The
+ * drawer opens from the burger at every width, desktop included, which is
+ * what keeps the settings reachable on a large screen.
  *
  * Submits to /locale, which stores the choice and redirects straight back to
  * the page the visitor is on — so switching language never costs them their

@@ -259,7 +259,6 @@
 
 .site-header--transparent .site-header__logo,
 .site-header--transparent .site-header__nav-link,
-.site-header--transparent .site-header__currency,
 .site-header--transparent .site-header__icon-btn {
   color: var(--color-paper);
 }
@@ -397,13 +396,6 @@
   opacity: 1;
 }
 
-.site-header__currency {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  color: var(--color-ink);
-  padding: 0 0.5rem;
-}
-
 .site-header__icon-btn {
   display: inline-flex;
   align-items: center;
@@ -432,14 +424,10 @@
   text-align: center;
 }
 
+/* Shown at every width, not just on phones: the drawer it opens is where the
+   settings live, and on desktop there is no other way in. */
 .site-header__burger {
   display: inline-flex;
-}
-
-@media (min-width: 48em) {
-  .site-header__burger {
-    display: none;
-  }
 }
 
 /*
@@ -2096,21 +2084,9 @@ html {
 }
 
 .site-footer__bottom {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.9rem;
   border-top: 1px solid var(--color-line);
   padding: 1.1rem 1rem;
   text-align: center;
-}
-
-@media (min-width: 40em) {
-  .site-footer__bottom {
-    flex-direction: row;
-    justify-content: space-between;
-    text-align: left;
-  }
 }
 
 .site-footer__copy {
@@ -4909,19 +4885,15 @@ html {
   align-items: center;
   gap: 0.1rem;
   padding: 0.12rem;
-  border: 1px solid currentColor;
+  border: 1px solid var(--color-line);
   border-radius: 999px;
-  /* Borrows the header's own colour, so it turns white over the hero exactly
-     like the wordmark does, with no second rule to keep in step. */
-  opacity: 0.6;
-  transition: opacity 200ms var(--ease-out-soft);
 }
 
-.lang-switch:hover,
-.lang-switch:focus-within {
-  opacity: 1;
-}
-
+/*
+* No fade, no travel: picking a language reloads the page, so any transition
+* here was competing with a navigation the visitor was already watching. The
+* pill simply moves to the side they chose.
+*/
 .lang-switch__option {
   background: none;
   border: none;
@@ -4932,17 +4904,16 @@ html {
   font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: inherit;
-  transition:
-    background 200ms var(--ease-out-soft),
-    color 200ms var(--ease-out-soft);
+  color: var(--color-muted);
+}
+
+.lang-switch__option:hover {
+  color: var(--color-ink);
 }
 
 /*
 * The chosen language is filled in, so the pair reads as one control with a
-* current value rather than two loose buttons. Stated for both header tones
-* rather than derived: over the hero the header is white on a photo, and a
-* clever inversion would have been one browser quirk away from unreadable.
+* current value rather than two loose buttons.
 */
 .lang-switch__option[data-active='true'] {
   background: var(--color-ink);
@@ -4999,30 +4970,6 @@ html {
   border-top: 1px solid var(--color-line);
 }
 
-/* In the footer: compact, and on one line once there is room for it. */
-.site-footer__prefs {
-  align-items: center;
-  gap: 0.35rem 0.9rem;
-}
-
-.site-footer__prefs .locale-prefs__title {
-  display: none;
-}
-
-.site-footer__prefs .locale-prefs__row {
-  gap: 0.5rem;
-}
-
-.site-footer__prefs .locale-prefs__label {
-  color: var(--color-muted);
-  font-size: 0.72rem;
-}
-
-@media (min-width: 30em) {
-  .site-footer__prefs {
-    flex-direction: row;
-  }
-}
 
 /*
 * --------------------------------------------------
