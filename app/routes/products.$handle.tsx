@@ -24,6 +24,7 @@ import {getProductFaq} from '~/data/faq';
 import {parseRating} from '~/lib/rating';
 import {onlyShowcaseCollections} from '~/lib/collections';
 import {getRatingForSeed} from '~/data/reviews';
+import {useT} from '~/lib/i18n';
 
 export const meta: Route.MetaFunction = ({data}) => {
   const product = data?.product;
@@ -193,6 +194,7 @@ export default function Product() {
     selectedOrFirstAvailableVariant: selectedVariant,
   });
 
+  const t = useT();
   const {title, description, descriptionHtml, vendor} = product;
 
   const galleryImages = product.images.nodes.length
@@ -272,7 +274,7 @@ export default function Product() {
             )}
 
             <section className="pdp__section">
-              <h2 className="pdp__section-title">frequently asked questions</h2>
+              <h2 className="pdp__section-title">{t('product.faqTitle')}</h2>
               <div className="pdp__accordions">
                 {getProductFaq(description ?? '').map((item) => (
                   <Accordion key={item.question} title={item.question}>

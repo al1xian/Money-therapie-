@@ -1,12 +1,14 @@
 import {getReviewsForSeed} from '~/data/reviews';
 import {ReviewsSection} from '~/components/ReviewsSection';
+import {useT} from '~/lib/i18n';
 
 export function HomeReviews() {
+  const t = useT();
   const reviews = getReviewsForSeed('reda-studio-home', 12);
   return (
     <ReviewsSection
-      heading="what our customers say"
-      subheading="honest words from the reda studio community, on pieces made to last."
+      heading={t('reviews.title')}
+      subheading={t('reviews.subtitle')}
       reviews={reviews}
     />
   );

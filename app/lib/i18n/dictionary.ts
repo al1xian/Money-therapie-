@@ -62,6 +62,7 @@ export const en = {
   'product.sizeGuide': 'size guide',
   'product.description': 'description',
   'product.youMightLike': 'you might also like',
+  'product.faqTitle': 'frequently asked questions',
   'product.ratedOutOf': 'rated {value} out of 5',
   'product.fromReviews': 'from {count} reviews',
   'product.perk.delivery': '48-hour delivery across france',
@@ -106,7 +107,10 @@ export const en = {
   'cart.add': 'add',
 
   // — reviews —
-  'reviews.title': 'what they say',
+  'reviews.title': 'what our customers say',
+  'reviews.subtitle':
+    'honest words from the reda studio community, on pieces made to last.',
+  'reviews.forProduct': 'reviews for {product}',
   'reviews.verified': 'verified review',
 
   // — help / faq —
@@ -211,6 +215,34 @@ export const en = {
   'legal.updated': 'last updated —',
   'legal.question': 'A question about any of this? Write to us from the',
 
+  'cart.decrease': 'Decrease quantity',
+  'cart.increase': 'Increase quantity',
+  'size.available': 'available',
+  'size.soldOut': 'sold out',
+  'size.note1':
+    'our pieces fit true to size. if you fall between two sizes, take the larger one for a looser wear. not sure?',
+  'size.writeToUs': 'write to us',
+  'size.note2': 'before ordering — we reply within 24 hours.',
+  'vision.title': 'the reda studio vision',
+  'vision.ambition': 'ambition',
+  'vision.ambitionBody':
+    'A new generation driven by ambition and the will to build a future of its own.',
+  'vision.identity': 'identity',
+  'vision.identityBody':
+    'Distinctive pieces made for the people who refuse to go unnoticed.',
+  'vision.minimalism': 'minimalism',
+  'vision.minimalismBody':
+    'A stripped-back aesthetic where every cut, fabric and detail serves a real purpose.',
+  'vision.streetwear': 'streetwear',
+  'vision.streetwearBody':
+    'A contemporary take on streetwear, between elegance, character and city culture.',
+  'vision.vision': 'vision',
+  'vision.visionBody':
+    'Reda Studio does not simply follow trends — the house builds a world of its own.',
+  'vision.cta': 'discover the story behind the brand',
+  'vision.intro':
+    'Reda Studio builds a premium, minimalist vision of streetwear. Our pieces are made for founders, creators and anyone building something of their own: every design is shaped around ambition, identity and a refusal to overlook the detail.',
+
   // — errors —
   'error.oops': 'Oops',
   'error.notFound': 'This page could not be found.',
@@ -269,6 +301,7 @@ export const fr: Record<TranslationKey, string> = {
   'product.sizeGuide': 'guide des tailles',
   'product.description': 'description',
   'product.youMightLike': 'vous aimerez aussi',
+  'product.faqTitle': 'questions fréquentes',
   'product.ratedOutOf': 'noté {value} sur 5',
   'product.fromReviews': 'sur {count} avis',
   'product.perk.delivery': 'livraison en 48 h partout en france',
@@ -314,7 +347,10 @@ export const fr: Record<TranslationKey, string> = {
   'cart.add': 'ajouter',
 
   // — avis —
-  'reviews.title': 'ce qu’ils en disent',
+  'reviews.title': 'ce que disent nos clients',
+  'reviews.subtitle':
+    'des mots sincères de la communauté reda studio, sur des pièces faites pour durer.',
+  'reviews.forProduct': 'avis sur {product}',
   'reviews.verified': 'avis vérifié',
 
   // — aide / faq —
@@ -421,6 +457,34 @@ export const fr: Record<TranslationKey, string> = {
   'legal.updated': 'dernière mise à jour —',
   'legal.question':
     'Une question à ce sujet ? Écrivez-nous depuis la',
+
+  'cart.decrease': 'Diminuer la quantité',
+  'cart.increase': 'Augmenter la quantité',
+  'size.available': 'disponible',
+  'size.soldOut': 'épuisé',
+  'size.note1':
+    'nos pièces taillent normalement. si vous hésitez entre deux tailles, prenez la plus grande pour un porté plus ample. un doute ?',
+  'size.writeToUs': 'écrivez-nous',
+  'size.note2': 'avant de commander — nous répondons sous 24 h.',
+  'vision.title': 'la vision reda studio',
+  'vision.ambition': 'ambition',
+  'vision.ambitionBody':
+    'Une nouvelle génération portée par l’ambition et la volonté de bâtir son propre avenir.',
+  'vision.identity': 'identité',
+  'vision.identityBody':
+    'Des pièces marquées, faites pour celles et ceux qui refusent de passer inaperçus.',
+  'vision.minimalism': 'minimalisme',
+  'vision.minimalismBody':
+    'Une esthétique épurée où chaque coupe, chaque tissu et chaque détail a une vraie raison d’être.',
+  'vision.streetwear': 'streetwear',
+  'vision.streetwearBody':
+    'Une lecture contemporaine du streetwear, entre élégance, caractère et culture urbaine.',
+  'vision.vision': 'vision',
+  'vision.visionBody':
+    'Reda Studio ne suit pas les tendances — la maison construit son propre univers.',
+  'vision.cta': 'découvrir l’histoire de la marque',
+  'vision.intro':
+    'Reda Studio construit une vision premium et minimaliste du streetwear. Nos pièces sont faites pour les fondateurs, les créateurs et celles et ceux qui bâtissent quelque chose : chaque design est pensé autour de l’ambition, de l’identité et du refus de négliger le détail.',
 
   // — erreurs —
   'error.oops': 'Oups',

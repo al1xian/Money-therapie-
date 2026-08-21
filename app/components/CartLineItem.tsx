@@ -5,6 +5,7 @@ import {useVariantUrl} from '~/lib/variants';
 import {Link} from 'react-router';
 import {useAside} from './Aside';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
+import {useT} from '~/lib/i18n';
 
 export type CartLine = OptimisticCartLine<CartApiQueryFragment>;
 
@@ -83,6 +84,7 @@ export function CartLineItem({
 }
 
 function CartLineQuantity({line}: {line: CartLine}) {
+  const t = useT();
   if (!line || typeof line?.quantity === 'undefined') return null;
   const {id: lineId, quantity, isOptimistic} = line;
   const prevQuantity = Number(Math.max(0, quantity - 1).toFixed(0));
@@ -91,13 +93,13 @@ function CartLineQuantity({line}: {line: CartLine}) {
   return (
     <div className="qty">
       <CartLineUpdateButton lines={[{id: lineId, quantity: prevQuantity}]}>
-        <button aria-label="Decrease quantity" disabled={quantity <= 1 || !!isOptimistic} name="decrease-quantity" value={prevQuantity}>
+        <button aria-label={t('cart.decrease')} disabled={quantity <= 1 || !!isOptimistic} name="decrease-quantity" value={prevQuantity}>
           −
         </button>
       </CartLineUpdateButton>
       <span className="qty__value">{quantity}</span>
       <CartLineUpdateButton lines={[{id: lineId, quantity: nextQuantity}]}>
-        <button aria-label="Increase quantity" name="increase-quantity" value={nextQuantity} disabled={!!isOptimistic}>
+        <button aria-label={t('cart.increase')} name="increase-quantity" value={nextQuantity} disabled={!!isOptimistic}>
           +
         </button>
       </CartLineUpdateButton>

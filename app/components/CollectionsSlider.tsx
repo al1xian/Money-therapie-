@@ -1,6 +1,7 @@
 import {Link} from 'react-router';
 import {Image} from '@shopify/hydrogen';
 import {Reveal} from '~/components/Reveal';
+import {useT} from '~/lib/i18n';
 
 type SliderCollection = {
   id: string;
@@ -21,12 +22,13 @@ type SliderCollection = {
  * on touch and desktop alike.
  */
 export function CollectionsSlider({collections}: {collections: SliderCollection[]}) {
+  const t = useT();
   if (!collections.length) return null;
 
   return (
     <Reveal as="section" className="collections-slider" aria-labelledby="basics-heading">
       <h2 className="section-title" id="basics-heading">
-        our basics
+        {t('home.basics')}
       </h2>
 
       <div className="collections-slider__track">

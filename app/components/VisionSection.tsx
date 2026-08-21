@@ -1,5 +1,6 @@
 import {Link} from 'react-router';
 import {Reveal} from '~/components/Reveal';
+import {useT, type TranslationKey} from '~/lib/i18n';
 
 /**
  * "La vision Reda Studio" — an editorial statement of what the brand stands
@@ -9,65 +10,52 @@ import {Reveal} from '~/components/Reveal';
  * mentions, nothing attributed to anyone outside Reda Studio.
  */
 
-const PILLARS: Array<{title: string; body: string}> = [
-  {
-    title: 'ambition',
-    body: 'A new generation driven by ambition and the will to build a future of its own.',
-  },
-  {
-    title: 'identity',
-    body: 'Distinctive pieces made for the people who refuse to go unnoticed.',
-  },
-  {
-    title: 'minimalism',
-    body: 'A stripped-back aesthetic where every cut, fabric and detail serves a real purpose.',
-  },
-  {
-    title: 'streetwear',
-    body: 'A contemporary take on streetwear, between elegance, character and city culture.',
-  },
-  {
-    title: 'vision',
-    body: 'Reda Studio does not simply follow trends — the house builds a world of its own.',
-  },
+/**
+ * The five pillars, as dictionary keys rather than text: the words themselves
+ * are resolved at render time, so the section follows the language like
+ * everything else.
+ */
+const PILLARS: Array<{titleKey: TranslationKey; bodyKey: TranslationKey}> = [
+  {titleKey: 'vision.ambition', bodyKey: 'vision.ambitionBody'},
+  {titleKey: 'vision.identity', bodyKey: 'vision.identityBody'},
+  {titleKey: 'vision.minimalism', bodyKey: 'vision.minimalismBody'},
+  {titleKey: 'vision.streetwear', bodyKey: 'vision.streetwearBody'},
+  {titleKey: 'vision.vision', bodyKey: 'vision.visionBody'},
 ];
 
 export function VisionSection() {
+  const t = useT();
+
   return (
     <section className="vision" aria-labelledby="vision-heading">
       <Reveal className="vision__head">
         <h2 className="vision__title" id="vision-heading">
-          the reda studio vision
+          {t('vision.title')}
         </h2>
-        <p className="vision__intro">
-          Reda Studio builds a premium, minimalist vision of streetwear. Our
-          pieces are made for founders, creators and anyone building something
-          of their own: every design is shaped around ambition, identity and a
-          refusal to overlook the detail.
-        </p>
+        <p className="vision__intro">{t('vision.intro')}</p>
       </Reveal>
 
       {/* Five aligned blocks on desktop; the same markup becomes a horizontal
           carousel on mobile (see .vision__rail). */}
       <div className="vision__rail">
-        {PILLARS.map(({title, body}, index) => (
+        {PILLARS.map(({titleKey, bodyKey}, index) => (
           <Reveal
-            key={title}
+            key={titleKey}
             className="vision__card"
             style={{transitionDelay: `${index * 70}ms`}}
           >
             <span className="vision__index" aria-hidden="true">
               {String(index + 1).padStart(2, '0')}
             </span>
-            <h3 className="vision__card-title">{title}</h3>
-            <p className="vision__card-body">{body}</p>
+            <h3 className="vision__card-title">{t(titleKey)}</h3>
+            <p className="vision__card-body">{t(bodyKey)}</p>
           </Reveal>
         ))}
       </div>
 
       <Reveal className="vision__cta">
         <Link to="/about" prefetch="intent" className="btn">
-          discover the story behind the brand
+          {t('vision.cta')}
         </Link>
       </Reveal>
     </section>
